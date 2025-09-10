@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "customer_name": "Ali Khan",
+    "service_type": "Oil Change",
+    "appointment_date": "2025-06-10",
+    "status": "pending"
+  },
+  {
+    "id": 2,
+    "customer_name": "Sara Malik",
+    "service_type": "AC Repair",
+    "appointment_date": "2025-06-10",
+    "status": "pending"
+  },
+  {
+    "id": 3,
+    "customer_name": "Hamza",
+    "service_type": "Oil Change",
+    "appointment_date": "2025-06-10",
+    "status": "pending"
+  },
+  {
+    "id": 4,
+    "customer_name": "Rehman",
+    "service_type": "Battery Change",
+    "appointment_date": "2025-06-10",
+    "status": "pending"
+  },
+  {
+    "id": 5,
+    "customer_name": "Noor",
+    "service_type": "AC Repair",
+    "appointment_date": "2025-06-10",
+    "status": "completed"
+  },
+  {
+    "id": 6,
+    "customer_name": "Sunny",
+    "service_type": "Oil Change",
+    "appointment_date": "2025-06-10",
+    "status": "completed"
+  }
+]

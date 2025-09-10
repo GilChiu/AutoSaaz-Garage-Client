@@ -1,0 +1,82 @@
+/* Design Tokens - Scaled for 100% Browser Zoom */
+:root {
+  /* Base font size */
+  --base-font-size: 16px;
+  
+  /* Colors */
+  --color-primary-orange: #ff6b35;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-text-muted: #999999;
+  
+  /* Background colors */
+  --color-bg-main: #f8f9fa;
+  --color-bg-card: #ffffff;
+  --color-bg-sidebar: #ffffff;
+  --color-bg-header: #f8f9fa;
+  
+  /* Border colors */
+  --color-border-light: #e0e0e0;
+  --color-border-lighter: #f0f0f0;
+  
+  /* Status colors */
+  --color-status-progress-bg: #fff3cd;
+  --color-status-progress-text: #856404;
+  --color-status-progress-border: #ffeaa7;
+  --color-status-completed-bg: #d4edda;
+  --color-status-completed-text: #155724;
+  --color-status-completed-border: #c3e6cb;
+  
+  /* Sidebar active state */
+  --color-sidebar-active-bg: #2c3e50;
+  --color-sidebar-hover-bg: #f8f9fa;
+  
+  /* Spacing scale - Scaled for 100% browser zoom */
+  --space-xs: 4px;    /* 4px */
+  --space-sm: 8px;    /* 8px */
+  --space-md: 12px;   /* 12px */
+  --space-lg: 16px;   /* 16px */
+  --space-xl: 20px;   /* 20px */
+  --space-2xl: 24px;  /* 24px */
+  
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 50%;
+  
+  /* Sidebar measurements - Scaled for desktop */
+  --sidebar-width: 200px;
+  --sidebar-padding: 16px;
+  --sidebar-nav-item-height: 40px;
+  --sidebar-nav-gap: 8px;
+  
+  /* Typography scale - Scaled for 100% browser zoom */
+  --font-size-xs: 12px;     /* 12px */
+  --font-size-sm: 13px;     /* 13px */
+  --font-size-base: 14px;   /* 14px */
+  --font-size-lg: 16px;     /* 16px */
+  --font-size-xl: 18px;     /* 18px */
+  --font-size-2xl: 20px;    /* 20px */
+  --font-size-3xl: 24px;    /* 24px */
+  
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-sidebar: 2px 0 8px rgba(0, 0, 0, 0.1);
+  
+  /* Z-index scale */
+  --z-dropdown: 1000;
+  --z-sidebar: 1100;
+  --z-modal: 1200;
+  --z-tooltip: 1300;
+}

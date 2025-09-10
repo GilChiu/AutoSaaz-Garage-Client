@@ -1,0 +1,16 @@
+.profile-settings-card { position:relative; }
+.profile-form { display:flex; flex-direction:column; gap:28px; }
+.profile-avatar-block { display:flex; }
+.profile-avatar-btn { background:none; border:0; padding:0; cursor:pointer; position:relative; }
+.profile-avatar-circle { width:112px; height:112px; border-radius:50%; background:#111; color:#fff; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:600; position:relative; overflow:hidden; }
+.profile-avatar-circle img { width:100%; height:100%; object-fit:cover; }
+.camera-badge { position:absolute; bottom:4px; right:4px; width:30px; height:30px; border-radius:8px; background:#222; display:flex; align-items:center; justify-content:center; color:#ffb14f; box-shadow:0 2px 4px rgba(0,0,0,.25); }
+.avatar-letter { letter-spacing:1px; }
+
+.profile-fields { display:flex; flex-direction:column; gap:22px; }
+.profile-two-col { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px; }
+.settings-field.full textarea { resize:vertical; min-height:92px; }
+
+.profile-actions { justify-content:flex-start; }
+
+@media (min-width: 860px) { .profile-form { gap:34px; } }

@@ -1,0 +1,249 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* Garage Landing Page Styles */
+.garage-landing-verification-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Header */
+.landing-header-verification-page {
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header-logo-verification-page {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo-image-verification-page {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.header-text-verification-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.company-name-verification-page {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.1;
+}
+
+.tagline-verification-page {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.1;
+}
+
+/* Main Content */
+.main-container-verification-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: #f8f9fa;
+}
+
+/* Centered Form - No Image */
+.form-section-verification-page {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-content-verification-page {
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.form-header-verification-page {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.form-header-verification-page h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.form-header-verification-page p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+
+.demo-code-verification-page {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 16px;
+  text-align: center;
+  border: 1px solid #2196f3;
+  font-weight: 600;
+}
+
+/* Error Message */
+.error-message-verification-page {
+  background: #fee;
+  color: #c33;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 16px;
+  text-align: center;
+  border: 1px solid #fcc;
+}
+
+/* Form */
+.verification-form-verification-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group-verification-page {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group-verification-page label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.verification-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* Verification Input Boxes */
+.verification-inputs-container {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.verification-digit-input {
+  width: 56px;
+  height: 56px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.verification-digit-input:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.1);
+}
+
+.verification-digit-input:not(:placeholder-shown) {
+  border-color: #ff6b35;
+  background: #fff8f6;
+}
+
+.required-asterisk-verification-page {
+  color: #e53e3e;
+}
+
+/* Individual digit inputs handle their own styling now */
+
+.verify-btn-verification-page {
+  background: #ff6b35;
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+  margin-bottom: 16px;
+  height: 56px;
+}
+
+.verify-btn-verification-page:hover:not(:disabled) {
+  background: #e55a2b;
+}
+
+.verify-btn-verification-page:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.back-btn-verification-page {
+  background: none;
+  border: none;
+  color: #ff6b35;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+  padding: 12px;
+  transition: color 0.2s ease;
+}
+
+.back-btn-verification-page:hover {
+  color: #e55a2b;
+}
+
+.resend-section-verification-page {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #666;
+}
+
+.resend-btn-verification-page {
+  background: none;
+  border: none;
+  color: #ff6b35;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: underline;
+  font-family: 'Poppins', sans-serif;
+}
+
+.resend-btn-verification-page:hover {
+  color: #e55a2b;
+}

@@ -1,0 +1,236 @@
+/* Appointment Detail Page Styles */
+.appointment-detail-page {
+  padding: 2rem;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.appointment-detail-header {
+  margin-bottom: 2rem;
+}
+
+.appointment-detail-header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.appointment-detail-content {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-summary-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 600px;
+}
+
+.summary-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.priority-badge.high-urgency {
+  background-color: #ff6b35;
+  color: white;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.detail-icon {
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.accept-btn {
+  background-color: #ff6b35;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex: 1;
+}
+
+.accept-btn:hover:not(:disabled) {
+  background-color: #e55a2b;
+}
+
+.accept-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.appointment-status {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+  text-align: center;
+}
+
+.status-confirmed {
+  color: #2e7d32;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.status-cancelled {
+  color: #d32f2f;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  border: 1px solid #fcc;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .appointment-detail-page {
+    padding: 1rem;
+  }
+  
+  .appointment-summary-card {
+    padding: 1.5rem;
+  }
+  
+  .appointment-actions {
+    flex-direction: column;
+  }
+  
+  .detail-row {
+    gap: 0.75rem;
+  }
+  
+  .detail-icon {
+    font-size: 1.1rem;
+  }
+}
+
+/* ================= New Appointment Detail (apptfx-detail namespace) ================= */
+.apptfx-detail-page { padding:24px 32px 60px; background:#f7f7f7; min-height:100vh; }
+.apptfx-detail-header { margin-bottom:14px; }
+.apptfx-detail-title { font-size:22px; margin:0 0 4px; font-weight:600; }
+.apptfx-detail-sub { font-size:11px; margin:0; color:#666; }
+.apptfx-detail-section-heading { font-size:18px; font-weight:600; margin:4px 0 18px; padding-left:10px; border-left:4px solid #ff6b35; }
+.apptfx-detail-card { background:#fff; border:1px solid #e1e1e1; border-radius:10px; padding:26px 28px 30px; position:relative; max-width:680px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.apptfx-detail-pill { position:absolute; top:14px; right:18px; font-size:10px; padding:6px 10px; background:#ffe4d6; color:#ff6b35; border-radius:14px; font-weight:600; letter-spacing:.3px; }
+.apptfx-detail-grid { display:flex; flex-direction:column; gap:18px; margin-top:4px; }
+.apptfx-detail-row { display:flex; align-items:center; gap:10px; font-size:13px; flex-wrap:wrap; }
+.apptfx-detail-icon { font-size:14px; }
+.apptfx-detail-label { font-size:12px; font-weight:500; color:#555; }
+.apptfx-detail-value { font-size:13px; font-weight:600; color:#222; }
+.apptfx-detail-actions { display:flex; gap:14px; margin-top:26px; padding-top:20px; border-top:1px solid #eee; flex-wrap:wrap; }
+.apptfx-detail-btn { border:none; cursor:pointer; font-size:13px; font-weight:500; padding:10px 18px; border-radius:6px; transition:background .25s ease, box-shadow .25s ease; }
+.apptfx-detail-btn-primary { background:#ff6b35; color:#fff; }
+.apptfx-detail-btn-primary:hover:not(:disabled){ background:#e55a2b; }
+.apptfx-detail-btn-secondary { background:#f5f5f5; color:#444; }
+.apptfx-detail-btn-secondary:hover:not(:disabled){ background:#ececec; }
+.apptfx-detail-btn:disabled { opacity:.6; cursor:not-allowed; }
+.apptfx-detail-status { margin-top:26px; padding-top:20px; border-top:1px solid #eee; font-size:14px; font-weight:600; text-align:center; }
+.apptfx-detail-status-confirmed { color:#2e7d32; }
+.apptfx-detail-status-cancelled { color:#c62828; }
+.apptfx-detail-error { background:#ffecec; border:1px solid #f5b5b5; padding:14px 18px; border-radius:8px; font-size:12px; margin-bottom:18px; color:#c62828; }
+
+/* Skeleton */
+.apptfx-detail-skel { max-width:680px; }
+.apptfx-detail-skel-row { height:14px; background:linear-gradient(90deg,#f2f2f2 0%,#e7e7e7 50%,#f2f2f2 100%); background-size:200% 100%; animation:apptfx-detail-shimmer 1.3s linear infinite; border-radius:4px; margin-bottom:14px; }
+@keyframes apptfx-detail-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+@media (max-width: 760px) {
+  .apptfx-detail-page { padding:18px 18px 50px; }
+  .apptfx-detail-card { padding:22px 22px 26px; }
+  .apptfx-detail-actions { flex-direction:column; }
+  .apptfx-detail-btn { width:100%; }
+}

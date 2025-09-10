@@ -1,0 +1,45 @@
+/* Resolution Center (rcfx namespace) */
+.rcfx-page { padding: 20px 28px 60px; }
+.rcfx-header-block { margin-bottom: 18px; /* align with appointments header spacing */ }
+.rcfx-title { font-size: 22px; margin:0 0 4px; }
+.rcfx-sub { font-size:11px; margin:0; color:#666; }
+.rcfx-section-heading { font-size:18px; font-weight:600; margin:0 0 14px; padding:4px 0 8px; padding-left:10px; border-left:4px solid #ff6b35; }
+.rcfx-loading { font-size:13px; color:#555; padding:20px 0; }
+.rcfx-empty { font-size:13px; color:#666; padding:40px 0; }
+.rcfx-error { background:#ffecec; border:1px solid #f5b5b5; padding:12px 16px; border-radius:8px; font-size:12px; margin-bottom:14px; color:#c62828; }
+
+.rcfx-dispute-grid { display:flex; gap:18px; flex-wrap:wrap; }
+.rcfx-dispute-card { background:#fff; border:1px solid #e1e1e1; border-radius:8px; padding:18px 18px 14px; width:260px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.rcfx-dispute-card[data-status='resolved'] { border-style:solid; }
+.rcfx-dispute-body { font-size:11px; line-height:1.4; color:#222; display:flex; flex-direction:column; gap:6px; }
+.rcfx-dispute-line strong { font-weight:600; }
+.rcfx-reason { color:#b01035; font-weight:500; }
+.rcfx-btn { cursor:pointer; border:none; border-radius:4px; font-size:11px; font-weight:500; padding:8px 14px; transition:background .25s ease, box-shadow .25s ease; }
+.rcfx-btn-primary { background:#ff6b35; color:#fff; }
+.rcfx-btn-primary:hover { background:#e55a2b; }
+
+/* Chat */
+.rcfx-chat-wrapper { max-width:860px; }
+.rcfx-chat-box { background:#fff; border:1px solid #e1e1e1; border-radius:8px; padding:20px 24px 22px; display:flex; flex-direction:column; gap:18px; }
+.rcfx-messages { display:flex; flex-direction:column; gap:10px; max-height:420px; overflow-y:auto; padding-right:4px; }
+.rcfx-msg { max-width:60%; font-size:12px; line-height:1.4; padding:10px 12px 8px; border-radius:8px; position:relative; display:flex; flex-direction:column; gap:4px; }
+.rcfx-msg-customer { align-self:flex-end; background:#e6f0ff; color:#1a3d6d; }
+.rcfx-msg-admin { align-self:flex-start; background:#f5f5f5; color:#333; }
+.rcfx-msg-text { word-break:break-word; }
+.rcfx-msg-time { font-size:10px; opacity:.6; text-align:right; }
+.rcfx-chat-input-row { display:flex; gap:10px; }
+.rcfx-chat-input { flex:1; border:1px solid #d7d7d7; border-radius:6px; padding:10px 12px; font-size:12px; }
+.rcfx-chat-input:focus { outline:none; border-color:#ff6b35; box-shadow:0 0 0 2px rgba(255,107,53,.15); }
+
+@media (max-width:840px){
+  .rcfx-dispute-grid { justify-content:flex-start; }
+  .rcfx-dispute-card { width:100%; }
+  .rcfx-msg { max-width:80%; }
+}
+
+@media (max-width:640px){
+  .rcfx-page { padding:18px 18px 50px; }
+  .rcfx-chat-box { padding:18px 18px 20px; }
+  .rcfx-chat-input-row { flex-direction:column; }
+  .rcfx-btn-primary { width:100%; }
+}

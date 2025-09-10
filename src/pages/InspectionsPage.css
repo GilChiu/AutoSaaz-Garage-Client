@@ -1,0 +1,173 @@
+/* Inspections Page Styles - Dashboard Layout */
+
+/* Content */
+.inspections-page-section {
+  margin-bottom: var(--space-xl);
+}
+
+/* Align spacing & visual rhythm with Appointments page */
+.inspections-page-header-block {
+  background: var(--color-bg-surface, #ffffff);
+  padding: var(--space-lg) var(--space-lg) var(--space-md);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  /* Previously used var(--space-lg); normalize to 18px like appointments header */
+  margin: 0 0 18px;
+}
+
+.inspections-page-header-block .small-heading {
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--space-xs);
+}
+
+.inspections-page-header-block .small-sub {
+  font-size: var(--font-size-xs);
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.inspections-page-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  /* Reduce bottom margin to 14px to match appointments section heading */
+  margin: 0 0 14px 0;
+  padding-left: var(--space-xs);
+  border-left: 3px solid var(--color-primary-orange);
+}
+
+/* Cards */
+.inspections-page-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.inspections-page-card {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  transition: box-shadow 0.2s ease;
+}
+
+.inspections-page-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.inspections-page-card-header {
+  margin-bottom: var(--space-lg);
+}
+
+.inspections-page-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.inspections-page-card-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.inspections-page-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-lg);
+}
+
+/* Task List */
+.inspections-page-task-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.inspections-page-task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.inspections-page-task-bullet {
+  color: var(--color-primary-orange);
+  font-size: var(--font-size-xs);
+  line-height: 1;
+}
+
+.inspections-page-task-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+/* View Details Button */
+.inspections-page-view-details-btn {
+  background-color: var(--color-primary-orange);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.inspections-page-view-details-btn:hover {
+  background-color: #e55a2b;
+}
+
+/* Loading and Error States */
+.inspections-page-loading,
+.inspections-page-error {
+  text-align: center;
+  padding: var(--space-2xl);
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+}
+
+.inspections-page-error {
+  color: var(--color-error);
+}
+
+.inspections-page-empty {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  background: white;
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .inspections-page-card-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-md);
+  }
+
+  .inspections-page-view-details-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .inspections-page-card {
+    padding: var(--space-lg);
+  }
+
+  .inspections-page-card-title {
+    font-size: var(--font-size-md);
+  }
+}

@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* Garage Landing Page Styles */
+.garage-landing-home-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Header */
+.landing-header-home-page {
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header-logo-home-page {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo-image-home-page {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.header-text-home-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.company-name-home-page {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.0;
+}
+
+.tagline-home-page {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  line-height: 1.0;
+  letter-spacing: 0.15px;
+}
+
+/* Main Container */
+.main-container-home-page {
+  flex: 1;
+  display: flex;
+  height: calc(100vh - 80px);
+  padding: 0;
+  gap: 0;
+  box-sizing: border-box;
+}
+
+/* Left Side - Image Section */
+.image-section-home-page {
+  flex: 0.5;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  border-radius: 24px;
+  background: white;
+}
+
+.garage-image-home-page {
+  margin-top: 20px;
+  width: 40vw;
+  height: 80vh;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.hero-image-home-page {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 12px;
+}
+
+/* Right Side - Welcome Section */
+.welcome-section-home-page {
+  flex: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 40px 80px;
+}
+
+.welcome-content-home-page {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.welcome-logo-home-page {
+  margin-bottom: 40px;
+}
+
+.welcome-logo-image-home-page {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-top: 60px;
+}
+
+.welcome-text-home-page {
+  margin-bottom: 30px;
+}
+
+.welcome-text-home-page h1 {
+  font-family: 'Poppins', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #333333;
+  text-align: center;
+}
+
+.welcome-text-home-page h2 {
+  font-family: 'Poppins', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #333333;
+  margin: 0;
+  text-align: center;
+}
+
+/* Login Button */
+.login-btn-home-page {
+  display: block;
+  width: 200px;
+  height: 48px;
+  background-color: #ff6b35;
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 auto 40px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-btn-home-page:hover {
+  background-color: #e55a2b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
+}
+
+/* Register Link */
+.register-link-home-page {
+  font-size: 14px;
+  color: #666;
+  font-family: 'Poppins', sans-serif;
+}
+
+.register-now-home-page {
+  color: #ff6b35;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.register-now-home-page:hover {
+  color: #e55a2b;
+  text-decoration: underline;
+}
+
+

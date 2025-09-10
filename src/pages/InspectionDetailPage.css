@@ -1,0 +1,218 @@
+/* Inspection Detail Page Styles - Dashboard Layout */
+
+/* Content */
+.inspection-detail-section {
+  max-width: 800px;
+}
+
+.inspection-detail-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-lg) 0;
+  padding-left: var(--space-xs);
+  border-left: 3px solid var(--color-primary-orange);
+}
+
+/* Card */
+.inspection-detail-card {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+}
+
+.inspection-detail-card-header {
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.inspection-detail-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Info Grid */
+.inspection-detail-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.inspection-detail-info-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.inspection-detail-info-label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  min-width: 180px;
+  flex-shrink: 0;
+}
+
+.inspection-detail-info-value {
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+/* Status */
+.inspection-detail-status {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.inspection-detail-status-pending {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.inspection-detail-status-completed {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+/* Tasks */
+.inspection-detail-tasks {
+  margin-bottom: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.inspection-detail-tasks-title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-lg) 0;
+}
+
+.inspection-detail-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.inspection-detail-task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.inspection-detail-task-bullet {
+  color: var(--color-primary-orange);
+  font-size: var(--font-size-xs);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.inspection-detail-task-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+/* Actions */
+.inspection-detail-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-start;
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.inspection-detail-complete-btn {
+  background-color: var(--color-primary-orange);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.inspection-detail-complete-btn:hover:not(:disabled) {
+  background-color: #e55a2b;
+}
+
+.inspection-detail-complete-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.inspection-detail-cancel-btn,
+.inspection-detail-back-btn {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.inspection-detail-cancel-btn:hover,
+.inspection-detail-back-btn:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+/* Loading and Error States */
+.inspection-detail-loading,
+.inspection-detail-error {
+  text-align: center;
+  padding: var(--space-2xl);
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+}
+
+.inspection-detail-error {
+  color: var(--color-error);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .inspection-detail-card {
+    padding: var(--space-lg);
+  }
+
+  .inspection-detail-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .inspection-detail-info-label {
+    min-width: auto;
+  }
+
+  .inspection-detail-actions {
+    flex-direction: column;
+  }
+
+  .inspection-detail-complete-btn,
+  .inspection-detail-cancel-btn,
+  .inspection-detail-back-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .inspection-detail-card-title {
+    font-size: var(--font-size-md);
+  }
+}

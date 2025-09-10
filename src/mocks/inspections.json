@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "customer": "Ali Khan",
+    "vehicle": "Honda Civic",
+    "date": "2025-06-24",
+    "time": "3:00 PM",
+    "assignedTechnician": "Ahmad",
+    "status": "pending",
+    "tasks": [
+      "Check engine light diagnostics",
+      "Oil level and filters inspection",
+      "Brake system review",
+      "Clutch maintenance"
+    ]
+  },
+  {
+    "id": 2,
+    "customer": "Sarah Ahmed",
+    "vehicle": "Toyota Corolla",
+    "date": "2025-06-25",
+    "time": "10:00 AM",
+    "assignedTechnician": "Hassan",
+    "status": "pending",
+    "tasks": [
+      "Engine diagnostics",
+      "Transmission check",
+      "Battery inspection",
+      "Tire pressure and alignment"
+    ]
+  },
+  {
+    "id": 3,
+    "customer": "Hamza",
+    "vehicle": "BMW m5",
+    "date": "2025-06-23",
+    "time": "3:00 PM",
+    "assignedTechnician": "Ahmad",
+    "status": "completed",
+    "tasks": [
+      "Brake fluid check",
+      "ABS sensor calibration",
+      "Rear axle testing",
+      "Clutch maintenance"
+    ]
+  },
+  {
+    "id": 4,
+    "customer": "Omar Khan",
+    "vehicle": "Mercedes C-Class",
+    "date": "2025-06-22",
+    "time": "2:00 PM",
+    "assignedTechnician": "Hassan",
+    "status": "completed",
+    "tasks": [
+      "Engine oil change",
+      "Air filter replacement",
+      "Cooling system check",
+      "Electrical diagnostics"
+    ]
+  }
+]
