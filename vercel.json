@@ -4,11 +4,6 @@
   "outputDirectory": "build",
   "installCommand": "npm install",
   "framework": "create-react-app",
-  "functions": {
-    "app/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "routes": [
     {
       "src": "/static/(.*)",
