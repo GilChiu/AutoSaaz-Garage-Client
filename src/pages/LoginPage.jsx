@@ -119,7 +119,7 @@ const LoginPage = () => {
                             </div>
 
                             <div className="forgot-password-login-page">
-                                <Link to="/forgot-password">forgot your password?</Link>
+                                <Link to="/forgot-password">Forgot your password?</Link>
                             </div>
 
                             <button type="submit" className="signin-btn-login-page" disabled={loading}>

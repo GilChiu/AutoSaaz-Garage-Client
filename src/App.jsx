@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import RegisterPage2 from './pages/RegisterPage2';
+import RegisterPage3 from './pages/RegisterPage3';
 import VerificationPage from './pages/VerificationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetVerificationPage from './pages/ResetVerificationPage';
@@ -39,6 +40,7 @@ const App = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/register-step-2" element={<RegisterPage2 />} />
+              <Route path="/register-step-3" element={<RegisterPage3 />} />
               <Route path="/verify-account" element={<VerificationPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-verification" element={<ResetVerificationPage />} />

@@ -13,6 +13,7 @@ const Layout = ({ children }) => {
     const isAuthPage = location.pathname === '/login' || 
                       location.pathname === '/register' || 
                       location.pathname === '/register-step-2' || 
+                      location.pathname === '/register-step-3' || 
                       location.pathname === '/verify-account' ||
                       location.pathname === '/forgot-password' ||
                       location.pathname === '/reset-verification' ||

@@ -31,9 +31,9 @@ const RegisterPage2 = () => {
                 location
             });
 
-            // Go to next step (verification)
+            // Go to next step (step 3 details)
             goToNextStep();
-            navigate('/verify-account');
+            navigate('/register-step-3');
         } catch (err) {
             setError('Something went wrong. Please try again.');
         }

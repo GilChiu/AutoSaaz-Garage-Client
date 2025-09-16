@@ -12,7 +12,7 @@
 /* Header */
 .landing-header-verification-page {
   background: white;
-  padding: 16px 24px;
+  padding: 20px 32px; /* align with other screens */
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -23,8 +23,8 @@
 }
 
 .header-logo-image-verification-page {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
 }
 
@@ -34,54 +34,49 @@
 }
 
 .company-name-verification-page {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
   color: #333;
   line-height: 1.1;
 }
 
 .tagline-verification-page {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
   line-height: 1.1;
 }
 
 /* Main Content */
 .main-container-verification-page {
+  position: relative; /* to position card absolutely */
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
+  display: block;
+  padding: 0;
   background: #f8f9fa;
 }
 
 /* Centered Form - No Image */
-.form-section-verification-page {
-  width: 100%;
-  max-width: 500px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.form-section-verification-page { display: contents; }
 
 .form-content-verification-page {
-  width: 100%;
-  max-width: 500px;
-  padding: 40px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  width: 775px;
+  height: 448px;
+  left: calc(50% - 775px/2 + 0.5px);
+  top: calc(50% - 448px/2 + 55px);
+  padding: 28px 32px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e6e6e6;
+  box-sizing: border-box;
 }
 
-.form-header-verification-page {
-  text-align: center;
-  margin-bottom: 32px;
-}
+.form-header-verification-page { text-align: center; margin-bottom: 20px; }
 
 .form-header-verification-page h1 {
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   color: #333;
   margin-bottom: 12px;
 }
@@ -118,11 +113,7 @@
 }
 
 /* Form */
-.verification-form-verification-page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
+.verification-form-verification-page { display: flex; flex-direction: column; gap: 16px; }
 
 .form-group-verification-page {
   display: flex;
@@ -147,12 +138,7 @@
 }
 
 /* Verification Input Boxes */
-.verification-inputs-container {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-bottom: 24px;
-}
+.verification-inputs-container { display: flex; gap: 12px; justify-content: center; margin-bottom: 8px; }
 
 .verification-digit-input {
   width: 56px;
@@ -183,21 +169,7 @@
 
 /* Individual digit inputs handle their own styling now */
 
-.verify-btn-verification-page {
-  background: #ff6b35;
-  color: white;
-  border: none;
-  padding: 16px 24px;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  font-family: 'Poppins', sans-serif;
-  width: 100%;
-  margin-bottom: 16px;
-  height: 56px;
-}
+.verify-btn-verification-page { background:#ff6b35;color:#fff;border:none;padding:14px 24px;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;transition:background-color .3s;font-family:'Poppins',sans-serif;width:100%;margin-bottom:8px;height:56px; }
 
 .verify-btn-verification-page:hover:not(:disabled) {
   background: #e55a2b;

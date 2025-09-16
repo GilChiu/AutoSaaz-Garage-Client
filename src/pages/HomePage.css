@@ -2,7 +2,6 @@
 
 /* Garage Landing Page Styles */
 .garage-landing-home-page {
-  min-height: 100vh;
   background-color: #f8f9fa;
   display: flex;
   flex-direction: column;
@@ -12,7 +11,7 @@
 /* Header */
 .landing-header-home-page {
   background: white;
-  padding: 16px 24px;
+  padding: 20px 32px; /* larger like Figma */
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -23,8 +22,8 @@
 }
 
 .header-logo-image-home-page {
-  width: 32px;
-  height: 32px;
+  width: 48px; /* bigger logo */
+  height: 48px;
   object-fit: contain;
 }
 
@@ -35,14 +34,14 @@
 }
 
 .company-name-home-page {
-  font-size: 20px;
+  font-size: 24px; /* larger name */
   font-weight: 700;
   color: #333;
   line-height: 1.0;
 }
 
 .tagline-home-page {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
   font-weight: 500;
   line-height: 1.0;
@@ -53,31 +52,31 @@
 .main-container-home-page {
   flex: 1;
   display: flex;
-  height: calc(100vh - 80px);
-  padding: 0;
-  gap: 0;
+  /* Responsive vertical padding that won't cause overflow */
+  padding: clamp(8px, 2.5vh, 24px) 24px;
   box-sizing: border-box;
+  min-height: 0; /* allow children to shrink within viewport */
 }
 
 /* Left Side - Image Section */
 .image-section-home-page {
-  flex: 0.5;
+  flex: 0 0 55%; /* give image more room like Figma */
   display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-  padding: 20px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-  border-radius: 24px;
-  background: white;
+  align-items: center; /* center the card */
+  background: transparent;
+  height: auto;
+  min-height: 0;
+  margin-left: 20px;
+  justify-content: center;
+
 }
 
 .garage-image-home-page {
-  margin-top: 20px;
-  width: 40vw;
-  height: 80vh;
-  border-radius: 12px;
+  width: 650px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); /* subtle card feel */
+  background: #fff;
 }
 
 .hero-image-home-page {
@@ -85,58 +84,66 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-  border-radius: 12px;
+  border-radius: inherit;
 }
 
 /* Right Side - Welcome Section */
 .welcome-section-home-page {
-  flex: 0.5;
-  display: flex;
+  flex: 0 0 45%;
   align-items: center;
   justify-content: center;
   background: white;
   border-radius: 0;
   box-shadow: none;
-  padding: 40px 80px;
+  margin-top: 80px;
+  min-height: 0; /* prevent child content from forcing page scroll */
 }
 
 .welcome-content-home-page {
   width: 100%;
-  max-width: 400px;
   text-align: center;
 }
 
 .welcome-logo-home-page {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
+  width: 180px;
+  height: 180px;
+  border-radius: 9999px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #ffffff;
+  border: 12px solid #f3f3f3; /* ring effect like Figma */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .welcome-logo-image-home-page {
-  width: 80px;
-  height: 80px;
   object-fit: contain;
-  margin-top: 60px;
 }
 
 .welcome-text-home-page {
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
 
 .welcome-text-home-page h1 {
   font-family: 'Poppins', sans-serif;
   font-style: normal;
   font-weight: 600;
-  font-size: 32px;
-  line-height: 1.2;
+  font-size: 52px; /* larger headline */
+  line-height: 1.25;
   color: #333333;
   text-align: center;
+  margin: 0;
 }
 
 .welcome-text-home-page h2 {
   font-family: 'Poppins', sans-serif;
   font-style: normal;
   font-weight: 600;
-  font-size: 32px;
-  line-height: 1.2;
+  font-size: 52px; /* larger headline */
+  line-height: 1.25;
   color: #333333;
   margin: 0;
   text-align: center;
@@ -145,16 +152,16 @@
 /* Login Button */
 .login-btn-home-page {
   display: block;
-  width: 200px;
-  height: 48px;
+  width: 360px; /* wider CTA like Figma */
+  height: 64px;  /* taller CTA */
   background-color: #ff6b35;
   color: white;
   text-decoration: none;
   border: none;
   border-radius: 12px;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: 16px 32px;
+  font-size: 20px; /* larger text */
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   margin: 0 auto 40px;

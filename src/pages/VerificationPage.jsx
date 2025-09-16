@@ -1,37 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
-import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+// Front-end only: no backend calls, we won't import useAuth or axios here
 import './VerificationPage.css';
 
 const VerificationPage = () => {
     const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [sentCode, setSentCode] = useState('');
-    const { registrationData, resetRegistration } = useRegistration();
-    const { register } = useAuth();
+    // Mock flow no longer needs to compare codes
+    const { resetRegistration } = useRegistration();
     const navigate = useNavigate();
     const inputRefs = useRef([]);
 
-    // Send verification code when component mounts
+    // Front-end only: generate a mock verification code on mount
     useEffect(() => {
-        const sendCode = async () => {
-            try {
-                const response = await axios.post('http://localhost:5000/api/auth/send-verification', {
-                    email: registrationData.email
-                });
-                setSentCode(response.data.verificationCode); // For demo purposes
-            } catch (err) {
-                setError('Failed to send verification code');
-            }
-        };
-
-        if (registrationData.email) {
-            sendCode();
-        }
-    }, [registrationData.email]);
+        // In mock mode, we could still show an alert to simulate code sent
+        // alert('A verification code has been sent (mock).');
+    }, []);
 
     const handleInputChange = (index, value) => {
         // Only allow digits
@@ -88,43 +74,16 @@ const VerificationPage = () => {
             return;
         }
 
-        try {
-            // Create the user account with all the registration data
-            await register({
-                firstName: registrationData.firstName,
-                lastName: registrationData.lastName,
-                email: registrationData.email,
-                password: registrationData.password,
-                phone: registrationData.phone,
-                address: registrationData.address,
-                street: registrationData.street,
-                state: registrationData.state,
-                location: registrationData.location,
-                verificationCode: codeString
-            });
-
-            // Clear registration data
-            resetRegistration();
-            
-            // Navigate to dashboard
-            navigate('/dashboard');
-        } catch (err) {
-            setError(err.response?.data?.message || 'Verification failed. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+        // Front-end only: accept any 6-digit code for now
+        // Clear registration data (front-end context) and navigate
+        resetRegistration();
+        navigate('/dashboard');
+        setLoading(false);
     };
 
-    const handleResendCode = async () => {
-        try {
-            const response = await axios.post('http://localhost:5000/api/auth/send-verification', {
-                email: registrationData.email
-            });
-            setSentCode(response.data.verificationCode);
-            alert(`New verification code: ${response.data.verificationCode}`);
-        } catch (err) {
-            setError('Failed to resend code');
-        }
+    const handleResendCode = () => {
+        // In mock mode, just notify the user a code was "sent".
+        // alert('A new verification code has been sent (mock).');
     };
 
     return (
@@ -152,37 +111,27 @@ const VerificationPage = () => {
                         <div className="form-header-verification-page">
                             <h1>Enter Verification Code</h1>
                             <p>We've sent a 6-digit code to your email or phone number.</p>
-                            {sentCode && (
-                                <div className="demo-code-verification-page">
-                                    <strong>Demo Code: {sentCode}</strong>
-                                </div>
-                            )}
                         </div>
 
                         {error && <div className="error-message-verification-page">{error}</div>}
 
                         <form onSubmit={handleSubmit} className="verification-form-verification-page">
-                            <div className="form-group-verification-page">
-                                <label>Enter Verification Code</label>
-                                <p className="verification-subtitle">We've sent a 6-digit code to your email or phone number.</p>
-                                
-                                <div className="verification-inputs-container">
-                                    {verificationCode.map((digit, index) => (
-                                        <input
-                                            key={index}
-                                            ref={el => inputRefs.current[index] = el}
-                                            type="text"
-                                            value={digit}
-                                            onChange={(e) => handleInputChange(index, e.target.value)}
-                                            onKeyDown={(e) => handleKeyDown(index, e)}
-                                            onPaste={handlePaste}
-                                            className="verification-digit-input"
-                                            maxLength="1"
-                                            inputMode="numeric"
-                                            autoComplete="off"
-                                        />
-                                    ))}
-                                </div>
+                            <div className="verification-inputs-container">
+                                {verificationCode.map((digit, index) => (
+                                    <input
+                                        key={index}
+                                        ref={el => inputRefs.current[index] = el}
+                                        type="text"
+                                        value={digit}
+                                        onChange={(e) => handleInputChange(index, e.target.value)}
+                                        onKeyDown={(e) => handleKeyDown(index, e)}
+                                        onPaste={handlePaste}
+                                        className="verification-digit-input"
+                                        maxLength="1"
+                                        inputMode="numeric"
+                                        autoComplete="off"
+                                    />
+                                ))}
                             </div>
 
                             <div className="resend-section-verification-page">
@@ -207,7 +156,7 @@ const VerificationPage = () => {
                             <button 
                                 type="button" 
                                 className="back-btn-verification-page"
-                                onClick={() => navigate('/register')}
+                                onClick={() => navigate('/register-step-3')}
                             >
                                 ← Back
                             </button>
