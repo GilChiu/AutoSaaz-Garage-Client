@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBookings } from '../hooks/useBookings';
 import { getStatusDisplayText, getStatusCssClass } from '../services/mappers/bookingMappers';
+import Notification from '../components/common/Notification';
 import './BookingDetailPage.css';
 
 const BookingDetailPage = () => {
@@ -11,6 +12,11 @@ const BookingDetailPage = () => {
     const [booking, setBooking] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [notification, setNotification] = useState({
+        isVisible: false,
+        message: '',
+        type: 'success'
+    });
 
     useEffect(() => {
         if (bookings && id) {
@@ -37,11 +43,26 @@ const BookingDetailPage = () => {
         return "10:00 AM";
     };
 
+    const showNotification = (message, type = 'success') => {
+        setNotification({
+            isVisible: true,
+            message,
+            type
+        });
+    };
+
+    const hideNotification = () => {
+        setNotification(prev => ({
+            ...prev,
+            isVisible: false
+        }));
+    };
+
     const handleUpdateBooking = () => {
         setIsUpdating(true);
         // Mock update - in real app this would call an API
         setTimeout(() => {
-            alert('Booking updated successfully!');
+            showNotification('Booking updated successfully!', 'success');
             setIsUpdating(false);
         }, 1000);
     };
@@ -50,10 +71,13 @@ const BookingDetailPage = () => {
         setIsUpdating(true);
         // Mock cancel - in real app this would call an API
         setTimeout(() => {
-            alert('Booking cancelled successfully!');
+            showNotification('Booking cancelled successfully!', 'success');
             setIsUpdating(false);
             setShowCancelConfirm(false);
-            navigate('/dashboard');
+            // Navigate back to dashboard after a delay
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 2000);
         }, 1000);
     };
 
@@ -202,6 +226,16 @@ const BookingDetailPage = () => {
                     </div>
                 )}
             </div>
+
+            {/* Notification Component */}
+            <Notification
+                message={notification.message}
+                type={notification.type}
+                isVisible={notification.isVisible}
+                onClose={hideNotification}
+                autoHide={true}
+                duration={4000}
+            />
         </div>
     );
 };
