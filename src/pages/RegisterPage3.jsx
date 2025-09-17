@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
 import './RegisterPage3.css';
+import { autoSaazLogo, heroRegister3 } from '../assets/images';
 
 const RegisterPage3 = () => {
   const [companyName, setCompanyName] = useState('');
@@ -41,7 +42,7 @@ const RegisterPage3 = () => {
       <div className="landing-header-register-page3">
         <div className="header-logo-register-page3">
           <img
-            src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
+            src={autoSaazLogo}
             alt="AutoSaaz"
             className="header-logo-image-register-page3"
           />
@@ -58,7 +59,7 @@ const RegisterPage3 = () => {
         <div className="image-section-register-page3">
           <div className="garage-image-register-page3">
             <img
-              src={`${process.env.PUBLIC_URL}/hero-register3.png`}
+              src={heroRegister3}
               alt="Mechanic and car parts"
               className="hero-image-register-page3"
             />

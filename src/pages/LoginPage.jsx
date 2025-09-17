@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import './LoginPage.css';
+import { autoSaazLogo, heroLogin2 } from '../assets/images';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -41,7 +42,7 @@ const LoginPage = () => {
             <div className="landing-header-login-page">
                 <div className="header-logo-login-page">
                     <img 
-                        src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
+                        src={autoSaazLogo}
                         alt="AutoSaaz" 
                         className="header-logo-image-login-page"
                     />
@@ -58,7 +59,7 @@ const LoginPage = () => {
                 <div className="image-section-login-page">
                     <div className="garage-image-login-page">
                         <img 
-                            src={`${process.env.PUBLIC_URL}/hero-login2.png`}
+                            src={heroLogin2}
                             alt="Auto mechanic working on car engine" 
                             className="hero-image-login-page"
                         />

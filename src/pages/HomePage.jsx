@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './HomePage.css';
+import { autoSaazLogo, heroLogin } from '../assets/images';
 
 const HomePage = () => {
     return (
@@ -9,7 +10,7 @@ const HomePage = () => {
             <div className="landing-header-home-page">
                 <div className="header-logo-home-page">
                     <img 
-                        src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
+                        src={autoSaazLogo}
                         alt="AutoSaaz" 
                         className="header-logo-image-home-page"
                     />
@@ -26,7 +27,7 @@ const HomePage = () => {
                 <div className="image-section-home-page">
                     <div className="garage-image-home-page">
                         <img 
-                            src={`${process.env.PUBLIC_URL}/hero-login.png`}
+                            src={heroLogin}
                             alt="Auto mechanic and customer handshake in garage" 
                             className="hero-image-home-page"
                         />
@@ -39,7 +40,7 @@ const HomePage = () => {
                         {/* Logo */}
                         <div className="welcome-logo-home-page">
                             <img 
-                                src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
+                                src={autoSaazLogo}
                                 alt="AutoSaaz Logo" 
                                 className="welcome-logo-image-home-page"
                             />
