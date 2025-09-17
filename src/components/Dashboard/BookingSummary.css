@@ -70,6 +70,15 @@
   background-color: var(--color-bg-main);
 }
 
+.dashboard-booking-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dashboard-booking-row:hover {
+  background-color: #f8f9fa !important;
+}
+
 .dashboard-booking-table tbody tr:last-child td {
   border-bottom: none;
 }

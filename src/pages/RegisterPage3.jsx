@@ -88,13 +88,21 @@ const RegisterPage3 = () => {
 
               <div className="form-group-register-page3">
                 <label>Owner/Representative Emirates ID <span className="required-asterisk-register-page3">*</span></label>
-                <input
-                  type="file"
-                  onChange={(e) => setEmiratesId(e.target.files?.[0] || null)}
-                  accept="image/*,application/pdf"
-                  placeholder="Upload Your Emirates ID"
-                  required
-                />
+                <div className="file-upload-container-register-page3">
+                  <input
+                    type="file"
+                    id="emirates-id-upload"
+                    onChange={(e) => setEmiratesId(e.target.files?.[0] || null)}
+                    accept="image/*,application/pdf"
+                    className="file-input-hidden-register-page3"
+                    required
+                  />
+                  <label htmlFor="emirates-id-upload" className="file-upload-area-register-page3">
+                    <span className="upload-text-register-page3">
+                      {emiratesId ? emiratesId.name : "Upload Your Emirates ID"}
+                    </span>
+                  </label>
+                </div>
               </div>
 
               <div className="form-group-register-page3">

@@ -13,6 +13,7 @@ import PasswordResetSuccessPage from './pages/PasswordResetSuccessPage';
 import Dashboard from './components/Dashboard/Dashboard';
 import AppointmentsPage from './pages/AppointmentsPage';
 import AppointmentDetailPage from './pages/AppointmentDetailPage';
+import BookingDetailPage from './pages/BookingDetailPage';
 import InspectionsPage from './pages/InspectionsPage';
 import InspectionDetailPage from './pages/InspectionDetailPage';
 import ChatsPage from './pages/ChatsPage';
@@ -49,6 +50,11 @@ const App = () => {
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/bookings/:id" element={
+                <ProtectedRoute>
+                  <BookingDetailPage />
                 </ProtectedRoute>
               } />
               <Route path="/appointments" element={

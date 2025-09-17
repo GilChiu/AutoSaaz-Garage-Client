@@ -1,14 +1,37 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useBookings } from '../../hooks/useBookings';
 import { getStatusDisplayText, getStatusCssClass } from '../../services/mappers/bookingMappers';
 import './BookingSummary.css';
 
 const BookingSummary = () => {
     const { data: bookings, loading, error } = useBookings();
+    const navigate = useNavigate();
 
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        if (!dateString) return 'N/A';
+        
+        try {
+            const date = new Date(dateString);
+            
+            // Check if the date is valid
+            if (isNaN(date.getTime())) {
+                console.warn(`Invalid date: ${dateString}`);
+                return dateString; // Return original string if date is invalid
+            }
+            
+            // Return the date in YYYY-MM-DD format
+            return date.toISOString().split('T')[0];
+        } catch (error) {
+            console.error(`Error parsing date: ${dateString}`, error);
+            return dateString; // Return original string if there's an error
+        }
+    };
+
+    const handleBookingClick = (bookingId) => {
+        // Remove the '#' prefix if it exists
+        const numericId = bookingId.toString().replace('#', '');
+        navigate(`/bookings/${numericId}`);
     };
 
     if (loading) {
@@ -51,7 +74,11 @@ const BookingSummary = () => {
                         </thead>
                         <tbody>
                             {bookings.map((booking) => (
-                                <tr key={booking.id}>
+                                <tr 
+                                    key={booking.id} 
+                                    className="dashboard-booking-row"
+                                    onClick={() => handleBookingClick(booking.id.replace('#', ''))}
+                                >
                                     <td className="dashboard-booking-id">{booking.id}</td>
                                     <td className="dashboard-customer-name">{booking.customer}</td>
                                     <td className="dashboard-service-type">{booking.service}</td>
