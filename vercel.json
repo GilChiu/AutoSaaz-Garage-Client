@@ -2,12 +2,13 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "build",
-  "installCommand": "npm install",
+  "installCommand": "npm install --no-audit",
   "framework": "create-react-app",
   "env": {
     "CI": "false",
     "GENERATE_SOURCEMAP": "false",
-    "REACT_APP_USE_MOCKS": "true"
+    "REACT_APP_USE_MOCKS": "true",
+    "NPM_CONFIG_AUDIT": "false"
   },
   "routes": [
     {
