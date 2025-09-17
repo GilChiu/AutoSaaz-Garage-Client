@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
 import './RegisterPage.css';
+import { autoSaazLogo, heroRegister } from '../assets/images';
 
 const RegisterPage = () => {
     const [firstName, setFirstName] = useState('');
@@ -60,7 +61,7 @@ const RegisterPage = () => {
             <div className="landing-header-register-page">
                 <div className="header-logo-register-page">
                     <img 
-                        src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
+                        src={autoSaazLogo}
                         alt="AutoSaaz" 
                         className="header-logo-image-register-page"
                     />
@@ -77,7 +78,7 @@ const RegisterPage = () => {
                 <div className="image-section-register-page">
                     <div className="garage-image-register-page">
                         <img 
-                            src={`${process.env.PUBLIC_URL}/hero-register.png`}
+                            src={heroRegister}
                             alt="Auto mechanics working" 
                             className="hero-image-register-page"
                         />
