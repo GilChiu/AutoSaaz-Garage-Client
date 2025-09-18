@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -25,6 +25,7 @@ import SettingsPage from './pages/SettingsPage';
 import SettingsProfilePage from './pages/SettingsProfilePage';
 import SettingsServiceManagementPage from './pages/SettingsServiceManagementPage';
 import SettingsAccountPage from './pages/SettingsAccountPage';
+import SupportContactPage from './pages/SupportContactPage';
 import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -114,8 +115,9 @@ const App = () => {
               } />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="/settings/profile" element={<ProtectedRoute><SettingsProfilePage /></ProtectedRoute>} />
-              <Route path="/settings/services" element={<ProtectedRoute><SettingsServiceManagementPage /></ProtectedRoute>} />
+              <Route path="/settings/services" element={<ProtectedRoute><SettingsServiceManagementPage /></ProtectedRoute>} />   
               <Route path="/settings/account" element={<ProtectedRoute><SettingsAccountPage /></ProtectedRoute>} />
+              <Route path="/support/contact" element={<ProtectedRoute><SupportContactPage /></ProtectedRoute>} />
             </Routes>
           </Layout>
         </Router>

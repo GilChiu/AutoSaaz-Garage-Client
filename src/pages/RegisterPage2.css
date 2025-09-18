@@ -234,3 +234,69 @@
   font-family: 'Poppins', sans-serif;
   border: 1px solid #fcc;
 }
+
+/* Responsive Layouts */
+@media (max-width: 1200px) {
+  .garage-image-register-page2 {
+    margin-left: 60px;
+    width: 520px;
+    height: 640px;
+  }
+  .form-content-register-page2 {
+    left: calc(50% - 650px/2 + 250px);
+    width: 650px;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-container-register-page2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  .garage-image-register-page2 {
+    margin: 0 0 20px 0;
+    width: 90%;
+    max-width: 640px;
+    height: auto;
+    aspect-ratio: 5 / 6;
+  }
+  .form-content-register-page2 {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: 720px;
+    height: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .landing-header-register-page2 {
+    padding: 14px 16px;
+  }
+  .company-name-register-page2 { font-size: 20px; }
+  .tagline-register-page2 { font-size: 12px; }
+
+  .form-content-register-page2 {
+    padding: 16px;
+    border-radius: 10px;
+  }
+  .form-header-register-page2 h1 {
+    font-size: 22px;
+  }
+  .form-group-register-page2 {
+    margin-left: 0;
+  }
+  .form-group-register-page2 input {
+    width: 100%;
+    height: 42px;
+    font-size: 15px;
+  }
+  .next-btn-register-page2 {
+    width: 100%;
+    height: 48px;
+    margin: 20px 0 8px 0;
+    font-size: 16px;
+  }
+}

@@ -5,10 +5,8 @@ import './RegisterPage.css';
 import { autoSaazLogo, heroRegister } from '../assets/images';
 
 const RegisterPage = () => {
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
+    const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [error, setError] = useState('');
     const { updateRegistrationData, goToNextStep } = useRegistration();
@@ -18,8 +16,8 @@ const RegisterPage = () => {
         e.preventDefault();
         setError('');
 
-        // Validate all fields are filled
-        if (!firstName || !lastName || !email || !password || !phoneNumber) {
+        // Validate required fields
+        if (!fullName || !email || !phoneNumber) {
             setError('All fields are required');
             return;
         }
@@ -31,19 +29,17 @@ const RegisterPage = () => {
             return;
         }
 
-        // Validate password length
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters long');
-            return;
-        }
-
         try {
+            // Derive first and last name from fullName (best-effort)
+            const nameParts = fullName.trim().split(/\s+/);
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
             // Save data to registration context
             updateRegistrationData({
                 firstName,
                 lastName,
                 email,
-                password,
                 phone: phoneNumber
             });
 
@@ -96,23 +92,12 @@ const RegisterPage = () => {
 
                         <form onSubmit={handleSubmit} className="register-form-register-page">
                             <div className="form-group-register-page">
-                                <label className='firstname-label-register-page'>First Name <span className="required-asterisk-register-page">*</span></label>
+                                <label className='fullname-label-register-page'>Full Name <span className="required-asterisk-register-page">*</span></label>
                                 <input
                                     type="text"
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    placeholder="Enter First Name"
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-group-register-page">
-                                <label className='lastname-label-register-page'>Last Name <span className="required-asterisk-register-page">*</span></label>
-                                <input
-                                    type="text"
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    placeholder="Enter Last Name"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    placeholder="Enter Full Name"
                                     required
                                 />
                             </div>
@@ -129,17 +114,6 @@ const RegisterPage = () => {
                             </div>
 
                             <div className="form-group-register-page">
-                                <label>Password <span className="required-asterisk-register-page">*</span></label>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter Password"
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-group-register-page">
                                 <label>Phone Number <span className="required-asterisk-register-page">*</span></label>
                                 <input
                                     type="tel"
@@ -151,7 +125,7 @@ const RegisterPage = () => {
                             </div>
 
                             <button type="submit" className="next-btn-register-page">
-                                Register
+                                Next
                             </button>
                         </form>
 
