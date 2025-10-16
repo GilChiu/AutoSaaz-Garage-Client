@@ -3,7 +3,8 @@
  * Handles the 4-step registration flow with session management
  */
 
-const API_BASE_URL = 'https://autosaaz-server.onrender.com/api';
+// Use environment variable, fallback to default if not set
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://auto-saaz-server.onrender.com/api';
 
 /**
  * Step 1: Personal Information (NO password)
