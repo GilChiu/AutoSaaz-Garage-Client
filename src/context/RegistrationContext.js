@@ -1,97 +1,62 @@
 import React, { createContext, useContext, useState } from 'react';
-import {
-  getRegistrationData as getStoredRegistrationData,
-  setRegistrationData as setStoredRegistrationData,
-  clearRegistrationData as clearStoredRegistrationData,
-} from '../services/storage.service';
 
 const RegistrationContext = createContext();
 
 export const RegistrationProvider = ({ children }) => {
-    // Initialize from storage if available
-    const storedData = getStoredRegistrationData();
-    
-    const [registrationData, setRegistrationData] = useState(storedData || {
-        // Step 1: Personal Info (from API)
-        userId: '',
-        fullName: '',
+    const [registrationData, setRegistrationData] = useState({
+        // Step 1: Personal Info
         firstName: '',
         lastName: '',
         email: '',
         password: '',
-        phoneNumber: '',
-        requiresVerification: false,
+        phone: '',
         
         // Step 2: Business Location
         address: '',
         street: '',
         state: '',
         location: '',
-        coordinates: null,
         
-        // Step 3: Business Details
-        companyLegalName: '',
-        emiratesIdUrl: '',
-        tradeLicenseNumber: '',
-        vatCertification: '',
-        
-        // Navigation
-        currentStep: 1,
-        isVerified: false
+        // Step 3: Verification
+        verificationCode: '',
+        currentStep: 1
     });
 
     const updateRegistrationData = (data) => {
-        const updatedData = {
-            ...registrationData,
+        setRegistrationData(prev => ({
+            ...prev,
             ...data
-        };
-        setRegistrationData(updatedData);
-        // Persist to storage
-        setStoredRegistrationData(updatedData);
+        }));
     };
 
     const goToNextStep = () => {
-        const updatedData = {
-            ...registrationData,
-            currentStep: registrationData.currentStep + 1
-        };
-        setRegistrationData(updatedData);
-        setStoredRegistrationData(updatedData);
+        setRegistrationData(prev => ({
+            ...prev,
+            currentStep: prev.currentStep + 1
+        }));
     };
 
     const goToPreviousStep = () => {
-        const updatedData = {
-            ...registrationData,
-            currentStep: registrationData.currentStep - 1
-        };
-        setRegistrationData(updatedData);
-        setStoredRegistrationData(updatedData);
+        setRegistrationData(prev => ({
+            ...prev,
+            currentStep: prev.currentStep - 1
+        }));
     };
 
     const resetRegistration = () => {
-        const emptyData = {
-            userId: '',
-            fullName: '',
+        setRegistrationData({
             firstName: '',
             lastName: '',
             email: '',
             password: '',
-            phoneNumber: '',
-            requiresVerification: false,
+            phone: '',
             address: '',
             street: '',
             state: '',
             location: '',
-            coordinates: null,
-            companyLegalName: '',
-            emiratesIdUrl: '',
-            tradeLicenseNumber: '',
-            vatCertification: '',
-            currentStep: 1,
-            isVerified: false
-        };
-        setRegistrationData(emptyData);
-        clearStoredRegistrationData();
+            verificationCode: '',
+            currentStep: 1
+        });
     };
 
     return (

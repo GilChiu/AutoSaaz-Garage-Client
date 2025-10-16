@@ -1,99 +1,53 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
-import { useAuth } from '../context/AuthContext';
 import './RegisterPage.css';
 import { autoSaazLogo, heroRegister } from '../assets/images';
-import {
-    validateFullName,
-    validateEmail,
-    validatePhoneNumber,
-    validatePassword,
-    formatPhoneNumber,
-} from '../utils/validation';
 
 const RegisterPage = () => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const { updateRegistrationData } = useRegistration();
-    const { registerStep1 } = useAuth();
+    const { updateRegistrationData, goToNextStep } = useRegistration();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
-        // Validate full name
-        const nameValidation = validateFullName(fullName);
-        if (!nameValidation.isValid) {
-            setError(nameValidation.error);
+        // Validate required fields
+        if (!fullName || !email || !phoneNumber) {
+            setError('All fields are required');
             return;
         }
 
-        // Validate email
-        const emailValidation = validateEmail(email);
-        if (!emailValidation.isValid) {
-            setError(emailValidation.error);
-            return;
-        }
-
-        // Format and validate phone number
-        const formattedPhone = formatPhoneNumber(phoneNumber);
-        const phoneValidation = validatePhoneNumber(formattedPhone);
-        if (!phoneValidation.isValid) {
-            setError(phoneValidation.error);
-            return;
-        }
-
-        // Validate password
-        const passwordValidation = validatePassword(password);
-        if (!passwordValidation.isValid) {
-            setError(passwordValidation.error);
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address');
             return;
         }
 
         try {
-            setLoading(true);
+            // Derive first and last name from fullName (best-effort)
+            const nameParts = fullName.trim().split(/\s+/);
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
 
-            // Call API for registration step 1
-            const response = await registerStep1({
-                fullName: fullName.trim(),
-                email: email.trim().toLowerCase(),
-                phoneNumber: formattedPhone,
-                password: password,
+            // Save data to registration context
+            updateRegistrationData({
+                firstName,
+                lastName,
+                email,
+                phone: phoneNumber
             });
 
-            if (response.success && response.data) {
-                // Save registration data to context
-                updateRegistrationData({
-                    userId: response.data.userId,
-                    fullName: fullName.trim(),
-                    email: response.data.email,
-                    phoneNumber: response.data.phoneNumber,
-                    password: password, // Store temporarily for the session
-                    requiresVerification: response.data.requiresVerification,
-                    currentStep: response.data.requiresVerification ? 0 : 2, // 0 for verification, 2 for step 2
-                });
-
-                // Navigate to verification or next step
-                if (response.data.requiresVerification) {
-                    navigate('/verify-account');
-                } else {
-                    navigate('/register-step-2');
-                }
-            }
+            // Go to next step (business location)
+            goToNextStep();
+            navigate('/register-step-2');
         } catch (err) {
-            console.error('Registration error:', err);
-            setError(
-                err.message ||
-                    'Registration failed. Please check your information and try again.'
-            );
-        } finally {
-            setLoading(false);
+            setError('Something went wrong. Please try again.');
         }
     };
 
@@ -144,7 +98,6 @@ const RegisterPage = () => {
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
                                     placeholder="Enter Full Name"
-                                    disabled={loading}
                                     required
                                 />
                             </div>
@@ -156,7 +109,6 @@ const RegisterPage = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Enter Email"
-                                    disabled={loading}
                                     required
                                 />
                             </div>
@@ -167,26 +119,13 @@ const RegisterPage = () => {
                                     type="tel"
                                     value={phoneNumber}
                                     onChange={(e) => setPhoneNumber(e.target.value)}
-                                    placeholder="+971501234567"
-                                    disabled={loading}
+                                    placeholder="Enter Phone Number"
                                     required
                                 />
                             </div>
 
-                            <div className="form-group-register-page">
-                                <label>Password <span className="required-asterisk-register-page">*</span></label>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter Password (min 8 characters)"
-                                    disabled={loading}
-                                    required
-                                />
-                            </div>
-
-                            <button type="submit" className="next-btn-register-page" disabled={loading}>
-                                {loading ? 'Creating Account...' : 'Next'}
+                            <button type="submit" className="next-btn-register-page">
+                                Next
                             </button>
                         </form>
 

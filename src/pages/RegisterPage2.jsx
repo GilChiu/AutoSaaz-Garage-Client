@@ -1,15 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
-import { useAuth } from '../context/AuthContext';
 import './RegisterPage2.css';
 import { autoSaazLogo, heroRegister2 } from '../assets/images';
-import {
-    validateAddress,
-    validateStreet,
-    validateState,
-    validateLocation,
-} from '../utils/validation';
 
 const RegisterPage2 = () => {
     const [address, setAddress] = useState('');
@@ -17,83 +10,33 @@ const RegisterPage2 = () => {
     const [state, setState] = useState('');
     const [location, setLocation] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const { registrationData, updateRegistrationData, goToNextStep } = useRegistration();
-    const { registerStep2 } = useAuth();
+    const { updateRegistrationData, goToNextStep } = useRegistration();
     const navigate = useNavigate();
-
-    // Redirect if no userId from step 1
-    useEffect(() => {
-        if (!registrationData.userId) {
-            navigate('/register');
-        }
-    }, [registrationData.userId, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
-        // Validate address
-        const addressValidation = validateAddress(address);
-        if (!addressValidation.isValid) {
-            setError(addressValidation.error);
-            return;
-        }
-
-        // Validate street
-        const streetValidation = validateStreet(street);
-        if (!streetValidation.isValid) {
-            setError(streetValidation.error);
-            return;
-        }
-
-        // Validate state
-        const stateValidation = validateState(state);
-        if (!stateValidation.isValid) {
-            setError(stateValidation.error);
-            return;
-        }
-
-        // Validate location
-        const locationValidation = validateLocation(location);
-        if (!locationValidation.isValid) {
-            setError(locationValidation.error);
+        // Validate all fields are filled
+        if (!address || !street || !state || !location) {
+            setError('All fields are required');
             return;
         }
 
         try {
-            setLoading(true);
-
-            // Call API for registration step 2
-            const response = await registerStep2({
-                userId: registrationData.userId,
-                address: address.trim(),
-                street: street.trim(),
-                state: state.trim(),
-                location: location.trim(),
+            // Save business location data to registration context
+            updateRegistrationData({
+                address,
+                street,
+                state,
+                location
             });
 
-            if (response.success) {
-                // Save to registration context
-                updateRegistrationData({
-                    address: address.trim(),
-                    street: street.trim(),
-                    state: state.trim(),
-                    location: location.trim(),
-                });
-
-                // Go to next step
-                goToNextStep();
-                navigate('/register-step-3');
-            }
+            // Go to next step (step 3 details)
+            goToNextStep();
+            navigate('/register-step-3');
         } catch (err) {
-            console.error('Registration Step 2 error:', err);
-            setError(
-                err.message ||
-                    'Failed to save business location. Please try again.'
-            );
-        } finally {
-            setLoading(false);
+            setError('Something went wrong. Please try again.');
         }
     };
 
@@ -144,7 +87,6 @@ const RegisterPage2 = () => {
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
                                     placeholder="Enter Shop Name, Building Name"
-                                    disabled={loading}
                                     required
                                 />
                             </div>
@@ -156,19 +98,17 @@ const RegisterPage2 = () => {
                                     value={street}
                                     onChange={(e) => setStreet(e.target.value)}
                                     placeholder="Enter Street"
-                                    disabled={loading}
                                     required
                                 />
                             </div>
 
                             <div className="form-group-register-page2">
-                                <label>State/Emirate <span className="required-asterisk-register-page2">*</span></label>
+                                <label>State <span className="required-asterisk-register-page2">*</span></label>
                                 <input
                                     type="text"
                                     value={state}
                                     onChange={(e) => setState(e.target.value)}
-                                    placeholder="Enter State/Emirate (e.g., Dubai)"
-                                    disabled={loading}
+                                    placeholder="Enter State"
                                     required
                                 />
                             </div>
@@ -179,14 +119,13 @@ const RegisterPage2 = () => {
                                     type="text"
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
-                                    placeholder="Enter Location/Area"
-                                    disabled={loading}
+                                    placeholder="Enter Location"
                                     required
                                 />
                             </div>
 
-                            <button type="submit" className="next-btn-register-page2" disabled={loading}>
-                                {loading ? 'Saving...' : 'Next'}
+                            <button type="submit" className="next-btn-register-page2">
+                                Next
                             </button>
                         </form>
 

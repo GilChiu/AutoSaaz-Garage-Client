@@ -26,27 +26,11 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
-            const response = await login({ 
-                email: email.trim().toLowerCase(), 
-                password 
-            });
-            
-            if (response.success) {
-                navigate('/dashboard');
-            }
+            await login({ email, password });
+            navigate('/dashboard');
         } catch (err) {
             console.error('Login error:', err);
-            
-            // Handle specific error messages
-            if (err.status === 401) {
-                setError('Invalid email or password');
-            } else if (err.status === 403) {
-                setError(err.message || 'Please verify your email before logging in');
-            } else if (err.status === 423) {
-                setError('Your account is temporarily locked. Please try again later.');
-            } else {
-                setError(err.message || 'Login failed. Please try again.');
-            }
+            setError('Invalid email or password');
         } finally {
             setLoading(false);
         }
