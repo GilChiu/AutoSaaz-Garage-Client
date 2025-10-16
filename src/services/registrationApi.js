@@ -158,12 +158,15 @@ export const registerStep3 = async (companyLegalName, emiratesIdUrl, tradeLicens
 };
 
 /**
- * Step 4: Verification with OTP and Password
- * Creates user account and returns auth tokens
+ * Step 4: Verification with OTP (NO PASSWORD)
+ * Verifies OTP and returns auth tokens
  */
-export const verifyRegistration = async (code, password) => {
+export const verifyRegistration = async (code) => {
   try {
+    console.log('=== STEP 4 VERIFICATION START ===');
     const sessionId = localStorage.getItem('registrationSessionId');
+    console.log('SessionId:', sessionId);
+    console.log('OTP Code:', code);
     
     if (!sessionId) {
       throw new Error('Session expired. Please start registration again.');
@@ -177,11 +180,14 @@ export const verifyRegistration = async (code, password) => {
       body: JSON.stringify({
         sessionId,
         code,
-        password,
       }),
     });
 
+    console.log('Response Status:', response.status);
+    console.log('Response OK:', response.ok);
+
     const data = await response.json();
+    console.log('Response Data:', data);
 
     if (!response.ok) {
       throw new Error(data.message || 'Verification failed');
@@ -195,18 +201,25 @@ export const verifyRegistration = async (code, password) => {
     if (data.success && data.data) {
       if (data.data.accessToken) {
         localStorage.setItem('accessToken', data.data.accessToken);
+        console.log('✅ Access token saved');
       }
       if (data.data.refreshToken) {
         localStorage.setItem('refreshToken', data.data.refreshToken);
+        console.log('✅ Refresh token saved');
       }
       if (data.data.user) {
         localStorage.setItem('user', JSON.stringify(data.data.user));
+        console.log('✅ User data saved');
       }
     }
 
+    console.log('=== STEP 4 VERIFICATION SUCCESS ===');
     return data;
   } catch (error) {
-    console.error('Verification Error:', error);
+    console.error('=== STEP 4 VERIFICATION ERROR ===');
+    console.error('Error Type:', error.name);
+    console.error('Error Message:', error.message);
+    console.error('Error Stack:', error.stack);
     throw error;
   }
 };

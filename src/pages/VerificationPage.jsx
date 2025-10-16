@@ -3,15 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
 import { useAuth } from '../hooks/useAuth';
 import { verifyRegistration, resendOTP } from '../services/registrationApi';
-import { validateOTP, validatePassword, validatePasswordConfirmation, getPasswordStrength } from '../utils/registrationValidation';
+import { validateOTP } from '../utils/registrationValidation';
 import './VerificationPage.css';
 
 const VerificationPage = () => {
     const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
@@ -85,25 +81,9 @@ const VerificationPage = () => {
             return;
         }
 
-        // Validate password
-        const passwordError = validatePassword(password);
-        if (passwordError) {
-            setError(passwordError);
-            setLoading(false);
-            return;
-        }
-
-        // Validate password confirmation
-        const confirmError = validatePasswordConfirmation(password, confirmPassword);
-        if (confirmError) {
-            setError(confirmError);
-            setLoading(false);
-            return;
-        }
-
         try {
-            // Call backend API to verify registration
-            const response = await verifyRegistration(codeString, password);
+            // Call backend API to verify registration (NO PASSWORD)
+            const response = await verifyRegistration(codeString);
 
             // Save tokens to localStorage
             localStorage.setItem('accessToken', response.data.accessToken);
@@ -209,73 +189,6 @@ const VerificationPage = () => {
                                 ))}
                             </div>
 
-                            {/* Password Field */}
-                            <div className="form-group-verification-page" style={{ marginTop: '24px' }}>
-                                <label>Create Password <span style={{ color: '#dc2626' }}>*</span></label>
-                                <div className="password-input-container" style={{ position: 'relative' }}>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Enter your password"
-                                        required
-                                        style={{ width: '100%', paddingRight: '40px' }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        style={{
-                                            position: 'absolute',
-                                            right: '12px',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            fontSize: '18px'
-                                        }}
-                                    >
-                                        {showPassword ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                                {password && (
-                                    <div style={{ marginTop: '8px', fontSize: '12px' }}>
-                                        Password strength: <strong>{getPasswordStrength(password)}</strong>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Confirm Password Field */}
-                            <div className="form-group-verification-page">
-                                <label>Confirm Password <span style={{ color: '#dc2626' }}>*</span></label>
-                                <div className="password-input-container" style={{ position: 'relative' }}>
-                                    <input
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        placeholder="Re-enter your password"
-                                        required
-                                        style={{ width: '100%', paddingRight: '40px' }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        style={{
-                                            position: 'absolute',
-                                            right: '12px',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            fontSize: '18px'
-                                        }}
-                                    >
-                                        {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-
                             <div className="resend-section-verification-page">
                                 <span>Didn't get the code? </span>
                                 <button 
@@ -298,7 +211,7 @@ const VerificationPage = () => {
                                 className="verify-btn-verification-page"
                                 disabled={loading}
                             >
-                                {loading ? 'Verifying...' : 'Complete Registration'}
+                                {loading ? 'Verifying...' : 'Verify Code'}
                             </button>
 
                             <button 
