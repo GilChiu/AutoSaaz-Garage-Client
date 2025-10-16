@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
+import { registerStep1 } from '../services/registrationApi';
+import { validateFullName, validateEmail, validatePhoneNumber, formatPhoneNumber } from '../utils/registrationValidation';
 import './RegisterPage.css';
 import { autoSaazLogo, heroRegister } from '../assets/images';
 
@@ -22,32 +24,61 @@ const RegisterPage = () => {
             return;
         }
 
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            setError('Please enter a valid email address');
+        // Client-side validation
+        const nameError = validateFullName(fullName);
+        if (nameError) {
+            setError(nameError);
+            return;
+        }
+
+        const emailError = validateEmail(email);
+        if (emailError) {
+            setError(emailError);
+            return;
+        }
+
+        const phoneError = validatePhoneNumber(phoneNumber);
+        if (phoneError) {
+            setError(phoneError);
             return;
         }
 
         try {
-            // Derive first and last name from fullName (best-effort)
-            const nameParts = fullName.trim().split(/\s+/);
-            const firstName = nameParts[0] || '';
-            const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+            // Format phone number to UAE international format
+            const formattedPhone = formatPhoneNumber(phoneNumber);
 
-            // Save data to registration context
-            updateRegistrationData({
-                firstName,
-                lastName,
-                email,
-                phone: phoneNumber
-            });
+            // Call Step 1 API (NO password here)
+            const response = await registerStep1(fullName, email, formattedPhone);
 
-            // Go to next step (business location)
-            goToNextStep();
-            navigate('/register-step-2');
+            if (response.success) {
+                // Derive first and last name from fullName
+                const nameParts = fullName.trim().split(/\s+/);
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+                // Save data to registration context
+                updateRegistrationData({
+                    fullName,
+                    firstName,
+                    lastName,
+                    email,
+                    phone: formattedPhone,
+                    sessionId: response.data.sessionId
+                });
+
+                // Go to next step (business location)
+                goToNextStep();
+                navigate('/register-step-2');
+            }
         } catch (err) {
-            setError('Something went wrong. Please try again.');
+            // Handle specific error messages from backend
+            if (err.message.includes('already registered')) {
+                setError('This email is already registered. Please login instead.');
+            } else if (err.message.includes('Session expired')) {
+                setError('Session expired. Please try again.');
+            } else {
+                setError(err.message || 'Registration failed. Please try again.');
+            }
         }
     };
 

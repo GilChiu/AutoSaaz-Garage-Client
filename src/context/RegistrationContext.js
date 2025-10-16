@@ -4,11 +4,11 @@ const RegistrationContext = createContext();
 
 export const RegistrationProvider = ({ children }) => {
     const [registrationData, setRegistrationData] = useState({
-        // Step 1: Personal Info
+        // Step 1: Personal Info (NO password here anymore)
+        fullName: '',
         firstName: '',
         lastName: '',
         email: '',
-        password: '',
         phone: '',
         
         // Step 2: Business Location
@@ -17,8 +17,20 @@ export const RegistrationProvider = ({ children }) => {
         state: '',
         location: '',
         
-        // Step 3: Verification
+        // Step 3: Business Details
+        companyName: '',
+        tradeLicense: '',
+        vatCert: '',
+        emiratesIdName: '',
+        emiratesIdUrl: '',
+        
+        // Step 4: Verification (password moved here)
         verificationCode: '',
+        password: '',
+        confirmPassword: '',
+        
+        // Session tracking
+        sessionId: localStorage.getItem('registrationSessionId') || '',
         currentStep: 1
     });
 
@@ -45,18 +57,29 @@ export const RegistrationProvider = ({ children }) => {
 
     const resetRegistration = () => {
         setRegistrationData({
+            fullName: '',
             firstName: '',
             lastName: '',
             email: '',
-            password: '',
             phone: '',
             address: '',
             street: '',
             state: '',
             location: '',
+            companyName: '',
+            tradeLicense: '',
+            vatCert: '',
+            emiratesIdName: '',
+            emiratesIdUrl: '',
             verificationCode: '',
+            password: '',
+            confirmPassword: '',
+            sessionId: '',
             currentStep: 1
         });
+        // Clear session data from localStorage
+        localStorage.removeItem('registrationSessionId');
+        localStorage.removeItem('sessionExpiresAt');
     };
 
     return (
