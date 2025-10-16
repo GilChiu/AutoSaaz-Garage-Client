@@ -1,23 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
-// Front-end only: no backend calls, we won't import useAuth or axios here
+import { useAuth } from '../context/AuthContext';
+import { autoSaazLogo } from '../assets/images';
 import './VerificationPage.css';
+import { validateOtpCode } from '../utils/validation';
 
 const VerificationPage = () => {
     const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
-    // Mock flow no longer needs to compare codes
-    const { resetRegistration } = useRegistration();
+    const { registrationData, resetRegistration } = useRegistration();
+    const { verifyAccount, resendVerification } = useAuth();
     const navigate = useNavigate();
     const inputRefs = useRef([]);
 
-    // Front-end only: generate a mock verification code on mount
+    // Redirect if no email/phone from registration
     useEffect(() => {
-        // In mock mode, we could still show an alert to simulate code sent
-        // alert('A verification code has been sent (mock).');
-    }, []);
+        if (!registrationData.email && !registrationData.phoneNumber) {
+            navigate('/register');
+        }
+    }, [registrationData, navigate]);
 
     const handleInputChange = (index, value) => {
         // Only allow digits
@@ -65,25 +69,64 @@ const VerificationPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
+        setSuccess('');
 
         const codeString = verificationCode.join('');
-        if (!codeString || codeString.length !== 6) {
-            setError('Please enter a valid 6-digit verification code');
-            setLoading(false);
+        
+        // Validate OTP code
+        const validation = validateOtpCode(codeString);
+        if (!validation.isValid) {
+            setError(validation.error);
             return;
         }
 
-        // Front-end only: accept any 6-digit code for now
-        // Clear registration data (front-end context) and navigate
-        resetRegistration();
-        navigate('/dashboard');
-        setLoading(false);
+        try {
+            setLoading(true);
+
+            // Call API to verify account
+            const response = await verifyAccount({
+                code: codeString,
+                email: registrationData.email,
+                phoneNumber: registrationData.phoneNumber,
+            });
+
+            if (response.success) {
+                setSuccess('Verification successful! Proceeding to next step...');
+                
+                // Clear registration data and navigate
+                setTimeout(() => {
+                    resetRegistration();
+                    navigate('/register-step-2');
+                }, 1500);
+            }
+        } catch (err) {
+            console.error('Verification error:', err);
+            setError(
+                err.message ||
+                    'Verification failed. Please check your code and try again.'
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleResendCode = () => {
-        // In mock mode, just notify the user a code was "sent".
-        // alert('A new verification code has been sent (mock).');
+    const handleResendCode = async () => {
+        setError('');
+        setSuccess('');
+
+        try {
+            const response = await resendVerification({
+                email: registrationData.email,
+                phoneNumber: registrationData.phoneNumber,
+            });
+
+            if (response.success) {
+                setSuccess(response.message || 'Verification code resent successfully!');
+            }
+        } catch (err) {
+            console.error('Resend code error:', err);
+            setError(err.message || 'Failed to resend code. Please try again.');
+        }
     };
 
     return (
@@ -92,7 +135,7 @@ const VerificationPage = () => {
             <div className="landing-header-verification-page">
                 <div className="header-logo-verification-page">
                     <img 
-                        src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
+                        src={autoSaazLogo}
                         alt="AutoSaaz" 
                         className="header-logo-image-verification-page"
                     />
@@ -110,10 +153,11 @@ const VerificationPage = () => {
                     <div className="form-content-verification-page">
                         <div className="form-header-verification-page">
                             <h1>Enter Verification Code</h1>
-                            <p>We've sent a 6-digit code to your email or phone number.</p>
+                            <p>We've sent a 6-digit code to {registrationData.email || registrationData.phoneNumber}</p>
                         </div>
 
                         {error && <div className="error-message-verification-page">{error}</div>}
+                        {success && <div className="success-message-verification-page">{success}</div>}
 
                         <form onSubmit={handleSubmit} className="verification-form-verification-page">
                             <div className="verification-inputs-container">

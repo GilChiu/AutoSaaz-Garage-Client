@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
+import { useAuth } from '../context/AuthContext';
 import './RegisterPage3.css';
 import { autoSaazLogo, heroRegister3 } from '../assets/images';
+import {
+    validateCompanyName,
+    validateTradeLicense,
+    validateVatCertification,
+} from '../utils/validation';
 
 const RegisterPage3 = () => {
   const [companyName, setCompanyName] = useState('');
@@ -10,29 +16,86 @@ const RegisterPage3 = () => {
   const [tradeLicense, setTradeLicense] = useState('');
   const [vatCert, setVatCert] = useState('');
   const [error, setError] = useState('');
-  const { updateRegistrationData, goToNextStep } = useRegistration();
+  const [loading, setLoading] = useState(false);
+  const { registrationData, updateRegistrationData } = useRegistration();
+  const { registerStep3 } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if no userId from previous steps
+  useEffect(() => {
+    if (!registrationData.userId) {
+      navigate('/register');
+    }
+  }, [registrationData.userId, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!companyName || !tradeLicense || !emiratesId) {
-      setError('Please complete all required fields');
+    // Validate company name
+    const companyValidation = validateCompanyName(companyName);
+    if (!companyValidation.isValid) {
+      setError(companyValidation.error);
+      return;
+    }
+
+    // Validate trade license
+    const licenseValidation = validateTradeLicense(tradeLicense);
+    if (!licenseValidation.isValid) {
+      setError(licenseValidation.error);
+      return;
+    }
+
+    // Validate VAT certification (optional)
+    const vatValidation = validateVatCertification(vatCert);
+    if (!vatValidation.isValid) {
+      setError(vatValidation.error);
+      return;
+    }
+
+    // Check Emirates ID file
+    if (!emiratesId) {
+      setError('Please upload your Emirates ID');
       return;
     }
 
     try {
-      updateRegistrationData({
-        companyName,
-        tradeLicense,
-        vatCert,
-        emiratesIdName: emiratesId?.name || '',
+      setLoading(true);
+
+      // TODO: Upload Emirates ID file to server first (implement file upload API)
+      // For now, we'll use a placeholder URL
+      const emiratesIdUrl = emiratesId.name; // Replace with actual upload URL
+
+      // Call API for registration step 3
+      const response = await registerStep3({
+        userId: registrationData.userId,
+        companyLegalName: companyName.trim(),
+        emiratesIdUrl: emiratesIdUrl,
+        tradeLicenseNumber: tradeLicense.trim().toUpperCase(),
+        vatCertification: vatCert.trim().toUpperCase() || undefined,
       });
-      goToNextStep();
-      navigate('/verify-account');
+
+      if (response.success) {
+        // Save to registration context
+        updateRegistrationData({
+          companyLegalName: companyName.trim(),
+          emiratesIdUrl: emiratesIdUrl,
+          tradeLicenseNumber: tradeLicense.trim().toUpperCase(),
+          vatCertification: vatCert.trim().toUpperCase(),
+        });
+
+        // Navigate to login since registration is complete
+        // Note: Backend may require verification, adjust flow as needed
+        navigate('/login');
+      }
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      console.error('Registration Step 3 error:', err);
+      setError(
+        err.message ||
+          'Failed to save business details. Please try again.'
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,6 +146,7 @@ const RegisterPage3 = () => {
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="Enter Company Name"
+                  disabled={loading}
                   required
                 />
               </div>
@@ -96,6 +160,7 @@ const RegisterPage3 = () => {
                     onChange={(e) => setEmiratesId(e.target.files?.[0] || null)}
                     accept="image/*,application/pdf"
                     className="file-input-hidden-register-page3"
+                    disabled={loading}
                     required
                   />
                   <label htmlFor="emirates-id-upload" className="file-upload-area-register-page3">
@@ -113,6 +178,7 @@ const RegisterPage3 = () => {
                   value={tradeLicense}
                   onChange={(e) => setTradeLicense(e.target.value)}
                   placeholder="Enter Trade License Number"
+                  disabled={loading}
                   required
                 />
               </div>
@@ -123,11 +189,14 @@ const RegisterPage3 = () => {
                   type="text"
                   value={vatCert}
                   onChange={(e) => setVatCert(e.target.value)}
-                  placeholder="Enter VAT Certification"
+                  placeholder="Enter VAT Certification (Optional)"
+                  disabled={loading}
                 />
               </div>
 
-              <button type="submit" className="next-btn-register-page3">Next</button>
+              <button type="submit" className="next-btn-register-page3" disabled={loading}>
+                {loading ? 'Submitting...' : 'Complete Registration'}
+              </button>
             </form>
 
             {/* Login Link */}
