@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
+import { registerStep3 } from '../services/registrationApi';
+import { validateCompanyName, validateTradeLicense, validateVATCertification, validateEmiratesIdFile } from '../utils/registrationValidation';
 import './RegisterPage3.css';
 import { autoSaazLogo, heroRegister3 } from '../assets/images';
 
@@ -17,22 +19,77 @@ const RegisterPage3 = () => {
     e.preventDefault();
     setError('');
 
+    // Validate all required fields
     if (!companyName || !tradeLicense || !emiratesId) {
       setError('Please complete all required fields');
       return;
     }
 
+    // Validate company name
+    const companyError = validateCompanyName(companyName);
+    if (companyError) {
+      setError(companyError);
+      return;
+    }
+
+    // Validate trade license
+    const tradeLicenseError = validateTradeLicense(tradeLicense);
+    if (tradeLicenseError) {
+      setError(tradeLicenseError);
+      return;
+    }
+
+    // Validate Emirates ID file
+    const emiratesIdError = validateEmiratesIdFile(emiratesId);
+    if (emiratesIdError) {
+      setError(emiratesIdError);
+      return;
+    }
+
+    // Validate VAT certification if provided
+    if (vatCert) {
+      const vatError = validateVATCertification(vatCert);
+      if (vatError) {
+        setError(vatError);
+        return;
+      }
+    }
+
     try {
+      // NOTE: File upload for Emirates ID is a placeholder
+      // In a real implementation, you would:
+      // 1. Upload the file to a storage service (e.g., AWS S3, Cloudinary)
+      // 2. Get back the URL of the uploaded file
+      // 3. Pass that URL to registerStep3
+      // For now, we're using a placeholder URL
+      const emiratesIdUrl = 'placeholder-url-for-emirates-id';
+      
+      // Call backend API for Step 3
+      await registerStep3(companyName, emiratesIdUrl, tradeLicense, vatCert || null);
+
+      // Update context with the data
       updateRegistrationData({
         companyName,
         tradeLicense,
         vatCert,
+        emiratesIdUrl,
         emiratesIdName: emiratesId?.name || '',
       });
+
+      // Success! OTP has been sent, navigate to verification
       goToNextStep();
       navigate('/verify-account');
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      // Handle session expired error
+      if (err.message.includes('Session expired') || err.message.includes('Session not found')) {
+        setError('Your session has expired. Redirecting to start...');
+        setTimeout(() => {
+          navigate('/register');
+        }, 3000);
+        return;
+      }
+      
+      setError(err.message || 'Something went wrong. Please try again.');
     }
   };
 

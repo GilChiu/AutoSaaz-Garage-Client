@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
+import { registerStep2 } from '../services/registrationApi';
+import { validateAddress, validateStreet, validateState, validateLocation } from '../utils/registrationValidation';
 import './RegisterPage2.css';
 import { autoSaazLogo, heroRegister2 } from '../assets/images';
 
@@ -23,20 +25,57 @@ const RegisterPage2 = () => {
             return;
         }
 
-        try {
-            // Save business location data to registration context
-            updateRegistrationData({
-                address,
-                street,
-                state,
-                location
-            });
+        // Client-side validation
+        const addressError = validateAddress(address);
+        if (addressError) {
+            setError(addressError);
+            return;
+        }
 
-            // Go to next step (step 3 details)
-            goToNextStep();
-            navigate('/register-step-3');
+        const streetError = validateStreet(street);
+        if (streetError) {
+            setError(streetError);
+            return;
+        }
+
+        const stateError = validateState(state);
+        if (stateError) {
+            setError(stateError);
+            return;
+        }
+
+        const locationError = validateLocation(location);
+        if (locationError) {
+            setError(locationError);
+            return;
+        }
+
+        try {
+            // Call Step 2 API with sessionId
+            const response = await registerStep2(address, street, state, location);
+
+            if (response.success) {
+                // Save business location data to registration context
+                updateRegistrationData({
+                    address,
+                    street,
+                    state,
+                    location
+                });
+
+                // Go to next step (step 3 - business details)
+                goToNextStep();
+                navigate('/register-step-3');
+            }
         } catch (err) {
-            setError('Something went wrong. Please try again.');
+            // Handle specific error messages
+            if (err.message.includes('Session expired') || err.message.includes('complete Step 1')) {
+                setError('Session expired. Please start registration again.');
+                // Optionally redirect to step 1
+                setTimeout(() => navigate('/register'), 3000);
+            } else {
+                setError(err.message || 'Failed to save business location. Please try again.');
+            }
         }
     };
 
