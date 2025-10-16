@@ -11,6 +11,10 @@ const API_BASE_URL = 'https://autosaaz-server.onrender.com/api';
  */
 export const registerStep1 = async (fullName, email, phoneNumber) => {
   try {
+    console.log('=== STEP 1 REGISTRATION START ===');
+    console.log('API URL:', `${API_BASE_URL}/auth/register/step1`);
+    console.log('Request Data:', { fullName, email, phoneNumber });
+
     const response = await fetch(`${API_BASE_URL}/auth/register/step1`, {
       method: 'POST',
       headers: {
@@ -23,21 +27,41 @@ export const registerStep1 = async (fullName, email, phoneNumber) => {
       }),
     });
 
+    console.log('Response Status:', response.status);
+    console.log('Response OK:', response.ok);
+    console.log('Response Headers:', Object.fromEntries(response.headers.entries()));
+
     const data = await response.json();
+    console.log('Response Data:', data);
 
     if (!response.ok) {
+      console.error('Registration failed with status:', response.status);
       throw new Error(data.message || 'Registration failed');
     }
 
     // Save sessionId to localStorage
     if (data.success && data.data?.sessionId) {
+      console.log('Saving sessionId to localStorage:', data.data.sessionId);
       localStorage.setItem('registrationSessionId', data.data.sessionId);
       localStorage.setItem('sessionExpiresAt', data.data.expiresAt);
     }
 
+    console.log('=== STEP 1 REGISTRATION SUCCESS ===');
     return data;
   } catch (error) {
-    console.error('Step 1 Registration Error:', error);
+    console.error('=== STEP 1 REGISTRATION ERROR ===');
+    console.error('Error Type:', error.name);
+    console.error('Error Message:', error.message);
+    console.error('Error Stack:', error.stack);
+    
+    // Check if it's a network/CORS error
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      console.error('🚨 CORS ERROR DETECTED 🚨');
+      console.error('This is a backend CORS configuration issue.');
+      console.error('The backend needs to allow requests from:', window.location.origin);
+      throw new Error('Unable to connect to server. Please check your internet connection or contact support.');
+    }
+    
     throw error;
   }
 };
