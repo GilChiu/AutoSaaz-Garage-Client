@@ -47,6 +47,11 @@ const RegisterPage = () => {
             // Format phone number to UAE international format
             const formattedPhone = formatPhoneNumber(phoneNumber);
 
+            // Save to localStorage for mock verification
+            localStorage.setItem('registrationFullName', fullName);
+            localStorage.setItem('registrationEmail', email);
+            localStorage.setItem('registrationPhone', formattedPhone);
+
             // Call Step 1 API (NO password here)
             const response = await registerStep1(fullName, email, formattedPhone);
 

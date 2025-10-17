@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
 import { useAuth } from '../hooks/useAuth';
-import { verifyRegistration, resendOTP } from '../services/registrationApi';
 import { validateOTP } from '../utils/registrationValidation';
 import './VerificationPage.css';
 
@@ -73,7 +72,7 @@ const VerificationPage = () => {
 
         const codeString = verificationCode.join('');
 
-        // Validate OTP
+        // Validate OTP (must be 6 digits)
         const otpError = validateOTP(codeString);
         if (otpError) {
             setError(otpError);
@@ -81,37 +80,49 @@ const VerificationPage = () => {
             return;
         }
 
+        // MOCK MODE: Accept any 6-digit code
+        // Since backend email is not sending codes yet, we'll simulate success
         try {
-            // Call backend API to verify registration (NO PASSWORD)
-            const response = await verifyRegistration(codeString);
+            console.log('=== MOCK VERIFICATION MODE ===');
+            console.log('OTP Code entered:', codeString);
+            console.log('Simulating successful verification...');
+
+            // Simulate a delay (like an API call)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Create mock user data
+            const mockUser = {
+                id: 'mock-user-' + Date.now(),
+                fullName: localStorage.getItem('registrationFullName') || 'Mock User',
+                email: localStorage.getItem('registrationEmail') || 'mock@example.com',
+                phoneNumber: localStorage.getItem('registrationPhone') || '+971501234567',
+                role: 'garage_owner'
+            };
+
+            // Create mock tokens
+            const mockAccessToken = 'mock-access-token-' + Date.now();
+            const mockRefreshToken = 'mock-refresh-token-' + Date.now();
 
             // Save tokens to localStorage
-            localStorage.setItem('accessToken', response.data.accessToken);
-            localStorage.setItem('refreshToken', response.data.refreshToken);
+            localStorage.setItem('accessToken', mockAccessToken);
+            localStorage.setItem('refreshToken', mockRefreshToken);
+            localStorage.setItem('user', JSON.stringify(mockUser));
+
+            console.log('✅ Mock user created:', mockUser);
+            console.log('✅ Mock tokens saved');
 
             // Save user data to auth context (auto-login)
-            login(response.data.user, response.data.accessToken);
+            login(mockUser, mockAccessToken);
 
             // Clear registration session and context data
             resetRegistration();
 
+            console.log('✅ Navigating to dashboard...');
+            
             // Navigate to dashboard
             navigate('/dashboard');
         } catch (err) {
-            // Handle specific errors
-            if (err.message.includes('Invalid verification code')) {
-                setError('Invalid verification code. Please check and try again.');
-            } else if (err.message.includes('Session expired') || err.message.includes('Session not found')) {
-                setError('Your session has expired. Redirecting to start...');
-                setTimeout(() => {
-                    navigate('/register');
-                }, 3000);
-            } else if (err.message.includes('Code has expired')) {
-                setError('Verification code has expired. Please request a new code.');
-            } else {
-                setError(err.message || 'Verification failed. Please try again.');
-            }
-        } finally {
+            setError('Verification failed. Please try again.');
             setLoading(false);
         }
     };
@@ -121,21 +132,21 @@ const VerificationPage = () => {
         setResendSuccess(false);
         setError('');
 
+        // MOCK MODE: Simulate resending code
         try {
-            await resendOTP();
+            console.log('=== MOCK RESEND OTP ===');
+            console.log('Simulating OTP resend...');
+            
+            // Simulate a delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            console.log('✅ Mock OTP resent');
             setResendSuccess(true);
             setTimeout(() => {
                 setResendSuccess(false);
             }, 5000);
         } catch (err) {
-            if (err.message.includes('Session expired') || err.message.includes('Session not found')) {
-                setError('Your session has expired. Redirecting to start...');
-                setTimeout(() => {
-                    navigate('/register');
-                }, 3000);
-            } else {
-                setError(err.message || 'Failed to resend code. Please try again.');
-            }
+            setError('Failed to resend code. Please try again.');
         } finally {
             setResendLoading(false);
         }
