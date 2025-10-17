@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
-import { useAuth } from '../hooks/useAuth';
+import { verifyRegistration, resendOTP } from '../services/registrationApi';
 import { validateOTP } from '../utils/registrationValidation';
 import './VerificationPage.css';
 
@@ -12,7 +12,6 @@ const VerificationPage = () => {
     const [resendLoading, setResendLoading] = useState(false);
     const [resendSuccess, setResendSuccess] = useState(false);
     const { resetRegistration } = useRegistration();
-    const { login } = useAuth();
     const navigate = useNavigate();
     const inputRefs = useRef([]);
 
@@ -80,49 +79,58 @@ const VerificationPage = () => {
             return;
         }
 
-        // MOCK MODE: Accept any 6-digit code
-        // Since backend email is not sending codes yet, we'll simulate success
         try {
-            console.log('=== MOCK VERIFICATION MODE ===');
+            console.log('=== REAL VERIFICATION MODE ===');
             console.log('OTP Code entered:', codeString);
-            console.log('Simulating successful verification...');
+            console.log('Calling real backend verification endpoint...');
 
-            // Simulate a delay (like an API call)
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Call the real backend verification API
+            const response = await verifyRegistration(codeString);
 
-            // Create mock user data
-            const mockUser = {
-                id: 'mock-user-' + Date.now(),
-                fullName: localStorage.getItem('registrationFullName') || 'Mock User',
-                email: localStorage.getItem('registrationEmail') || 'mock@example.com',
-                phoneNumber: localStorage.getItem('registrationPhone') || '+971501234567',
-                role: 'garage_owner'
-            };
-
-            // Create mock tokens
-            const mockAccessToken = 'mock-access-token-' + Date.now();
-            const mockRefreshToken = 'mock-refresh-token-' + Date.now();
-
-            // Save tokens to localStorage
-            localStorage.setItem('accessToken', mockAccessToken);
-            localStorage.setItem('refreshToken', mockRefreshToken);
-            localStorage.setItem('user', JSON.stringify(mockUser));
-
-            console.log('✅ Mock user created:', mockUser);
-            console.log('✅ Mock tokens saved');
-
-            // Save user data to auth context (auto-login)
-            login(mockUser, mockAccessToken);
-
-            // Clear registration session and context data
-            resetRegistration();
-
-            console.log('✅ Navigating to dashboard...');
-            
-            // Navigate to dashboard
-            navigate('/dashboard');
+            if (response && response.success) {
+                console.log('✅ Real verification successful:', response);
+                
+                // The registrationApi already saved the tokens and user data
+                // Now update the auth context with the user
+                const userData = response.data.user;
+                const accessToken = response.data.accessToken;
+                
+                if (userData && accessToken) {
+                    // Set the token in localStorage for AuthContext to pick up
+                    localStorage.setItem('token', accessToken);
+                    
+                    console.log('✅ User authenticated:', userData);
+                    console.log('✅ Token saved, auth context will auto-login');
+                    
+                    // Clear registration context
+                    resetRegistration();
+                    
+                    console.log('✅ Navigating to dashboard...');
+                    navigate('/dashboard');
+                } else {
+                    throw new Error('Invalid response data from verification');
+                }
+            } else {
+                throw new Error(response?.message || 'Verification failed');
+            }
         } catch (err) {
-            setError('Verification failed. Please try again.');
+            console.error('Verification error:', err);
+            
+            // Handle specific backend errors
+            if (err.message.includes('expired') || err.message.includes('Session')) {
+                setError('Registration session expired. Please start the registration process again.');
+                // Clear any stale session data
+                localStorage.removeItem('registrationSessionId');
+                localStorage.removeItem('sessionExpiresAt');
+                setTimeout(() => navigate('/register'), 2000);
+            } else if (err.message.includes('Invalid') || err.message.includes('code')) {
+                setError('Invalid verification code. Please try again.');
+            } else if (err.message.includes('attempts') || err.message.includes('Maximum')) {
+                setError('Too many verification attempts. Please request a new code.');
+            } else {
+                setError(err.message || 'Verification failed. Please try again.');
+            }
+        } finally {
             setLoading(false);
         }
     };
@@ -132,21 +140,32 @@ const VerificationPage = () => {
         setResendSuccess(false);
         setError('');
 
-        // MOCK MODE: Simulate resending code
         try {
-            console.log('=== MOCK RESEND OTP ===');
-            console.log('Simulating OTP resend...');
+            console.log('=== RESENDING OTP VIA REAL API ===');
+            console.log('Calling backend resend endpoint...');
             
-            // Simulate a delay
-            await new Promise(resolve => setTimeout(resolve, 500));
+            const response = await resendOTP();
             
-            console.log('✅ Mock OTP resent');
-            setResendSuccess(true);
-            setTimeout(() => {
-                setResendSuccess(false);
-            }, 5000);
+            if (response && response.success) {
+                console.log('✅ OTP resent successfully via backend');
+                setResendSuccess(true);
+                setTimeout(() => {
+                    setResendSuccess(false);
+                }, 5000);
+            } else {
+                throw new Error(response?.message || 'Failed to resend code');
+            }
         } catch (err) {
-            setError('Failed to resend code. Please try again.');
+            console.error('Resend OTP error:', err);
+            
+            if (err.message.includes('expired') || err.message.includes('Session')) {
+                setError('Registration session expired. Please start the registration process again.');
+                localStorage.removeItem('registrationSessionId');
+                localStorage.removeItem('sessionExpiresAt');
+                setTimeout(() => navigate('/register'), 2000);
+            } else {
+                setError(err.message || 'Failed to resend code. Please try again.');
+            }
         } finally {
             setResendLoading(false);
         }
