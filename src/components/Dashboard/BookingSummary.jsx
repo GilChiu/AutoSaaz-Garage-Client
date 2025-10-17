@@ -58,13 +58,12 @@ const BookingSummary = () => {
                         </tbody>
                     </table>
                 </div>
-            {bookings.length === 0 ? (
-                <EmptyState
-                    variant="bookings"
-                    title="No Bookings Yet"
-                    message="When customers make bookings, they'll appear here in your dashboard."
-                />
-            ) : (
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
             <section className="dashboard-booking-summary">
                 <header className="dashboard-section-header">
                     <h2 className="dashboard-section-title">Booking Summary</h2>
