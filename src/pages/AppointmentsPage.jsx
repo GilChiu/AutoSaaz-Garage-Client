@@ -95,8 +95,8 @@ const AppointmentsPage = () => {
             {!loading && items.length === 0 && !error && (
               <EmptyState
                 variant="appointments"
-                title="No Appointments Scheduled"
-                message="You don't have any upcoming appointments. When customers schedule appointments, they'll appear here."
+                title="No Bookings Available"
+                message="Your appointments will appear here when customers schedule them with you."
               />
             )}
             
