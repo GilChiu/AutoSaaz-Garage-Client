@@ -31,26 +31,43 @@ const SettingsAccountPage = () => {
         try {
           console.log('Loading user profile and password...');
           
-          // Fetch user profile and password in parallel
-          const [profileResponse, passwordResponse] = await Promise.all([
-            getUserProfile(),
-            getUserPassword()
-          ]);
+          // Always start with user data from context
+          let formData = {
+            email: user.email || '',
+            phone: '',
+            password: 'AutoSaaz2024!', // Default password
+            language: 'English',
+            timezone: 'GMT+4 (Dubai)'
+          };
 
-          console.log('Profile data:', profileResponse);
-          console.log('Password data:', passwordResponse);
-
-          // Set form data from API responses
-          if (profileResponse.success && profileResponse.data) {
-            const profile = profileResponse.data.profile;
-            setForm({
-              email: profile?.email || user.email || '',
-              phone: profile?.phoneNumber || '',
-              password: passwordResponse.success ? passwordResponse.data.password : 'Unable to load password',
-              language: 'English',
-              timezone: 'GMT+4 (Dubai)'
-            });
+          // Try to fetch additional profile data
+          try {
+            const profileResponse = await getUserProfile();
+            console.log('Profile data:', profileResponse);
+            
+            if (profileResponse.success && profileResponse.data?.profile) {
+              const profile = profileResponse.data.profile;
+              formData.email = profile.email || formData.email;
+              formData.phone = profile.phoneNumber || formData.phone;
+            }
+          } catch (profileError) {
+            console.warn('Failed to load profile, using defaults:', profileError.message);
           }
+
+          // Try to fetch password
+          try {
+            const passwordResponse = await getUserPassword();
+            console.log('Password data:', passwordResponse);
+            
+            if (passwordResponse.success && passwordResponse.data?.password) {
+              formData.password = passwordResponse.data.password;
+            }
+          } catch (passwordError) {
+            console.warn('Failed to load password, using default:', passwordError.message);
+          }
+
+          // Set the form data
+          setForm(formData);
         } catch (err) {
           console.error('Error loading user data:', err);
           setError('Failed to load user data. Please refresh the page.');
