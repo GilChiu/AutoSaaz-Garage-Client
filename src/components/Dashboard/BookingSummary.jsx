@@ -58,7 +58,8 @@ const BookingSummary = () => {
             
             {bookings.length === 0 ? (
                 <div className="dashboard-no-bookings">
-                    <p>No bookings found.</p>
+                    <p>No bookings yet</p>
+                    <span className="dashboard-no-bookings-subtitle">Your upcoming bookings will appear here</span>
                 </div>
             ) : (
                 <div className="dashboard-booking-table-container">

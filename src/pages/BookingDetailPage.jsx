@@ -198,65 +198,26 @@ const BookingDetailPage = () => {
                             </span>
                         </div>
                         
-                        {booking.phone && (
-                            <div className="booking-detail-row">
-                                <label>Customer Phone:</label>
-                                <span className="customer-phone">{booking.phone}</span>
-                            </div>
-                        )}
+                        <div className="booking-detail-row">
+                            <label>Customer Phone:</label>
+                            <span className="customer-phone">{booking.phone || 'Not provided'}</span>
+                        </div>
                         
-                        {booking.email && (
-                            <div className="booking-detail-row">
-                                <label>Customer Email:</label>
-                                <span className="customer-email">{booking.email}</span>
-                            </div>
-                        )}
+                        <div className="booking-detail-row">
+                            <label>Vehicle:</label>
+                            <span className="vehicle-info">
+                                {booking.vehicle 
+                                    ? `${booking.vehicle}${booking.plateNumber ? ` - ${booking.plateNumber}` : ''}`
+                                    : 'Not specified'}
+                            </span>
+                        </div>
                         
-                        {booking.vehicle && (
-                            <div className="booking-detail-row">
-                                <label>Vehicle:</label>
-                                <span className="vehicle-info">
-                                    {booking.vehicle}
-                                    {booking.plateNumber && ` - ${booking.plateNumber}`}
-                                </span>
-                            </div>
-                        )}
-                        
-                        {(booking.estimatedCost || booking.actualCost) && (
-                            <div className="booking-detail-row">
-                                <label>Cost:</label>
-                                <span className="booking-cost">
-                                    {booking.actualCost 
-                                        ? `AED ${booking.actualCost.toFixed(2)}` 
-                                        : booking.estimatedCost 
-                                        ? `Est. AED ${booking.estimatedCost.toFixed(2)}`
-                                        : 'TBD'}
-                                </span>
-                            </div>
-                        )}
-                        
-                        {booking.paymentStatus && (
-                            <div className="booking-detail-row">
-                                <label>Payment Status:</label>
-                                <span className={`payment-badge payment-${booking.paymentStatus}`}>
-                                    {booking.paymentStatus.charAt(0).toUpperCase() + booking.paymentStatus.slice(1)}
-                                </span>
-                            </div>
-                        )}
-                        
-                        {booking.assignedTechnician && (
-                            <div className="booking-detail-row">
-                                <label>Assigned Technician:</label>
-                                <span className="technician-name">{booking.assignedTechnician}</span>
-                            </div>
-                        )}
-                        
-                        {booking.notes && (
-                            <div className="booking-detail-row notes-row">
-                                <label>Notes:</label>
-                                <span className="booking-notes">{booking.notes}</span>
-                            </div>
-                        )}
+                        <div className="booking-detail-row notes-row">
+                            <label>Notes:</label>
+                            <span className="booking-notes">
+                                {booking.notes || 'No additional notes'}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
