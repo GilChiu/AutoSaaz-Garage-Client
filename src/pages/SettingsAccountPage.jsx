@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { getUserProfile, getUserPassword, updateUserProfile } from '../services/profileApi';
 import Sidebar from '../components/Dashboard/Sidebar';
 import '../components/Dashboard/Dashboard.css';
 import './SettingsAccount.css';
@@ -10,31 +11,65 @@ const SettingsAccountPage = () => {
   const [form, setForm] = useState({
     email: '',
     phone: '',
-    password: '', // Will be populated from user data or localStorage
+    password: '', // Will be fetched from backend API
     language: 'English',
     timezone: 'GMT+4 (Dubai)'
   });
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   // Load user data when component mounts or user changes
   useEffect(() => {
-    if (user) {
-      console.log('Loading user data in account settings:', user);
-      
-      // Check if password was stored during registration (in development mode)
-      const registrationPassword = localStorage.getItem('userGeneratedPassword');
-      console.log('Generated password from localStorage:', registrationPassword ? 'Found' : 'Not found');
-      
-      setForm({
-        email: user.email || '',
-        phone: user.phone || user.phoneNumber || '',
-        password: registrationPassword || 'Password sent to your email', // More user-friendly message
-        language: user.language || 'English',
-        timezone: user.timezone || 'GMT+4 (Dubai)'
-      });
-    }
+    const loadUserData = async () => {
+      if (user) {
+        setLoading(true);
+        setError('');
+        
+        try {
+          console.log('Loading user profile and password...');
+          
+          // Fetch user profile and password in parallel
+          const [profileResponse, passwordResponse] = await Promise.all([
+            getUserProfile(),
+            getUserPassword()
+          ]);
+
+          console.log('Profile data:', profileResponse);
+          console.log('Password data:', passwordResponse);
+
+          // Set form data from API responses
+          if (profileResponse.success && profileResponse.data) {
+            const profile = profileResponse.data.profile;
+            setForm({
+              email: profile?.email || user.email || '',
+              phone: profile?.phoneNumber || '',
+              password: passwordResponse.success ? passwordResponse.data.password : 'Unable to load password',
+              language: 'English',
+              timezone: 'GMT+4 (Dubai)'
+            });
+          }
+        } catch (err) {
+          console.error('Error loading user data:', err);
+          setError('Failed to load user data. Please refresh the page.');
+          
+          // Fallback to user context data
+          setForm({
+            email: user.email || '',
+            phone: '',
+            password: 'Unable to load password',
+            language: 'English',
+            timezone: 'GMT+4 (Dubai)'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadUserData();
   }, [user]);
 
   // Show loading state if user data is not loaded yet
@@ -61,8 +96,48 @@ const SettingsAccountPage = () => {
     );
   }
 
-  const change = e => { const { name, value } = e.target; setForm(f => ({ ...f, [name]: value })); setSaved(false); };
-  const submit = e => { e.preventDefault(); setSaving(true); setTimeout(() => { setSaving(false); setSaved(true); }, 600); };
+  const change = e => { 
+    const { name, value } = e.target; 
+    setForm(f => ({ ...f, [name]: value })); 
+    setSaved(false); 
+    setError('');
+  };
+
+  const submit = async (e) => { 
+    e.preventDefault(); 
+    setSaving(true); 
+    setError('');
+    
+    try {
+      console.log('Updating user profile:', form);
+      
+      const response = await updateUserProfile({
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+        language: form.language,
+        timezone: form.timezone
+      });
+
+      if (response.success) {
+        setSaved(true);
+        console.log('Profile updated successfully');
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          setSaved(false);
+        }, 3000);
+      } else {
+        throw new Error(response.message || 'Update failed');
+      }
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError(err.message || 'Failed to update profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   return (
@@ -76,7 +151,21 @@ const SettingsAccountPage = () => {
                 <span className="bar" aria-hidden="true" />
                 <h2>Account Settings</h2>
               </div>
-              <form onSubmit={submit} className="account-form">
+              
+              {loading && (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  Loading user data...
+                </div>
+              )}
+              
+              {error && (
+                <div style={{ padding: '12px', marginBottom: '16px', backgroundColor: '#fee', border: '1px solid #fcc', color: '#c33', borderRadius: '6px' }}>
+                  {error}
+                </div>
+              )}
+              
+              {!loading && (
+                <form onSubmit={submit} className="account-form">
                 <label className="settings-field">
                   <span className="settings-label">Email Address</span>
                   <input name="email" type="email" value={form.email} onChange={change} />
@@ -139,7 +228,8 @@ const SettingsAccountPage = () => {
                   <button type="submit" className="settings-primary-btn" disabled={saving}>{saving ? 'Saving...' : 'Save Details'}</button>
                   {saved && <span className="settings-save-indicator" role="status">Saved</span>}
                 </div>
-              </form>
+                </form>
+              )}
             </div>
           </div>
         </div>
