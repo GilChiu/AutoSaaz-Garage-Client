@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login, isAuthenticated } from '../services/auth.service';
+import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 import { autoSaazLogo, heroLogin2 } from '../assets/images';
 
@@ -10,14 +10,16 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const { login, user } = useAuth();
     const navigate = useNavigate();
 
     // Redirect if already logged in
     useEffect(() => {
-        if (isAuthenticated()) {
+        if (user) {
+            console.log('User already logged in, redirecting to dashboard');
             navigate('/dashboard');
         }
-    }, [navigate]);
+    }, [user, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -32,13 +34,18 @@ const LoginPage = () => {
         }
 
         try {
+            console.log('Attempting login with:', { email, password: '***' });
             const response = await login({ email, password });
             
-            if (response.success) {
-                // Successful login, navigate to dashboard
+            console.log('Login response:', response);
+            
+            if (response && response.success) {
+                console.log('Login successful, navigating to dashboard');
                 navigate('/dashboard');
             } else {
-                setError(response.message || 'Login failed. Please try again.');
+                const errorMsg = response?.message || 'Login failed. Please try again.';
+                console.log('Login failed:', errorMsg);
+                setError(errorMsg);
             }
         } catch (err) {
             console.error('Login error:', err);

@@ -9,7 +9,9 @@ const Sidebar = () => {
     const { logout } = useAuth();
 
     const handleLogout = () => {
+        console.log('Logout button clicked in Sidebar');
         logout();
+        console.log('Logout completed, navigating to login');
         navigate('/login');
     };
 

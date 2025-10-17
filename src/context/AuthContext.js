@@ -26,20 +26,33 @@ export const AuthProvider = ({ children }) => {
                     return;
                 }
 
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+                console.log('Checking for existing token:', token ? 'Found' : 'Not found');
+                
                 if (token) {
                     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    console.log('Validating token with backend...');
+                    
                     const response = await api.get('/auth/me');
-                    if (response.data.success && response.data.user) {
-                        setUser(response.data.user);
+                    if (response.data.success && response.data.data) {
+                        console.log('Token valid, user authenticated:', response.data.data);
+                        setUser(response.data.data);
                     } else {
+                        console.log('Invalid token response, clearing auth');
                         throw new Error('Invalid user data');
                     }
+                } else {
+                    console.log('No token found, user not authenticated');
                 }
             } catch (error) {
-                console.error('Failed to fetch user:', error);
+                console.error('Failed to validate token:', error.response?.status, error.response?.data?.message || error.message);
+                
+                // Clear all auth data on token validation failure
                 setUser(null);
                 localStorage.removeItem('token');
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('user');
                 delete api.defaults.headers.common['Authorization'];
             } finally {
                 setLoading(false);
@@ -90,15 +103,33 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
+        console.log('Logout called');
+        
         // If auth is disabled, just clear user
         if (!DEV_CONFIG.ENABLE_AUTH) {
             setUser(null);
             return;
         }
 
+        // Clear all possible auth tokens
         localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        
+        // Clear session storage as well
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('user');
+        
+        // Clear axios auth header
         delete api.defaults.headers.common['Authorization'];
+        
+        // Clear user state
         setUser(null);
+        
+        console.log('Logout completed - all tokens cleared');
     };
 
     const register = async (userData) => {
