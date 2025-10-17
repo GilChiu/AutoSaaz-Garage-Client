@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useBookings } from '../hooks/useBookings';
+import { getBookingById, updateBooking, deleteBooking } from '../services/bookings.service';
 import { getStatusDisplayText, getStatusCssClass } from '../services/mappers/bookingMappers';
 import Notification from '../components/common/Notification';
 import './BookingDetailPage.css';
@@ -8,8 +8,9 @@ import './BookingDetailPage.css';
 const BookingDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { data: bookings, loading, error } = useBookings();
     const [booking, setBooking] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
     const [notification, setNotification] = useState({
@@ -19,15 +20,27 @@ const BookingDetailPage = () => {
     });
 
     useEffect(() => {
-        if (bookings && id) {
-            // Try to find booking by ID, handling both numeric and #-prefixed IDs
-            const foundBooking = bookings.find(b => {
-                const bookingId = b.id.toString().replace('#', '');
-                return bookingId === id || b.id.toString() === id;
-            });
-            setBooking(foundBooking);
-        }
-    }, [bookings, id]);
+        const controller = new AbortController();
+        
+        const loadBooking = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const data = await getBookingById(id, controller.signal);
+                setBooking(data);
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    setError(err.message || 'Failed to load booking');
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadBooking();
+
+        return () => controller.abort();
+    }, [id]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -38,9 +51,24 @@ const BookingDetailPage = () => {
         });
     };
 
-    const formatTime = (dateString) => {
-        // Mock time since our data doesn't have time
-        return "10:00 AM";
+    const formatTime = (timeString) => {
+        if (!timeString) return "10:00 AM"; // Default fallback
+        
+        // If it's already formatted (e.g., "10:00 AM"), return as is
+        if (timeString.includes('AM') || timeString.includes('PM')) {
+            return timeString;
+        }
+        
+        // If it's in HH:MM format, convert to 12-hour format
+        try {
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours, 10);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes} ${ampm}`;
+        } catch {
+            return "10:00 AM";
+        }
     };
 
     const showNotification = (message, type = 'success') => {
@@ -58,27 +86,39 @@ const BookingDetailPage = () => {
         }));
     };
 
-    const handleUpdateBooking = () => {
+    const handleUpdateBooking = async () => {
         setIsUpdating(true);
-        // Mock update - in real app this would call an API
-        setTimeout(() => {
+        try {
+            // Update booking status to confirmed if it's pending
+            const updates = {
+                status: booking.status === 'pending' ? 'confirmed' : booking.status
+            };
+            
+            const updated = await updateBooking(id, updates);
+            setBooking(updated);
             showNotification('Booking updated successfully!', 'success');
+        } catch (err) {
+            showNotification(err.message || 'Failed to update booking', 'error');
+        } finally {
             setIsUpdating(false);
-        }, 1000);
+        }
     };
 
-    const handleCancelBooking = () => {
+    const handleCancelBooking = async () => {
         setIsUpdating(true);
-        // Mock cancel - in real app this would call an API
-        setTimeout(() => {
+        try {
+            await deleteBooking(id);
             showNotification('Booking cancelled successfully!', 'success');
-            setIsUpdating(false);
             setShowCancelConfirm(false);
+            
             // Navigate back to dashboard after a delay
             setTimeout(() => {
                 navigate('/dashboard');
             }, 2000);
-        }, 1000);
+        } catch (err) {
+            showNotification(err.message || 'Failed to cancel booking', 'error');
+            setIsUpdating(false);
+        }
     };
 
     const goBack = () => {
@@ -148,7 +188,7 @@ const BookingDetailPage = () => {
                         
                         <div className="booking-detail-row">
                             <label>Time:</label>
-                            <span className="appointment-time">{formatTime(booking.date)}</span>
+                            <span className="appointment-time">{formatTime(booking.scheduledTime)}</span>
                         </div>
                         
                         <div className="booking-detail-row">
@@ -158,26 +198,65 @@ const BookingDetailPage = () => {
                             </span>
                         </div>
                         
-                        <div className="booking-detail-row">
-                            <label>Customer Phone:</label>
-                            <span className="customer-phone">+971 50 123 4567</span>
-                        </div>
+                        {booking.phone && (
+                            <div className="booking-detail-row">
+                                <label>Customer Phone:</label>
+                                <span className="customer-phone">{booking.phone}</span>
+                            </div>
+                        )}
                         
-                        <div className="booking-detail-row">
-                            <label>Vehicle:</label>
-                            <span className="vehicle-info">Toyota Camry 2020 - ABC1234</span>
-                        </div>
+                        {booking.email && (
+                            <div className="booking-detail-row">
+                                <label>Customer Email:</label>
+                                <span className="customer-email">{booking.email}</span>
+                            </div>
+                        )}
                         
-                        <div className="booking-detail-row notes-row">
-                            <label>Notes:</label>
-                            <span className="booking-notes">
-                                {booking.service === 'Oil Change' 
-                                    ? 'Regular oil change service. Customer requested synthetic oil.'
-                                    : booking.service === 'AC Repair'
-                                    ? 'AC not cooling properly. Check refrigerant levels and compressor.'
-                                    : 'Standard maintenance service as requested.'}
-                            </span>
-                        </div>
+                        {booking.vehicle && (
+                            <div className="booking-detail-row">
+                                <label>Vehicle:</label>
+                                <span className="vehicle-info">
+                                    {booking.vehicle}
+                                    {booking.plateNumber && ` - ${booking.plateNumber}`}
+                                </span>
+                            </div>
+                        )}
+                        
+                        {(booking.estimatedCost || booking.actualCost) && (
+                            <div className="booking-detail-row">
+                                <label>Cost:</label>
+                                <span className="booking-cost">
+                                    {booking.actualCost 
+                                        ? `AED ${booking.actualCost.toFixed(2)}` 
+                                        : booking.estimatedCost 
+                                        ? `Est. AED ${booking.estimatedCost.toFixed(2)}`
+                                        : 'TBD'}
+                                </span>
+                            </div>
+                        )}
+                        
+                        {booking.paymentStatus && (
+                            <div className="booking-detail-row">
+                                <label>Payment Status:</label>
+                                <span className={`payment-badge payment-${booking.paymentStatus}`}>
+                                    {booking.paymentStatus.charAt(0).toUpperCase() + booking.paymentStatus.slice(1)}
+                                </span>
+                            </div>
+                        )}
+                        
+                        {booking.assignedTechnician && (
+                            <div className="booking-detail-row">
+                                <label>Assigned Technician:</label>
+                                <span className="technician-name">{booking.assignedTechnician}</span>
+                            </div>
+                        )}
+                        
+                        {booking.notes && (
+                            <div className="booking-detail-row notes-row">
+                                <label>Notes:</label>
+                                <span className="booking-notes">{booking.notes}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
