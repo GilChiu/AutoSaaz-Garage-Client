@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { forgotPassword } from '../services/auth.service';
 import './ForgotPasswordPage.css';
 
 const ForgotPasswordPage = () => {
@@ -13,14 +14,27 @@ const ForgotPasswordPage = () => {
         setError('');
         setLoading(true);
 
+        if (!email) {
+            setError('Please enter your email address');
+            setLoading(false);
+            return;
+        }
+
         try {
-            // TODO: Implement API call to send reset code
-            // For now, just navigate to the next step
-            console.log('Sending reset code to:', email);
-            navigate('/reset-verification', { state: { email } });
+            const response = await forgotPassword(email);
+            
+            if (response.success) {
+                // Navigate to verification page
+                navigate('/reset-verification', { state: { email } });
+            } else {
+                setError(response.message || 'Failed to send reset code. Please try again.');
+            }
         } catch (err) {
             console.error('Send reset code error:', err);
-            setError('Failed to send reset code. Please try again.');
+            
+            // Always show a generic success message for security (prevent email enumeration)
+            // But navigate to verification page anyway
+            navigate('/reset-verification', { state: { email } });
         } finally {
             setLoading(false);
         }
