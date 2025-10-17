@@ -5,18 +5,45 @@
  * @returns {import('../../types/booking.js').Booking}
  */
 export function mapApiBookingToBooking(apiBooking, index = 0) {
+  // Format vehicle information
+  const vehicle = [
+    apiBooking.vehicle_make,
+    apiBooking.vehicle_model,
+    apiBooking.vehicle_year
+  ].filter(Boolean).join(' ');
+
   return {
-    id: apiBooking.id ? `#${apiBooking.id}` : `#${1001 + index}`,
+    // Core fields (required by UI table)
+    id: apiBooking.booking_number 
+      ? `#${apiBooking.booking_number}` 
+      : (apiBooking.id ? `#${apiBooking.id}` : `#${1001 + index}`),
     customer: apiBooking.customerName || apiBooking.customer_name,
     service: apiBooking.serviceType || apiBooking.service_type,
-    date: apiBooking.appointmentDate || apiBooking.appointment_date,
-    status: mapApiStatusToUiStatus(apiBooking.status)
+    date: apiBooking.appointmentDate || apiBooking.appointment_date || apiBooking.booking_date,
+    status: mapApiStatusToUiStatus(apiBooking.status),
+    
+    // Extended fields (for detail view)
+    phone: apiBooking.customer_phone,
+    email: apiBooking.customer_email,
+    vehicle: vehicle || undefined,
+    plateNumber: apiBooking.vehicle_plate_number,
+    estimatedCost: apiBooking.estimated_cost,
+    actualCost: apiBooking.actual_cost,
+    paymentStatus: apiBooking.payment_status,
+    scheduledTime: apiBooking.scheduled_time,
+    completionDate: apiBooking.completion_date,
+    assignedTechnician: apiBooking.assigned_technician,
+    notes: apiBooking.notes,
+    internalNotes: apiBooking.internal_notes,
+    bookingNumber: apiBooking.booking_number,
   };
 }
 
 /**
  * Maps API status to UI status
- * @param {'pending'|'confirmed'|'cancelled'|'completed'} apiStatus
+ * Backend statuses: pending, confirmed, in_progress, completed, cancelled, no_show
+ * UI statuses: in_progress, completed, cancelled
+ * @param {'pending'|'confirmed'|'in_progress'|'completed'|'cancelled'|'no_show'} apiStatus
  * @returns {'in_progress'|'completed'|'cancelled'}
  */
 export function mapApiStatusToUiStatus(apiStatus) {
@@ -24,9 +51,11 @@ export function mapApiStatusToUiStatus(apiStatus) {
     case 'completed':
       return 'completed';
     case 'cancelled':
+    case 'no_show':
       return 'cancelled';
     case 'pending':
     case 'confirmed':
+    case 'in_progress':
     default:
       return 'in_progress';
   }

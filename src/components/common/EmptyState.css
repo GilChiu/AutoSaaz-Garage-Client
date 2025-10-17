@@ -1,0 +1,284 @@
+/* ============================================================
+   EMPTY STATE STYLES
+   Professional empty state components
+   ============================================================ */
+
+/* Main empty state container */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-state-content {
+  max-width: 400px;
+}
+
+/* Illustration */
+.empty-state-illustration {
+  margin-bottom: 24px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-illustration {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  display: block;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Icon */
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+/* Title */
+.empty-state-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+/* Message */
+.empty-state-message {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+/* Action button */
+.empty-state-action-btn {
+  background: #FF6B35;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.empty-state-action-btn:hover {
+  background: #E55A2B;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.empty-state-action-btn:active {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   VARIANT STYLES
+   ============================================================ */
+
+/* Error variant */
+.empty-state-error .empty-state-title {
+  color: #EF4444;
+}
+
+.empty-state-error .empty-state-icon {
+  color: #EF4444;
+}
+
+/* Search variant */
+.empty-state-search .empty-state-icon {
+  font-size: 56px;
+}
+
+/* ============================================================
+   INLINE EMPTY STATE
+   ============================================================ */
+
+.empty-state-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+.empty-state-inline-icon {
+  font-size: 32px;
+  opacity: 0.5;
+}
+
+.empty-state-inline-message {
+  font-weight: 500;
+}
+
+/* ============================================================
+   TABLE EMPTY STATE
+   ============================================================ */
+
+.empty-state-table-row {
+  background: transparent !important;
+}
+
+.empty-state-table {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-state-table-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state-table-message {
+  font-size: 16px;
+  color: #999;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ============================================================
+   COMPACT MODE (for smaller containers)
+   ============================================================ */
+
+.empty-state-compact {
+  min-height: 250px;
+  padding: 30px 20px;
+}
+
+.empty-state-compact .empty-state-illustration {
+  margin-bottom: 16px;
+}
+
+.empty-state-compact .empty-illustration {
+  width: 120px;
+  height: 120px;
+}
+
+.empty-state-compact .empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.empty-state-compact .empty-state-title {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.empty-state-compact .empty-state-message {
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* ============================================================
+   CARD STYLE EMPTY STATE
+   ============================================================ */
+
+.empty-state-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 16px 0;
+}
+
+.empty-state-card .empty-state {
+  min-height: 300px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .empty-state {
+    min-height: 300px;
+    padding: 30px 16px;
+  }
+
+  .empty-illustration {
+    width: 150px;
+    height: 150px;
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+  }
+
+  .empty-state-title {
+    font-size: 20px;
+  }
+
+  .empty-state-message {
+    font-size: 14px;
+  }
+
+  .empty-state-action-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .empty-state {
+    min-height: 250px;
+    padding: 20px 12px;
+  }
+
+  .empty-illustration {
+    width: 120px;
+    height: 120px;
+  }
+
+  .empty-state-icon {
+    font-size: 40px;
+  }
+
+  .empty-state-title {
+    font-size: 18px;
+  }
+
+  .empty-state-message {
+    font-size: 13px;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+
+.empty-state[role="status"],
+.empty-state[aria-live="polite"] {
+  /* Announce to screen readers */
+}
+
+/* Focus styles for action button */
+.empty-state-action-btn:focus {
+  outline: 2px solid #FF6B35;
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .empty-state-illustration,
+  .empty-state-action-btn {
+    animation: none;
+    transition: none;
+  }
+}

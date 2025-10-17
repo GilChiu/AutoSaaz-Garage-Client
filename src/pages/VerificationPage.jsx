@@ -1,23 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { verifyRegistration, resendOTP } from '../services/registrationApi';
-import { validateOTP, validatePassword, validatePasswordConfirmation, getPasswordStrength } from '../utils/registrationValidation';
+import { validateOTP } from '../utils/registrationValidation';
 import './VerificationPage.css';
 
 const VerificationPage = () => {
     const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
     const [resendSuccess, setResendSuccess] = useState(false);
     const { resetRegistration } = useRegistration();
-    const { login } = useAuth();
+    const { loginWithToken } = useAuth();
     const navigate = useNavigate();
     const inputRefs = useRef([]);
 
@@ -77,7 +73,7 @@ const VerificationPage = () => {
 
         const codeString = verificationCode.join('');
 
-        // Validate OTP
+        // Validate OTP (must be 6 digits)
         const otpError = validateOTP(codeString);
         if (otpError) {
             setError(otpError);
@@ -85,49 +81,52 @@ const VerificationPage = () => {
             return;
         }
 
-        // Validate password
-        const passwordError = validatePassword(password);
-        if (passwordError) {
-            setError(passwordError);
-            setLoading(false);
-            return;
-        }
-
-        // Validate password confirmation
-        const confirmError = validatePasswordConfirmation(password, confirmPassword);
-        if (confirmError) {
-            setError(confirmError);
-            setLoading(false);
-            return;
-        }
-
         try {
-            // Call backend API to verify registration
-            const response = await verifyRegistration(codeString, password);
+            console.log('=== REAL VERIFICATION MODE ===');
+            console.log('OTP Code entered:', codeString);
+            console.log('Calling real backend verification endpoint...');
 
-            // Save tokens to localStorage
-            localStorage.setItem('accessToken', response.data.accessToken);
-            localStorage.setItem('refreshToken', response.data.refreshToken);
+            // Call the real backend verification API
+            const response = await verifyRegistration(codeString);
 
-            // Save user data to auth context (auto-login)
-            login(response.data.user, response.data.accessToken);
-
-            // Clear registration session and context data
-            resetRegistration();
-
-            // Navigate to dashboard
-            navigate('/dashboard');
+            if (response && response.success) {
+                console.log('✅ Real verification successful:', response);
+                
+                // The backend returns: response.data.data.user and response.data.data.accessToken
+                const userData = response.data?.user;
+                const accessToken = response.data?.accessToken;
+                
+                if (userData && accessToken) {
+                    console.log('✅ User data and token received:', userData);
+                    
+                    // Use AuthContext's loginWithToken method for proper auto-login
+                    loginWithToken(accessToken, userData);
+                    
+                    // Clear registration context
+                    resetRegistration();
+                    
+                    console.log('✅ Auto-login completed, navigating to dashboard...');
+                    navigate('/dashboard');
+                } else {
+                    throw new Error('Invalid response data from verification - missing user or token');
+                }
+            } else {
+                throw new Error(response?.message || 'Verification failed');
+            }
         } catch (err) {
-            // Handle specific errors
-            if (err.message.includes('Invalid verification code')) {
-                setError('Invalid verification code. Please check and try again.');
-            } else if (err.message.includes('Session expired') || err.message.includes('Session not found')) {
-                setError('Your session has expired. Redirecting to start...');
-                setTimeout(() => {
-                    navigate('/register');
-                }, 3000);
-            } else if (err.message.includes('Code has expired')) {
-                setError('Verification code has expired. Please request a new code.');
+            console.error('Verification error:', err);
+            
+            // Handle specific backend errors
+            if (err.message.includes('expired') || err.message.includes('Session')) {
+                setError('Registration session expired. Please start the registration process again.');
+                // Clear any stale session data
+                localStorage.removeItem('registrationSessionId');
+                localStorage.removeItem('sessionExpiresAt');
+                setTimeout(() => navigate('/register'), 2000);
+            } else if (err.message.includes('Invalid') || err.message.includes('code')) {
+                setError('Invalid verification code. Please try again.');
+            } else if (err.message.includes('attempts') || err.message.includes('Maximum')) {
+                setError('Too many verification attempts. Please request a new code.');
             } else {
                 setError(err.message || 'Verification failed. Please try again.');
             }
@@ -142,17 +141,28 @@ const VerificationPage = () => {
         setError('');
 
         try {
-            await resendOTP();
-            setResendSuccess(true);
-            setTimeout(() => {
-                setResendSuccess(false);
-            }, 5000);
-        } catch (err) {
-            if (err.message.includes('Session expired') || err.message.includes('Session not found')) {
-                setError('Your session has expired. Redirecting to start...');
+            console.log('=== RESENDING OTP VIA REAL API ===');
+            console.log('Calling backend resend endpoint...');
+            
+            const response = await resendOTP();
+            
+            if (response && response.success) {
+                console.log('✅ OTP resent successfully via backend');
+                setResendSuccess(true);
                 setTimeout(() => {
-                    navigate('/register');
-                }, 3000);
+                    setResendSuccess(false);
+                }, 5000);
+            } else {
+                throw new Error(response?.message || 'Failed to resend code');
+            }
+        } catch (err) {
+            console.error('Resend OTP error:', err);
+            
+            if (err.message.includes('expired') || err.message.includes('Session')) {
+                setError('Registration session expired. Please start the registration process again.');
+                localStorage.removeItem('registrationSessionId');
+                localStorage.removeItem('sessionExpiresAt');
+                setTimeout(() => navigate('/register'), 2000);
             } else {
                 setError(err.message || 'Failed to resend code. Please try again.');
             }
@@ -209,73 +219,6 @@ const VerificationPage = () => {
                                 ))}
                             </div>
 
-                            {/* Password Field */}
-                            <div className="form-group-verification-page" style={{ marginTop: '24px' }}>
-                                <label>Create Password <span style={{ color: '#dc2626' }}>*</span></label>
-                                <div className="password-input-container" style={{ position: 'relative' }}>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Enter your password"
-                                        required
-                                        style={{ width: '100%', paddingRight: '40px' }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        style={{
-                                            position: 'absolute',
-                                            right: '12px',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            fontSize: '18px'
-                                        }}
-                                    >
-                                        {showPassword ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                                {password && (
-                                    <div style={{ marginTop: '8px', fontSize: '12px' }}>
-                                        Password strength: <strong>{getPasswordStrength(password)}</strong>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Confirm Password Field */}
-                            <div className="form-group-verification-page">
-                                <label>Confirm Password <span style={{ color: '#dc2626' }}>*</span></label>
-                                <div className="password-input-container" style={{ position: 'relative' }}>
-                                    <input
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        placeholder="Re-enter your password"
-                                        required
-                                        style={{ width: '100%', paddingRight: '40px' }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        style={{
-                                            position: 'absolute',
-                                            right: '12px',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            fontSize: '18px'
-                                        }}
-                                    >
-                                        {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-
                             <div className="resend-section-verification-page">
                                 <span>Didn't get the code? </span>
                                 <button 
@@ -298,7 +241,7 @@ const VerificationPage = () => {
                                 className="verify-btn-verification-page"
                                 disabled={loading}
                             >
-                                {loading ? 'Verifying...' : 'Complete Registration'}
+                                {loading ? 'Verifying...' : 'Verify Code'}
                             </button>
 
                             <button 

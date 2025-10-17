@@ -169,7 +169,17 @@ const InspectionsPage = ({ type }) => {
                         </div>
                     </div>
                     <div className="dashboard-layout-content">
-                        <div className="inspections-page-error">{error}</div>
+                        <div className="inspections-page-error-container">
+                            <div className="inspections-page-error-icon">⚠️</div>
+                            <h3 className="inspections-page-error-title">Unable to Load Inspections</h3>
+                            <p className="inspections-page-error-message">{error}</p>
+                            <button 
+                                className="inspections-page-retry-btn"
+                                onClick={() => window.location.reload()}
+                            >
+                                Try Again
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -190,7 +200,16 @@ const InspectionsPage = ({ type }) => {
                                     <InspectionCard key={inspection.id} inspection={inspection} />
                                 ))
                             ) : (
-                                <div className="inspections-page-empty">No {currentType} inspections</div>
+                                <div className="inspections-page-empty">
+                                    <div className="inspections-page-empty-icon">🔍</div>
+                                    <h3 className="inspections-page-empty-title">No {currentType === 'pending' ? 'Pending' : 'Completed'} Inspections</h3>
+                                    <p className="inspections-page-empty-message">
+                                        {currentType === 'pending' 
+                                            ? 'All caught up! No pending inspections at the moment.'
+                                            : 'No completed inspections to display.'
+                                        }
+                                    </p>
+                                </div>
                             )}
                         </div>
                     </div>

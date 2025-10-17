@@ -1,22 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { verifyResetCode, forgotPassword } from '../services/auth.service';
 import './ResetVerificationPage.css';
 
 const ResetVerificationPage = () => {
     const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const [resending, setResending] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const inputRefs = useRef([]);
     const email = location.state?.email || '';
 
     useEffect(() => {
+        // Redirect to forgot password if no email
+        if (!email) {
+            navigate('/forgot-password');
+            return;
+        }
+
         // Focus first input on mount
         if (inputRefs.current[0]) {
             inputRefs.current[0].focus();
         }
-    }, []);
+    }, [email, navigate]);
 
     const handleInputChange = (index, value) => {
         // Only allow digits
@@ -59,28 +68,53 @@ const ResetVerificationPage = () => {
         }
 
         setError('');
+        setSuccess('');
         setLoading(true);
 
         try {
-            // TODO: Implement API call to verify reset code
-            console.log('Verifying reset code:', code, 'for email:', email);
-            navigate('/reset-password', { state: { email, verificationCode: code } });
+            const response = await verifyResetCode(email, code);
+            
+            if (response.success && response.data.verified) {
+                // Navigate to reset password page with verified code
+                navigate('/reset-password', { state: { email, verificationCode: code } });
+            } else {
+                setError(response.message || 'Invalid verification code. Please try again.');
+            }
         } catch (err) {
             console.error('Verification error:', err);
-            setError('Invalid verification code. Please try again.');
+            
+            const errorMessage = err.message || 'An error occurred';
+            
+            if (errorMessage.includes('401') || errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('expired')) {
+                setError('Invalid or expired code. Please check the code or request a new one.');
+            } else {
+                setError('Failed to verify code. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
     };
 
     const handleResendCode = async () => {
+        setError('');
+        setSuccess('');
+        setResending(true);
+
         try {
-            // TODO: Implement resend reset code API call
-            console.log('Resending reset code to:', email);
-            // Show success message or notification
+            const response = await forgotPassword(email);
+            
+            if (response.success) {
+                setSuccess('A new verification code has been sent to your email.');
+                // Clear the input fields
+                setVerificationCode(['', '', '', '', '', '']);
+                // Focus first input
+                inputRefs.current[0]?.focus();
+            }
         } catch (err) {
             console.error('Resend error:', err);
-            setError('Failed to resend code. Please try again.');
+            setError('Failed to resend code. Please try again later.');
+        } finally {
+            setResending(false);
         }
     };
 
@@ -109,6 +143,7 @@ const ResetVerificationPage = () => {
                         </p>
 
                         {error && <div className="reset-verification-error-message">{error}</div>}
+                        {success && <div className="reset-verification-success-message">{success}</div>}
 
                         <form onSubmit={handleSubmit} className="reset-verification-form">
                             <div className="reset-verification-code-inputs">
@@ -133,8 +168,9 @@ const ResetVerificationPage = () => {
                                     type="button" 
                                     onClick={handleResendCode}
                                     className="reset-verification-resend-btn"
+                                    disabled={resending}
                                 >
-                                    Resend Code
+                                    {resending ? 'Sending...' : 'Resend Code'}
                                 </button>
                             </div>
 

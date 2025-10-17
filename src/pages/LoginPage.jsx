@@ -1,6 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 import { autoSaazLogo, heroLogin2 } from '../assets/images';
 
@@ -10,12 +10,13 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, user } = useContext(AuthContext);
+    const { login, user } = useAuth();
     const navigate = useNavigate();
 
     // Redirect if already logged in
     useEffect(() => {
         if (user) {
+            console.log('User already logged in, redirecting to dashboard');
             navigate('/dashboard');
         }
     }, [user, navigate]);
@@ -25,12 +26,44 @@ const LoginPage = () => {
         setError('');
         setLoading(true);
 
+        // Basic validation
+        if (!email || !password) {
+            setError('Please enter both email and password');
+            setLoading(false);
+            return;
+        }
+
         try {
-            await login({ email, password });
-            navigate('/dashboard');
+            console.log('Attempting login with:', { email, password: '***' });
+            const response = await login({ email, password });
+            
+            console.log('Login response:', response);
+            
+            if (response && response.success) {
+                console.log('Login successful, navigating to dashboard');
+                navigate('/dashboard');
+            } else {
+                const errorMsg = response?.message || 'Login failed. Please try again.';
+                console.log('Login failed:', errorMsg);
+                setError(errorMsg);
+            }
         } catch (err) {
             console.error('Login error:', err);
-            setError('Invalid email or password');
+            
+            // Handle specific error messages
+            const errorMessage = err.message || 'An error occurred. Please try again.';
+            
+            if (errorMessage.includes('423')) {
+                setError('Account locked due to too many failed attempts. Please try again in 30 minutes.');
+            } else if (errorMessage.includes('403')) {
+                setError('Please verify your email address before logging in.');
+            } else if (errorMessage.includes('401') || errorMessage.toLowerCase().includes('invalid')) {
+                setError('Invalid email or password. Please check your credentials and try again.');
+            } else if (errorMessage.toLowerCase().includes('network') || errorMessage.toLowerCase().includes('fetch')) {
+                setError('Network error. Please check your internet connection and try again.');
+            } else {
+                setError(errorMessage);
+            }
         } finally {
             setLoading(false);
         }

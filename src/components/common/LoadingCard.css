@@ -1,0 +1,315 @@
+/* ============================================================
+   LOADING CARD STYLES
+   Professional loading skeletons with shimmer animation
+   ============================================================ */
+
+/* Base loading card */
+.loading-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+}
+
+/* Shimmer animation */
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #f8f8f8 50%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ============================================================
+   BOOKING CARD SKELETON
+   ============================================================ */
+
+.loading-card-booking {
+  min-height: 200px;
+}
+
+.loading-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.loading-booking-number {
+  width: 120px;
+  height: 24px;
+}
+
+.loading-status-badge {
+  width: 80px;
+  height: 28px;
+  border-radius: 14px;
+}
+
+.loading-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loading-customer-name {
+  width: 60%;
+  height: 20px;
+}
+
+.loading-vehicle {
+  width: 45%;
+  height: 18px;
+}
+
+.loading-service {
+  width: 55%;
+  height: 18px;
+}
+
+.loading-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.loading-date {
+  width: 35%;
+  height: 16px;
+}
+
+.loading-amount {
+  width: 25%;
+  height: 20px;
+}
+
+/* ============================================================
+   APPOINTMENT CARD SKELETON
+   ============================================================ */
+
+.loading-card-appointment {
+  min-height: 180px;
+}
+
+.loading-card-top {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.loading-date-block {
+  width: 150px;
+  height: 20px;
+}
+
+.loading-time-block {
+  width: 100px;
+  height: 20px;
+}
+
+.loading-card-middle {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.loading-card-bottom {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.loading-btn {
+  width: 120px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+/* ============================================================
+   STAT CARD SKELETON
+   ============================================================ */
+
+.loading-card-stat {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.loading-stat-label {
+  width: 70%;
+  height: 16px;
+}
+
+.loading-stat-value {
+  width: 50%;
+  height: 32px;
+  margin: 12px 0;
+}
+
+.loading-stat-change {
+  width: 40%;
+  height: 14px;
+}
+
+/* ============================================================
+   DEFAULT CARD SKELETON
+   ============================================================ */
+
+.loading-card-default {
+  min-height: 140px;
+}
+
+.loading-title {
+  width: 60%;
+  height: 24px;
+  margin-bottom: 12px;
+}
+
+.loading-subtitle {
+  width: 45%;
+  height: 18px;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  width: 80%;
+  height: 16px;
+}
+
+/* ============================================================
+   LOADING SPINNER
+   ============================================================ */
+
+.loading-spinner {
+  display: inline-block;
+  position: relative;
+}
+
+.loading-spinner-small {
+  width: 20px;
+  height: 20px;
+}
+
+.loading-spinner-medium {
+  width: 40px;
+  height: 40px;
+}
+
+.loading-spinner-large {
+  width: 60px;
+  height: 60px;
+}
+
+.spinner-circle {
+  width: 100%;
+  height: 100%;
+  border: 3px solid rgba(255, 107, 53, 0.1);
+  border-top-color: #FF6B35;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner-small .spinner-circle {
+  border-width: 2px;
+}
+
+.loading-spinner-large .spinner-circle {
+  border-width: 4px;
+}
+
+/* Spinner color variants */
+.loading-spinner-secondary .spinner-circle {
+  border-top-color: #6c757d;
+}
+
+.loading-spinner-success .spinner-circle {
+  border-top-color: #10B981;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================
+   LOADING OVERLAY
+   ============================================================ */
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.loading-overlay-content {
+  text-align: center;
+}
+
+.loading-overlay-message {
+  margin-top: 16px;
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* ============================================================
+   TABLE ROW SKELETON
+   ============================================================ */
+
+.loading-table-row {
+  height: 60px;
+}
+
+.loading-table-cell {
+  width: 90%;
+  height: 16px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .loading-card {
+    padding: 16px;
+  }
+
+  .loading-card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .loading-date,
+  .loading-amount {
+    width: 100%;
+  }
+}

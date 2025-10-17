@@ -24,10 +24,8 @@ export const RegistrationProvider = ({ children }) => {
         emiratesIdName: '',
         emiratesIdUrl: '',
         
-        // Step 4: Verification (password moved here)
+        // Step 4: Verification (NO password - backend doesn't use it)
         verificationCode: '',
-        password: '',
-        confirmPassword: '',
         
         // Session tracking
         sessionId: localStorage.getItem('registrationSessionId') || '',
@@ -72,8 +70,6 @@ export const RegistrationProvider = ({ children }) => {
             emiratesIdName: '',
             emiratesIdUrl: '',
             verificationCode: '',
-            password: '',
-            confirmPassword: '',
             sessionId: '',
             currentStep: 1
         });

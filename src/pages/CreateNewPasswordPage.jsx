@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { resetPassword, validatePassword } from '../services/auth.service';
 import './CreateNewPasswordPage.css';
 
 const CreateNewPasswordPage = () => {
@@ -9,18 +10,36 @@ const CreateNewPasswordPage = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
     const email = location.state?.email || '';
     const verificationCode = location.state?.verificationCode || '';
+
+    useEffect(() => {
+        // Redirect to forgot password if no email or code
+        if (!email || !verificationCode) {
+            navigate('/forgot-password');
+        }
+    }, [email, verificationCode, navigate]);
+
+    useEffect(() => {
+        // Validate password strength on change
+        if (newPassword) {
+            const validation = validatePassword(newPassword);
+            setPasswordStrength(validation);
+        } else {
+            setPasswordStrength(null);
+        }
+    }, [newPassword]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
         // Validation
-        if (newPassword.length < 8) {
-            setError('Password must be at least 8 characters long');
+        if (!passwordStrength || !passwordStrength.isValid) {
+            setError('Password does not meet all requirements');
             return;
         }
 
@@ -32,12 +51,27 @@ const CreateNewPasswordPage = () => {
         setLoading(true);
 
         try {
-            // TODO: Implement API call to reset password
-            console.log('Resetting password for:', email, 'with code:', verificationCode);
-            navigate('/password-reset-success');
+            const response = await resetPassword({
+                email,
+                code: verificationCode,
+                newPassword
+            });
+
+            if (response.success) {
+                navigate('/password-reset-success');
+            } else {
+                setError(response.message || 'Failed to reset password. Please try again.');
+            }
         } catch (err) {
             console.error('Password reset error:', err);
-            setError('Failed to reset password. Please try again.');
+            
+            const errorMessage = err.message || '';
+            
+            if (errorMessage.includes('401') || errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('expired')) {
+                setError('Invalid or expired reset code. Please start the process again.');
+            } else {
+                setError('Failed to reset password. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -99,6 +133,30 @@ const CreateNewPasswordPage = () => {
                                         )}
                                     </button>
                                 </div>
+                                
+                                {/* Password Strength Indicator */}
+                                {passwordStrength && (
+                                    <div className="password-requirements">
+                                        <p className="requirements-title">Password must contain:</p>
+                                        <ul className="requirements-list">
+                                            <li className={passwordStrength.requirements.minLength ? 'valid' : 'invalid'}>
+                                                {passwordStrength.requirements.minLength ? '✓' : '○'} At least 8 characters
+                                            </li>
+                                            <li className={passwordStrength.requirements.hasUppercase ? 'valid' : 'invalid'}>
+                                                {passwordStrength.requirements.hasUppercase ? '✓' : '○'} One uppercase letter
+                                            </li>
+                                            <li className={passwordStrength.requirements.hasLowercase ? 'valid' : 'invalid'}>
+                                                {passwordStrength.requirements.hasLowercase ? '✓' : '○'} One lowercase letter
+                                            </li>
+                                            <li className={passwordStrength.requirements.hasNumber ? 'valid' : 'invalid'}>
+                                                {passwordStrength.requirements.hasNumber ? '✓' : '○'} One number
+                                            </li>
+                                            <li className={passwordStrength.requirements.hasSpecial ? 'valid' : 'invalid'}>
+                                                {passwordStrength.requirements.hasSpecial ? '✓' : '○'} One special character
+                                            </li>
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="create-new-password-form-group">
