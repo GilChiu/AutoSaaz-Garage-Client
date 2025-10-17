@@ -1,10 +1,10 @@
 // Development configuration
 const DEV_CONFIG = {
   // Set to false to disable authentication for frontend development
-  ENABLE_AUTH: false,
+  ENABLE_AUTH: true,
   
   // API endpoints
-  API_BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  API_BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3000/api',
   
   // Mock user for development when auth is disabled
   MOCK_USER: {

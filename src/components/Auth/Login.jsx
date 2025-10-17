@@ -1,25 +1,32 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext';
-import { loginUser } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { setAuth } = useContext(AuthContext);
+    const [loading, setLoading] = useState(false);
+    const { login } = useAuth();
     const history = useHistory();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         try {
-            const response = await loginUser({ email, password });
-            setAuth(response.data);
-            history.push('/dashboard');
+            const response = await login({ email, password });
+            if (response.success) {
+                history.push('/dashboard');
+            } else {
+                setError(response.message || 'Login failed');
+            }
         } catch (err) {
-            setError('Invalid email or password');
+            console.error('Login error:', err);
+            setError(err.response?.data?.message || 'Invalid email or password');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -46,7 +53,9 @@ const Login = () => {
                         required
                     />
                 </div>
-                <button type="submit">Login</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Logging in...' : 'Login'}
+                </button>
             </form>
         </div>
     );

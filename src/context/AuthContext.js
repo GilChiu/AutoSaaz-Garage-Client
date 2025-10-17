@@ -6,7 +6,7 @@ const AuthContext = createContext();
 
 export { AuthContext };
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -56,12 +56,37 @@ export const AuthProvider = ({ children }) => {
             return { success: true, user: DEV_CONFIG.MOCK_USER };
         }
 
-        const response = await api.post('/auth/login', credentials);
-        const { token, user } = response.data;
-        localStorage.setItem('token', token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        setUser(user);
-        return response.data;
+        try {
+            const response = await api.post('/auth/login', credentials);
+            
+            if (response.data.success) {
+                const { accessToken, user } = response.data.data;
+                
+                // Store token
+                localStorage.setItem('token', accessToken);
+                api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+                
+                // Set user in context
+                setUser(user);
+                
+                return {
+                    success: true,
+                    data: response.data.data,
+                    message: response.data.message
+                };
+            } else {
+                return {
+                    success: false,
+                    message: response.data.message || 'Login failed'
+                };
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Login failed'
+            };
+        }
     };
 
     const logout = () => {
@@ -83,14 +108,42 @@ export const AuthProvider = ({ children }) => {
             return { success: true, user: DEV_CONFIG.MOCK_USER };
         }
 
-        const response = await api.post('/auth/register', userData);
-        const { token, user } = response.data;
-        if (token) {
-            localStorage.setItem('token', token);
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            setUser(user);
+        try {
+            // Use simple registration endpoint
+            const response = await api.post('/auth/register', {
+                fullName: userData.fullName,
+                email: userData.email,
+                phoneNumber: userData.phoneNumber
+            });
+
+            if (response.data.success) {
+                const { accessToken, user } = response.data.data;
+                
+                // Store token
+                localStorage.setItem('token', accessToken);
+                api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+                
+                // Set user in context
+                setUser(user);
+                
+                return {
+                    success: true,
+                    data: response.data.data,
+                    message: response.data.message
+                };
+            } else {
+                return {
+                    success: false,
+                    message: response.data.message || 'Registration failed'
+                };
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Registration failed'
+            };
         }
-        return response.data;
     };
 
     return (

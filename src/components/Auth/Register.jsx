@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { registerUser } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
 const Register = () => {
     const [formData, setFormData] = useState({
-        username: '',
+        fullName: '',
         email: '',
-        password: '',
+        phoneNumber: '',
     });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { register } = useAuth();
     const history = useHistory();
 
     const handleChange = (e) => {
@@ -20,12 +22,28 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         try {
-            await registerUser(formData);
-            history.push('/verification-code');
+            const response = await register(formData);
+            if (response.success) {
+                if (response.data?.nextStep) {
+                    // Multi-step registration - redirect to next step
+                    history.push(`/register/step${response.data.nextStep}`, { 
+                        sessionId: response.data.sessionId 
+                    });
+                } else {
+                    // Single-step registration completed
+                    history.push('/dashboard');
+                }
+            } else {
+                setError(response.message || 'Registration failed');
+            }
         } catch (err) {
-            setError(err.response.data.message || 'Registration failed');
+            console.error('Registration error:', err);
+            setError(err.response?.data?.message || 'Registration failed');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -35,12 +53,12 @@ const Register = () => {
             {error && <p className="error">{error}</p>}
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label htmlFor="username">Username</label>
+                    <label htmlFor="fullName">Full Name</label>
                     <input
                         type="text"
-                        id="username"
-                        name="username"
-                        value={formData.username}
+                        id="fullName"
+                        name="fullName"
+                        value={formData.fullName}
                         onChange={handleChange}
                         required
                     />
@@ -57,17 +75,19 @@ const Register = () => {
                     />
                 </div>
                 <div>
-                    <label htmlFor="password">Password</label>
+                    <label htmlFor="phoneNumber">Phone Number</label>
                     <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={formData.password}
+                        type="tel"
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
                         onChange={handleChange}
                         required
                     />
                 </div>
-                <button type="submit">Register</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Registering...' : 'Register'}
+                </button>
             </form>
         </div>
     );
