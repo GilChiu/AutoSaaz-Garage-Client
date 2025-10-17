@@ -211,6 +211,11 @@ export const verifyRegistration = async (code) => {
         localStorage.setItem('user', JSON.stringify(data.data.user));
         console.log('✅ User data saved');
       }
+      // Save generated password if available (development mode)
+      if (data.data.generatedPassword) {
+        localStorage.setItem('userGeneratedPassword', data.data.generatedPassword);
+        console.log('✅ Generated password saved for account settings');
+      }
     }
 
     console.log('=== STEP 4 VERIFICATION SUCCESS ===');

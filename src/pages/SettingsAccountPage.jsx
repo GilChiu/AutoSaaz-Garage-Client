@@ -1,19 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Dashboard/Sidebar';
 import '../components/Dashboard/Dashboard.css';
 import './SettingsAccount.css';
 
 const SettingsAccountPage = () => {
+  const { user } = useAuth(); // Get the current logged-in user
+  
   const [form, setForm] = useState({
-    email: 'info@autosaaz.com',
-    phone: '+971 50 123 4567',
-    password: 'MySecurePass123!', // In production, this would come from user context or backend
+    email: '',
+    phone: '',
+    password: '', // Will be populated from user data or localStorage
     language: 'English',
     timezone: 'GMT+4 (Dubai)'
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
+
+  // Load user data when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      console.log('Loading user data in account settings:', user);
+      
+      // Check if password was stored during registration (in development mode)
+      const registrationPassword = localStorage.getItem('userGeneratedPassword');
+      console.log('Generated password from localStorage:', registrationPassword ? 'Found' : 'Not found');
+      
+      setForm({
+        email: user.email || '',
+        phone: user.phone || user.phoneNumber || '',
+        password: registrationPassword || 'Password sent to your email', // More user-friendly message
+        language: user.language || 'English',
+        timezone: user.timezone || 'GMT+4 (Dubai)'
+      });
+    }
+  }, [user]);
+
+  // Show loading state if user data is not loaded yet
+  if (!user) {
+    return (
+      <div className="dashboard-layout dashboard-tight">
+        <Sidebar />
+        <div className="dashboard-layout-main">
+          <div className="dashboard-layout-content">
+            <div className="settings-account-wrapper">
+              <div className="settings-card account-settings-card">
+                <div className="settings-card-header">
+                  <span className="bar" aria-hidden="true" />
+                  <h2>Account Settings</h2>
+                </div>
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  Loading user data...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const change = e => { const { name, value } = e.target; setForm(f => ({ ...f, [name]: value })); setSaved(false); };
   const submit = e => { e.preventDefault(); setSaving(true); setTimeout(() => { setSaving(false); setSaved(true); }, 600); };
@@ -48,6 +94,7 @@ const SettingsAccountPage = () => {
                       value={form.password} 
                       onChange={change} 
                       className="password-input"
+                      placeholder="Your password"
                     />
                     <button 
                       type="button" 
@@ -68,6 +115,11 @@ const SettingsAccountPage = () => {
                       )}
                     </button>
                   </div>
+                  {!localStorage.getItem('userGeneratedPassword') && (
+                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px' }}>
+                      Your password was sent to your email during registration. If you can't find it, you can change it here.
+                    </small>
+                  )}
                 </label>
                 <label className="settings-field">
                   <span className="settings-label">Language Preference</span>
