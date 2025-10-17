@@ -177,6 +177,27 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const loginWithToken = (accessToken, userData) => {
+        // If auth is disabled, use mock user
+        if (!DEV_CONFIG.ENABLE_AUTH) {
+            setUser(DEV_CONFIG.MOCK_USER);
+            return;
+        }
+
+        try {
+            // Store token
+            localStorage.setItem('token', accessToken);
+            api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+            
+            // Set user in context
+            setUser(userData);
+            
+            console.log('✅ Auto-login successful with token');
+        } catch (error) {
+            console.error('Auto-login with token failed:', error);
+        }
+    };
+
     return (
         <AuthContext.Provider value={{ 
             user, 
@@ -184,6 +205,7 @@ export const AuthProvider = ({ children }) => {
             login, 
             logout, 
             register,
+            loginWithToken,
             authEnabled: DEV_CONFIG.ENABLE_AUTH 
         }}>
             {children}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
+import { useAuth } from '../context/AuthContext';
 import { verifyRegistration, resendOTP } from '../services/registrationApi';
 import { validateOTP } from '../utils/registrationValidation';
 import './VerificationPage.css';
@@ -12,6 +13,7 @@ const VerificationPage = () => {
     const [resendLoading, setResendLoading] = useState(false);
     const [resendSuccess, setResendSuccess] = useState(false);
     const { resetRegistration } = useRegistration();
+    const { loginWithToken } = useAuth();
     const navigate = useNavigate();
     const inputRefs = useRef([]);
 
@@ -90,25 +92,23 @@ const VerificationPage = () => {
             if (response && response.success) {
                 console.log('✅ Real verification successful:', response);
                 
-                // The registrationApi already saved the tokens and user data
-                // Now update the auth context with the user
-                const userData = response.data.user;
-                const accessToken = response.data.accessToken;
+                // The backend returns: response.data.data.user and response.data.data.accessToken
+                const userData = response.data?.user;
+                const accessToken = response.data?.accessToken;
                 
                 if (userData && accessToken) {
-                    // Set the token in localStorage for AuthContext to pick up
-                    localStorage.setItem('token', accessToken);
+                    console.log('✅ User data and token received:', userData);
                     
-                    console.log('✅ User authenticated:', userData);
-                    console.log('✅ Token saved, auth context will auto-login');
+                    // Use AuthContext's loginWithToken method for proper auto-login
+                    loginWithToken(accessToken, userData);
                     
                     // Clear registration context
                     resetRegistration();
                     
-                    console.log('✅ Navigating to dashboard...');
+                    console.log('✅ Auto-login completed, navigating to dashboard...');
                     navigate('/dashboard');
                 } else {
-                    throw new Error('Invalid response data from verification');
+                    throw new Error('Invalid response data from verification - missing user or token');
                 }
             } else {
                 throw new Error(response?.message || 'Verification failed');
