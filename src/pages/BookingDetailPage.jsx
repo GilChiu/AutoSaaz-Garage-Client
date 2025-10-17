@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getBookingById, updateBooking, deleteBooking } from '../services/bookings.service';
 import { getStatusDisplayText, getStatusCssClass } from '../services/mappers/bookingMappers';
 import Notification from '../components/common/Notification';
+import { LoadingOverlay } from '../components/common/LoadingCard';
+import EmptyState from '../components/common/EmptyState';
 import './BookingDetailPage.css';
 
 const BookingDetailPage = () => {
@@ -126,28 +128,37 @@ const BookingDetailPage = () => {
     };
 
     if (loading) {
-        return (
-            <div className="booking-detail-loading">
-                <div className="loading-spinner">Loading booking details...</div>
-            </div>
-        );
+        return <LoadingOverlay message="Loading booking details..." />;
     }
 
     if (error) {
         return (
-            <div className="booking-detail-error">
-                <p>Error loading booking: {error}</p>
-                <button onClick={goBack} className="back-btn">Back to Dashboard</button>
+            <div className="booking-detail-page">
+                <div className="booking-detail-container">
+                    <EmptyState
+                        variant="error"
+                        title="Unable to Load Booking"
+                        message={error}
+                        actionLabel="Back to Dashboard"
+                        onAction={goBack}
+                    />
+                </div>
             </div>
         );
     }
 
     if (!booking) {
         return (
-            <div className="booking-detail-not-found">
-                <h2>Booking Not Found</h2>
-                <p>The booking with ID #{id} could not be found.</p>
-                <button onClick={goBack} className="back-btn">Back to Dashboard</button>
+            <div className="booking-detail-page">
+                <div className="booking-detail-container">
+                    <EmptyState
+                        variant="search"
+                        title="Booking Not Found"
+                        message={`The booking with ID #${id} could not be found.`}
+                        actionLabel="Back to Dashboard"
+                        onAction={goBack}
+                    />
+                </div>
             </div>
         );
     }

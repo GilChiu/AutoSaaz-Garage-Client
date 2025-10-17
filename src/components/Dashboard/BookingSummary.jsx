@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBookings } from '../../hooks/useBookings';
 import { getStatusDisplayText, getStatusCssClass } from '../../services/mappers/bookingMappers';
+import { LoadingTableRow } from '../common/LoadingCard';
+import EmptyState from '../common/EmptyState';
 import './BookingSummary.css';
 
 const BookingSummary = () => {
@@ -36,17 +38,45 @@ const BookingSummary = () => {
 
     if (loading) {
         return (
-            <div className="dashboard-booking-summary-loading">
-                <div className="dashboard-loading-spinner">Loading bookings...</div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="dashboard-booking-summary-error">
-                <p>Error loading bookings: {error}</p>
-            </div>
+            <section className="dashboard-booking-summary">
+                <header className="dashboard-section-header">
+                    <h2 className="dashboard-section-title">Booking Summary</h2>
+                </header>
+                <div className="dashboard-booking-table-container">
+                    <table className="dashboard-booking-table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Customer</th>
+                                <th>Service</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <LoadingTableRow columns={5} rows={5} />
+                        </tbody>
+                    </table>
+                </div>
+            {bookings.length === 0 ? (
+                <EmptyState
+                    variant="bookings"
+                    title="No Bookings Yet"
+                    message="When customers make bookings, they'll appear here in your dashboard."
+                />
+            ) : (
+            <section className="dashboard-booking-summary">
+                <header className="dashboard-section-header">
+                    <h2 className="dashboard-section-title">Booking Summary</h2>
+                </header>
+                <EmptyState
+                    variant="error"
+                    title="Unable to Load Bookings"
+                    message={error}
+                    actionLabel="Retry"
+                    onAction={() => window.location.reload()}
+                />
+            </section>
         );
     }
 

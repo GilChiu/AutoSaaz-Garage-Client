@@ -2,21 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getAppointments, mapAppointment } from '../services/appointments.service';
+import LoadingCard from '../components/common/LoadingCard';
+import EmptyState from '../components/common/EmptyState';
 import '../components/Dashboard/Dashboard.css';
 import '../styles/appointments.css';
 
 // Utility formatters (kept isolated for easy replacement / i18n)
 const formatLongDate = iso => new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 const formatTime = iso => new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-
-// Skeleton placeholder component
-const AppointmentSkeleton = () => (
-  <div className="apptfx-card apptfx-card-skeleton">
-    <div className="apptfx-skel-row apptfx-skel-date" />
-    <div className="apptfx-skel-row apptfx-skel-title" />
-    <div className="apptfx-skel-row apptfx-skel-meta" />
-  </div>
-);
 
 // Individual card
 const AppointmentCard = ({ appt }) => {
@@ -82,15 +75,31 @@ const AppointmentsPage = () => {
             <div className="apptfx-header-block">
             </div>
             <h2 className="apptfx-section-heading">Upcoming Appointments</h2>
-            {error && <div className="apptfx-error" role="alert">{error}</div>}
+            
+            {error && (
+              <EmptyState
+                variant="error"
+                title="Unable to Load Appointments"
+                message={error}
+                actionLabel="Try Again"
+                onAction={() => window.location.reload()}
+              />
+            )}
+            
             {loading && (
               <div className="apptfx-grid" aria-busy="true">
-                {Array.from({ length: 3 }).map((_, i) => <AppointmentSkeleton key={i} />)}
+                <LoadingCard variant="appointment" count={3} />
               </div>
             )}
+            
             {!loading && items.length === 0 && !error && (
-              <div className="apptfx-empty">No upcoming appointments scheduled.</div>
+              <EmptyState
+                variant="appointments"
+                title="No Appointments Scheduled"
+                message="You don't have any upcoming appointments. When customers schedule appointments, they'll appear here."
+              />
             )}
+            
             {!loading && items.length > 0 && (
               <div className="apptfx-grid">
                 {items.map(a => <AppointmentCard key={a.id} appt={a} />)}
