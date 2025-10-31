@@ -1,6 +1,8 @@
 import axios from 'axios';
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+// Use Supabase Edge Functions base URL
+const API_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -8,10 +10,16 @@ const api = axios.create({
 
 // Add token to requests if available
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Always include the Supabase anon key for Functions gateway
+  config.headers = config.headers || {};
+  config.headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
+
+  // Include application access token for protected endpoints
+  const accessToken = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  if (accessToken) {
+    config.headers['x-autosaaz-token'] = accessToken;
   }
+  config.headers['Content-Type'] = config.headers['Content-Type'] || 'application/json';
   return config;
 });
 
@@ -28,18 +36,15 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          // Call refresh token endpoint
-          const response = await axios.post(`${API_URL}/auth/refresh`, {
-            refreshToken
+          // Call Supabase refresh function
+          const response = await axios.post(`${API_URL}/auth-refresh`, { refreshToken }, {
+            headers: { Authorization: `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
           });
-
           const { accessToken } = response.data.data;
-          
           // Save new access token
           localStorage.setItem('accessToken', accessToken);
-          
-          // Retry original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          // Retry original request with new app token header
+          originalRequest.headers['x-autosaaz-token'] = accessToken;
           return api(originalRequest);
         }
       } catch (refreshError) {
@@ -66,13 +71,16 @@ api.interceptors.response.use(
 );
 
 // Auth API calls
+// Note: Registration uses step-based endpoints in registrationApi.js
 export const registerUser = async (userData) => {
-  const response = await api.post('/auth/register', userData);
+  // Minimal compatibility wrapper: calls Step 1
+  const response = await api.post('/auth-register-step1', userData);
   return response.data;
 };
 
+
 export const loginUser = async (credentials) => {
-  const response = await api.post('/auth/login', credentials);
+  const response = await api.post('/auth-login', credentials);
   const { data } = response.data;
   
   // Store tokens
@@ -90,7 +98,7 @@ export const loginUser = async (credentials) => {
 };
 
 export const verifyUser = async (sessionId, code) => {
-  const response = await api.post('/auth/verify', { sessionId, code });
+  const response = await api.post('/auth-verify', { sessionId, code });
   const { data } = response.data;
   
   // Store tokens if returned (registration flow)
@@ -109,7 +117,7 @@ export const verifyUser = async (sessionId, code) => {
 
 export const logoutUser = async () => {
   try {
-    await api.post('/auth/logout');
+    // Stateless JWT: nothing to call on server; clear storage below
   } catch (error) {
     console.error('Logout error:', error);
   } finally {

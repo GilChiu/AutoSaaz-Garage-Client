@@ -3,8 +3,8 @@ const DEV_CONFIG = {
   // Set to false to disable authentication for frontend development
   ENABLE_AUTH: true,
   
-  // API endpoints
-  API_BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3000/api',
+  // Supabase Functions base URL for API calls
+  API_BASE_URL: process.env.REACT_APP_FUNCTIONS_URL || 'https://lblcjyeiwgyanadssqac.functions.supabase.co',
   
   // Mock user for development when auth is disabled
   MOCK_USER: {
