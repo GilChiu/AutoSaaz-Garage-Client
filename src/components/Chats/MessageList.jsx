@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function MessageList({ messages }) {
+  const { user } = useAuth();
   const endRef = useRef(null);
   useEffect(() => { if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -14,11 +16,13 @@ export default function MessageList({ messages }) {
 
   return (
     <div className="chat-messages" role="log" aria-live="polite">
-      {messages.map((m) => (
-        <div key={m.id} className={"chat-msg-row " + (m.sender_id === 'me' || m.from === 'me' ? 'out' : 'in')}>
+      {messages.map((m) => {
+        const isMe = user && (m.sender_id === user.id);
+        return (
+        <div key={m.id} className={"chat-msg-row " + (isMe ? 'out' : 'in')}>
           <div className="chat-msg-bubble">{m.content || (m.attachment_url ? 'Attachment' : '')}</div>
         </div>
-      ))}
+      );})}
       <div ref={endRef} />
     </div>
   );

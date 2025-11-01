@@ -6,15 +6,21 @@ import ConversationList from '../components/Chats/ConversationList';
 import MessageList from '../components/Chats/MessageList';
 import Composer from '../components/Chats/Composer';
 import { useConversations, useMessages, send as sendApi, markRead as markReadApi } from '../hooks/useChats';
+import { useAuth } from '../context/AuthContext';
 
-function mapConversations(apiData) {
+function mapConversations(apiData, myUserId) {
     const items = (apiData?.conversations || []).map((row) => {
         const conv = row.conversation || row;
         const last = row.lastMessage || null;
         const unread = row.unreadCount || 0;
+    let title = 'Conversation';
+    if (row.participants && myUserId) {
+      const other = row.participants.find((p) => p.user_id !== myUserId);
+      if (other?.name) title = other.name;
+    }
         return {
             id: conv.id,
-            title: 'Conversation',
+      title,
             lastMessageSnippet: last?.content || (last?.attachment_url ? 'Attachment' : ''),
             lastMessageAt: last?.created_at || conv.last_message_at,
             unreadCount: unread,
@@ -26,9 +32,10 @@ function mapConversations(apiData) {
 
 const ChatsPage = () => {
   // fixed tab UI for now (active conversations)
-    const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState('');
+  const { user } = useAuth();
   const { conversations: convsData, loading: convLoading, refresh: refreshConvs } = useConversations({ limit: 50 });
-    const list = useMemo(() => mapConversations({ conversations: convsData }), [convsData]);
+  const list = useMemo(() => mapConversations({ conversations: convsData }, user?.id), [convsData, user?.id]);
     const filtered = useMemo(() => list.filter(c => !filter || (c.title?.toLowerCase().includes(filter.toLowerCase()) || c.lastMessageSnippet?.toLowerCase().includes(filter.toLowerCase()))), [list, filter]);
     const [activeId, setActiveId] = useState(null);
 
