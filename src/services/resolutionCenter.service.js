@@ -53,6 +53,11 @@ export function mapDisputeDetail(raw) {
   };
 }
 
+export async function createDispute({ subject, message, contactName, contactEmail }) {
+  const res = await axios.post(url(`/resolution-center`), { subject, message, contactName, contactEmail }, { headers: headers() });
+  return res?.data?.data ?? res?.data;
+}
+
 export async function getDisputes(status, signal) {
   const res = await axios.get(url(`/resolution-center?status=${encodeURIComponent(status || '')}`), {
     headers: headers(),
@@ -72,8 +77,7 @@ export async function postDisputeMessage(id, text) {
   return res?.data?.data ?? res?.data;
 }
 
-// Optional resolve endpoint not wired to UI yet; left for future admin tooling
 export async function resolveDispute(id, resolutionText) {
-  // To be implemented when resolve API is added
-  return null;
+  const res = await axios.put(url(`/resolution-center/${id}/resolve`), { resolution: resolutionText }, { headers: headers() });
+  return res?.data?.data ?? res?.data;
 }
