@@ -17,7 +17,7 @@ const useApi = (url, method = 'GET', body = null) => {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                        ...(localStorage.getItem('accessToken') && { 'x-autosaaz-token': localStorage.getItem('accessToken') }),
+                        ...(localStorage.getItem('accessToken') && { 'x-access-token': localStorage.getItem('accessToken') }),
                     },
                 });
                 setData(response.data);

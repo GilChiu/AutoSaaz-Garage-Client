@@ -17,7 +17,7 @@ export async function createSupportTicket(payload) {
         // Supabase gateway requires anon key
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         // Protected endpoints require app token
-        ...(accessToken ? { 'x-autosaaz-token': accessToken } : {})
+  ...(accessToken ? { 'x-access-token': accessToken } : {})
       },
       body: JSON.stringify(payload),
     });

@@ -11,7 +11,7 @@ function headers() {
   return {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-    ...(accessToken ? { 'x-autosaaz-token': accessToken } : {}),
+    ...(accessToken ? { 'x-access-token': accessToken } : {}),
   };
 }
 

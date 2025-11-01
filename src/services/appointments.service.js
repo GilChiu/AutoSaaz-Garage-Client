@@ -24,7 +24,7 @@ function getHeaders() {
     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
     'Content-Type': 'application/json',
   };
-  if (token) headers['x-autosaaz-token'] = token;
+  if (token) headers['x-access-token'] = token;
   return headers;
 }
 

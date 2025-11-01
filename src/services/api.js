@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
   // Include application access token for protected endpoints
   const accessToken = localStorage.getItem('accessToken') || localStorage.getItem('token');
   if (accessToken) {
-    config.headers['x-autosaaz-token'] = accessToken;
+    config.headers['x-access-token'] = accessToken;
   }
   config.headers['Content-Type'] = config.headers['Content-Type'] || 'application/json';
   return config;
@@ -47,7 +47,7 @@ api.interceptors.response.use(
           // Save new access token
           localStorage.setItem('accessToken', accessToken);
           // Retry original request with new app token header
-          originalRequest.headers['x-autosaaz-token'] = accessToken;
+          originalRequest.headers['x-access-token'] = accessToken;
           return api(originalRequest);
         }
       } catch (refreshError) {

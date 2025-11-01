@@ -13,7 +13,7 @@ function authHeaders(includeAppToken = false) {
   };
   if (includeAppToken) {
     const accessToken = localStorage.getItem('accessToken');
-    if (accessToken) headers['x-autosaaz-token'] = accessToken;
+    if (accessToken) headers['x-access-token'] = accessToken;
   }
   return headers;
 }
