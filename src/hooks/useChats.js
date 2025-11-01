@@ -11,8 +11,13 @@ export function useConversations({ limit = 20, offset = 0 } = {}) {
     setError(null);
     try {
       const res = await chats.listConversations({ limit, offset });
+      console.debug('[useConversations] fetched', {
+        total: res?.total ?? (res?.conversations?.length ?? 0),
+        count: res?.conversations?.length ?? 0,
+      });
       setData(res);
     } catch (e) {
+      console.error('[useConversations] error', e?.response?.status, e?.response?.data || e?.message);
       setError(e);
     } finally {
       setLoading(false);
@@ -35,8 +40,10 @@ export function useMessages(conversationId, { limit = 50, before, after } = {}) 
     setError(null);
     try {
       const res = await chats.getMessages(conversationId, { limit, before, after });
+      console.debug('[useMessages] fetched', { conversationId, count: res?.messages?.length ?? 0 });
       setMessages(res?.messages || []);
     } catch (e) {
+      console.error('[useMessages] error', e?.response?.status, e?.response?.data || e?.message);
       setError(e);
     } finally {
       setLoading(false);

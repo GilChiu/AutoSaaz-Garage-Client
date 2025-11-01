@@ -34,15 +34,19 @@ const ChatsPage = () => {
 
     useEffect(() => {
       if (!activeId && filtered.length > 0) setActiveId(filtered[0].id);
-    }, [filtered, activeId]);
+      console.debug('[ChatsPage] conversations', { total: list.length, filtered: filtered.length, activeId });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filtered, activeId, list.length]);
 
   const { messages, loading: msgLoading, refresh: refreshMsgs } = useMessages(activeId, { limit: 100 });
 
     async function onSend(payload) {
       if (!activeId) return;
+      console.debug('[ChatsPage] sending', { activeId, hasContent: !!payload?.content, hasAttachment: !!payload?.attachment_url });
       await sendApi(activeId, payload);
       await Promise.all([refreshMsgs(), refreshConvs()]);
       await markReadApi(activeId);
+      console.debug('[ChatsPage] sent + refreshed');
     }
 
     return (
