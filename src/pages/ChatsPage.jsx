@@ -76,8 +76,17 @@ const ChatsPage = () => {
                         <section className="chat-conversation" aria-label="Conversation">
                           <header className="chat-convo-header">
                             <div className="chat-convo-user">
-                              <img src={'https://ui-avatars.com/api/?background=EBEEF5&color=3C4257&name=' + encodeURIComponent('Conversation')} alt="" className="chat-avatar large" />
-                              <span className="chat-convo-name">Conversation</span>
+                              {(() => {
+                                const active = list.find(c => c.id === activeId);
+                                const title = active?.title || 'Conversation';
+                                return (
+                                  <>
+                                    {/* Keep avatar placeholder as-is (no real images wired yet) */}
+                                    <img src={'https://ui-avatars.com/api/?background=EBEEF5&color=3C4257&name=' + encodeURIComponent('CO')} alt="" className="chat-avatar large" />
+                                    <span className="chat-convo-name">{title}</span>
+                                  </>
+                                );
+                              })()}
                             </div>
                           </header>
                           <MessageList messages={messages} />
