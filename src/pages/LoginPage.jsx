@@ -116,7 +116,7 @@ const LoginPage = () => {
                             setShowPassword(true);
                         }} />
 
-                        <form onSubmit={handleSubmit} className="login-form-login-page">
+                        <form onSubmit={handleSubmit} className="login-form-login-page" autoComplete="off" noValidate>
                             <div className="form-group-login-page">
                                 <label className='email-label-login-page'>Email</label>
                                 <input
@@ -124,6 +124,8 @@ const LoginPage = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Enter Email"
+                                    autoComplete="username"
+                                    name="email"
                                     required
                                 />
                             </div>
@@ -136,6 +138,10 @@ const LoginPage = () => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter password"
+                                        autoComplete="current-password"
+                                        name="password"
+                                        data-lpignore="true"
+                                        data-1p-ignore
                                         required
                                     />
                                     <button
