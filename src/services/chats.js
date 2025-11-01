@@ -32,8 +32,12 @@ export async function listConversations({ limit = 20, offset = 0 } = {}) {
     console.error('[chats.service] GET /conversations error', e?.response?.status, e?.response?.data || e?.message);
     throw e;
   });
-  console.debug('[chats.service] /conversations response keys', Object.keys(res?.data || {}));
-  return res.data;
+  const payload = res?.data?.data ?? res?.data;
+  console.debug('[chats.service] /conversations payload shape', {
+    enveloped: !!res?.data?.data,
+    keys: Object.keys(payload || {}),
+  });
+  return payload;
 }
 
 export async function createConversation(otherUserId) {
@@ -43,7 +47,7 @@ export async function createConversation(otherUserId) {
     console.error('[chats.service] POST /conversations error', e?.response?.status, e?.response?.data || e?.message);
     throw e;
   });
-  return res.data;
+  return res?.data?.data ?? res?.data;
 }
 
 export async function getConversation(id) {
@@ -53,7 +57,7 @@ export async function getConversation(id) {
     console.error('[chats.service] GET /conversations/:id error', e?.response?.status, e?.response?.data || e?.message);
     throw e;
   });
-  return res.data;
+  return res?.data?.data ?? res?.data;
 }
 
 export async function getMessages(conversationId, { limit = 50, before, after } = {}) {
@@ -66,8 +70,9 @@ export async function getMessages(conversationId, { limit = 50, before, after } 
     console.error('[chats.service] GET /messages error', e?.response?.status, e?.response?.data || e?.message);
     throw e;
   });
-  console.debug('[chats.service] /messages count', res?.data?.messages?.length ?? 0);
-  return res.data;
+  const payload = res?.data?.data ?? res?.data;
+  console.debug('[chats.service] /messages count', payload?.messages?.length ?? 0);
+  return payload;
 }
 
 export async function sendMessage(conversationId, { content, attachment_url, message_type } = {}) {
@@ -81,7 +86,7 @@ export async function sendMessage(conversationId, { content, attachment_url, mes
     console.error('[chats.service] POST /messages error', e?.response?.status, e?.response?.data || e?.message);
     throw e;
   });
-  return res.data;
+  return res?.data?.data ?? res?.data;
 }
 
 export async function markRead(conversationId, upTo) {
