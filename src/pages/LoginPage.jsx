@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 import { autoSaazLogo, heroLogin2 } from '../assets/images';
+import DevCredentialsBanner from '../components/Auth/DevCredentialsBanner';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -107,6 +108,13 @@ const LoginPage = () => {
                         </div>
 
                         {error && <div className="error-message-login-page">{error}</div>}
+
+                        {/* Dev-only helper to speed up local testing (hidden in production) */}
+                        <DevCredentialsBanner onApply={({ email: devEmail, password: devPassword }) => {
+                            if (devEmail) setEmail(devEmail);
+                            if (devPassword) setPassword(devPassword);
+                            setShowPassword(true);
+                        }} />
 
                         <form onSubmit={handleSubmit} className="login-form-login-page">
                             <div className="form-group-login-page">
