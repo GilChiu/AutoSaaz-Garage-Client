@@ -1,9 +1,11 @@
 import { mapApiInspectionToInspection } from './mappers/inspectionMappers.js';
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
 
 /**
  * API base URL from environment
  */
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://auto-saaz-server.onrender.com/api';
+// Prefer Supabase Functions URL when available; fallback to legacy API if explicitly configured
+const API_BASE_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL || process.env.REACT_APP_API_URL || 'https://auto-saaz-server.onrender.com/api';
 
 /**
  * Gets authentication token from localStorage
@@ -19,10 +21,18 @@ function getAuthToken() {
  */
 function getHeaders() {
   const token = getAuthToken();
-  return {
-    'Authorization': token ? `Bearer ${token}` : '',
+  const headers = {
     'Content-Type': 'application/json',
   };
+  // If we're targeting Supabase Functions, include anon key + x-access-token
+  if (API_BASE_URL.includes('.functions.supabase.co')) {
+    headers['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`;
+    if (token) headers['x-access-token'] = token;
+  } else {
+    // Legacy server compatibility
+    headers['Authorization'] = token ? `Bearer ${token}` : '';
+  }
+  return headers;
 }
 
 /**
