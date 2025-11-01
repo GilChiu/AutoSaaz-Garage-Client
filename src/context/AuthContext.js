@@ -1,16 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 import DEV_CONFIG from '../config/dev';
+import { loginUser, getCurrentUser } from '../services/api';
 
 const AuthContext = createContext();
 
 export { AuthContext };
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
-
-const api = axios.create({
-  baseURL: API_URL,
-});
+// All HTTP calls for auth now routed via services/api (Supabase Functions)
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -26,17 +22,15 @@ export const AuthProvider = ({ children }) => {
                     return;
                 }
 
-                const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+                const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
                 console.log('Checking for existing token:', token ? 'Found' : 'Not found');
                 
                 if (token) {
-                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                    console.log('Validating token with backend...');
-                    
-                    const response = await api.get('/auth/me');
-                    if (response.data.success && response.data.data) {
-                        console.log('Token valid, user authenticated:', response.data.data);
-                        setUser(response.data.data);
+                    console.log('Validating token with Supabase Functions...');
+                    const response = await getCurrentUser();
+                    if (response.success && response.data?.user) {
+                        console.log('Token valid, user authenticated:', response.data.user);
+                        setUser(response.data.user);
                     } else {
                         console.log('Invalid token response, clearing auth');
                         throw new Error('Invalid user data');
@@ -53,7 +47,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
                 localStorage.removeItem('user');
-                delete api.defaults.headers.common['Authorization'];
+                // No global axios instance here; token headers handled per-request in services/api
             } finally {
                 setLoading(false);
             }
@@ -70,29 +64,15 @@ export const AuthProvider = ({ children }) => {
         }
 
         try {
-            const response = await api.post('/auth/login', credentials);
-            
-            if (response.data.success) {
-                const { accessToken, user } = response.data.data;
-                
-                // Store token
-                localStorage.setItem('token', accessToken);
-                api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-                
-                // Set user in context
+            const response = await loginUser(credentials);
+            if (response.success) {
+                const { accessToken, user } = response.data;
+                // Store token (kept for backward compatibility)
+                if (accessToken) localStorage.setItem('token', accessToken);
                 setUser(user);
-                
-                return {
-                    success: true,
-                    data: response.data.data,
-                    message: response.data.message
-                };
-            } else {
-                return {
-                    success: false,
-                    message: response.data.message || 'Login failed'
-                };
+                return { success: true, data: response.data, message: response.message };
             }
+            return { success: false, message: response.message || 'Login failed' };
         } catch (error) {
             console.error('Login error:', error);
             return {
@@ -123,9 +103,6 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.removeItem('refreshToken');
         sessionStorage.removeItem('user');
         
-        // Clear axios auth header
-        delete api.defaults.headers.common['Authorization'];
-        
         // Clear user state
         setUser(null);
         
@@ -139,42 +116,9 @@ export const AuthProvider = ({ children }) => {
             return { success: true, user: DEV_CONFIG.MOCK_USER };
         }
 
-        try {
-            // Use simple registration endpoint
-            const response = await api.post('/auth/register', {
-                fullName: userData.fullName,
-                email: userData.email,
-                phoneNumber: userData.phoneNumber
-            });
-
-            if (response.data.success) {
-                const { accessToken, user } = response.data.data;
-                
-                // Store token
-                localStorage.setItem('token', accessToken);
-                api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-                
-                // Set user in context
-                setUser(user);
-                
-                return {
-                    success: true,
-                    data: response.data.data,
-                    message: response.data.message
-                };
-            } else {
-                return {
-                    success: false,
-                    message: response.data.message || 'Registration failed'
-                };
-            }
-        } catch (error) {
-            console.error('Registration error:', error);
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Registration failed'
-            };
-        }
+        // Registration is handled via the multi-step flow using Supabase Functions.
+        // This method remains for backward compatibility but defers to the dedicated flow.
+        return { success: false, message: 'Please use the multi-step registration flow.' };
     };
 
     const loginWithToken = (accessToken, userData) => {
@@ -185,11 +129,8 @@ export const AuthProvider = ({ children }) => {
         }
 
         try {
-            // Store token
+            // Store token for legacy checks
             localStorage.setItem('token', accessToken);
-            api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-            
-            // Set user in context
             setUser(userData);
             
             console.log('✅ Auto-login successful with token');

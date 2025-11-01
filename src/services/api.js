@@ -129,6 +129,12 @@ export const logoutUser = async () => {
   }
 };
 
+// Current user (session validation)
+export const getCurrentUser = async () => {
+  const response = await api.get('/auth-me');
+  return response.data;
+};
+
 // Booking API calls
 export const createBooking = async (bookingData) => {
   const response = await api.post('/bookings', bookingData);
