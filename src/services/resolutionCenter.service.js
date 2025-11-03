@@ -20,7 +20,7 @@ export function mapDispute(raw) {
   // Map server payload to UI card structure
   return {
     id: raw.id,
-    code: raw.disputeId || raw.id,
+    code: raw.code || raw.disputeId || raw.id,
     orderId: raw.orderId || '—',
     customer: raw.customerName || raw.customerEmail || '—',
     phone: raw.customerPhone || '—',
@@ -39,7 +39,7 @@ export function mapDisputeDetail(raw) {
   if (!raw) return null;
   return {
     id: raw.id,
-    code: raw.disputeId || raw.id,
+    code: raw.code || raw.disputeId || raw.id,
     orderId: raw.orderId || '—',
     customer: raw.customerName || raw.customerEmail || '—',
     phone: raw.customerPhone || '—',
