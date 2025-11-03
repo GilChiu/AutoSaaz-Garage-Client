@@ -46,6 +46,10 @@ const InspectionDetailPage = () => {
                 // You can pass findings/recommendations/actual_cost here if a form is added later
             });
             setInspection(updated);
+            // Navigate to Completed tab to reflect the change in list view
+            setTimeout(() => {
+                navigate('/inspections/completed');
+            }, 300);
         } catch (err) {
             console.error('Error completing inspection:', err);
             // Optionally surface a toast/message here
