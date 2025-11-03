@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getInspectionById, updateInspection } from '../services/inspections.service';
+import { getInspectionById, completeInspection } from '../services/inspections.service';
 import Sidebar from '../components/Dashboard/Sidebar';
 import '../components/Dashboard/Dashboard.css';
 import './InspectionDetailPage.css';
@@ -41,11 +41,14 @@ const InspectionDetailPage = () => {
 
         try {
             setUpdating(true);
-            await updateInspection(inspection.id, { status: 'completed' });
-            setInspection(prev => ({ ...prev, status: 'completed' }));
+            // Call the dedicated complete endpoint so completed_at and other fields are set server-side
+            const updated = await completeInspection(inspection.id, {
+                // You can pass findings/recommendations/actual_cost here if a form is added later
+            });
+            setInspection(updated);
         } catch (err) {
-            console.error('Error updating inspection:', err);
-            // Show error message to user
+            console.error('Error completing inspection:', err);
+            // Optionally surface a toast/message here
         } finally {
             setUpdating(false);
         }
