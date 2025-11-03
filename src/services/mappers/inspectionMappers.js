@@ -38,6 +38,25 @@ export function mapApiInspectionToInspection(apiInspection, index = 0) {
     }
   };
 
+  // Normalize tasks to an array of displayable strings
+  const normalizeTasks = (raw) => {
+    try {
+      // If backend sent JSON string, parse it
+      const value = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      const arr = Array.isArray(value) ? value : [];
+      return arr.map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') {
+          // Prefer common keys; fallback to compact JSON
+          return item.task || item.title || item.name || JSON.stringify(item);
+        }
+        return String(item ?? '');
+      }).filter(Boolean);
+    } catch {
+      return [];
+    }
+  };
+
   return {
     // Core fields (required by UI)
     id: apiInspection.inspection_number 
@@ -49,7 +68,7 @@ export function mapApiInspectionToInspection(apiInspection, index = 0) {
     time: formatTime(apiInspection.scheduled_time),
     assignedTechnician: apiInspection.assigned_technician || 'Unassigned',
     status: mapApiStatusToUiStatus(apiInspection.status),
-    tasks: Array.isArray(apiInspection.tasks) ? apiInspection.tasks : [],
+  tasks: normalizeTasks(apiInspection.tasks),
     
     // Extended fields (for detail view)
     phone: apiInspection.customer_phone,
