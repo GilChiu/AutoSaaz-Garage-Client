@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Dashboard/Sidebar';
-import { getDisputes, mapDispute } from '../services/resolutionCenter.service';
+import { getDisputes, mapDispute, createDispute } from '../services/resolutionCenter.service';
 import '../components/Dashboard/Dashboard.css';
 import '../styles/resolution-center.css';
 
@@ -10,6 +10,10 @@ const NewDisputesPage = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [subject, setSubject] = useState('');
+  const [initialMessage, setInitialMessage] = useState('');
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -32,11 +36,17 @@ const NewDisputesPage = () => {
       <Sidebar />
       <div className="dashboard-layout-main">
         <div className="dashboard-layout-content rcfx-page">
-          {/* Removed duplicate header (UpperNavbar provides title/subtitle) */}
-          <h2 className="rcfx-section-heading">New Disputes</h2>
+          <div className="rcfx-toolbar">
+            <div className="rcfx-toolbar-left">
+              <h2 className="rcfx-section-heading" style={{ margin: 0 }}>New Disputes</h2>
+            </div>
+            <button className="rcfx-btn rcfx-btn-primary" onClick={() => setShowCreate(true)}>New Dispute</button>
+          </div>
           {error && <div className="rcfx-error" role="alert">{error}</div>}
           {loading && <div className="rcfx-loading">Loading...</div>}
-          {!loading && items.length === 0 && !error && <div className="rcfx-empty">No new disputes.</div>}
+          {!loading && items.length === 0 && !error && (
+            <div className="rcfx-empty">No new disputes. Click "New Dispute" to create one.</div>
+          )}
           <div className="rcfx-dispute-grid">
             {items.map(d => (
               <div key={d.id} className="rcfx-dispute-card">
@@ -51,6 +61,59 @@ const NewDisputesPage = () => {
               </div>
             ))}
           </div>
+          {showCreate && (
+            <div className="rcfx-modal" role="dialog" aria-modal="true" aria-labelledby="rcfx-create-title">
+              <div className="rcfx-modal-dialog">
+                <div className="rcfx-modal-header">
+                  <div id="rcfx-create-title" className="rcfx-modal-title">Create Dispute</div>
+                </div>
+                <div className="rcfx-modal-body">
+                  <label className="rcfx-label">Subject</label>
+                  <input
+                    className="rcfx-chat-input"
+                    placeholder="Short summary (e.g., Incorrect charge on invoice)"
+                    value={subject}
+                    onChange={e => setSubject(e.target.value)}
+                  />
+                  <label className="rcfx-label">Initial message (optional)</label>
+                  <textarea
+                    className="rcfx-textarea"
+                    rows={4}
+                    placeholder="Provide relevant details to help us resolve this quickly"
+                    value={initialMessage}
+                    onChange={e => setInitialMessage(e.target.value)}
+                  />
+                </div>
+                <div className="rcfx-modal-footer">
+                  <button className="rcfx-btn" onClick={() => setShowCreate(false)} disabled={creating}>Cancel</button>
+                  <button
+                    className="rcfx-btn rcfx-btn-primary"
+                    onClick={async () => {
+                      if (!subject.trim()) return;
+                      try {
+                        setCreating(true);
+                        const created = await createDispute({ subject: subject.trim(), message: initialMessage.trim() });
+                        setShowCreate(false);
+                        setSubject('');
+                        setInitialMessage('');
+                        if (created?.id) navigate(`/resolution-center/disputes/${created.id}`);
+                        else {
+                          // Fallback: reload list
+                          const data = await getDisputes('new');
+                          setItems(data.map(mapDispute));
+                        }
+                      } catch (err) {
+                        setError('Failed to create dispute');
+                      } finally {
+                        setCreating(false);
+                      }
+                    }}
+                    disabled={creating || !subject.trim()}
+                  >{creating ? 'Creating...' : 'Create Dispute'}</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

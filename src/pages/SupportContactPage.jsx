@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { createSupportTicket } from '../services/support.service';
 
 // Front-end only: prepares payload for easy API hookup later

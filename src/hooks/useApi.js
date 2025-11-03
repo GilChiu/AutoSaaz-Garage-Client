@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
 
 const useApi = (url, method = 'GET', body = null) => {
     const [data, setData] = useState(null);
@@ -11,10 +12,12 @@ const useApi = (url, method = 'GET', body = null) => {
             try {
                 const response = await axios({
                     method,
-                    url,
+                    url: url.startsWith('http') ? url : `${FUNCTIONS_URL}${url}`,
                     data: body,
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        ...(localStorage.getItem('accessToken') && { 'x-access-token': localStorage.getItem('accessToken') }),
                     },
                 });
                 setData(response.data);

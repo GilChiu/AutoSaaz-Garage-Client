@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 import { autoSaazLogo, heroLogin2 } from '../assets/images';
+import DevCredentialsBanner from '../components/Auth/DevCredentialsBanner';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -108,7 +109,14 @@ const LoginPage = () => {
 
                         {error && <div className="error-message-login-page">{error}</div>}
 
-                        <form onSubmit={handleSubmit} className="login-form-login-page">
+                        {/* Dev-only helper to speed up local testing (hidden in production) */}
+                        <DevCredentialsBanner onApply={({ email: devEmail, password: devPassword }) => {
+                            if (devEmail) setEmail(devEmail);
+                            if (devPassword) setPassword(devPassword);
+                            setShowPassword(true);
+                        }} />
+
+                        <form onSubmit={handleSubmit} className="login-form-login-page" autoComplete="off" noValidate>
                             <div className="form-group-login-page">
                                 <label className='email-label-login-page'>Email</label>
                                 <input
@@ -116,6 +124,8 @@ const LoginPage = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Enter Email"
+                                    autoComplete="username"
+                                    name="email"
                                     required
                                 />
                             </div>
@@ -128,6 +138,10 @@ const LoginPage = () => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter password"
+                                        autoComplete="current-password"
+                                        name="password"
+                                        data-lpignore="true"
+                                        data-1p-ignore
                                         required
                                     />
                                     <button

@@ -3,7 +3,17 @@
  * Handles user profile management and password operations
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://auto-saaz-server.onrender.com/api';
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+const API_BASE_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL;
+
+function headers() {
+  const accessToken = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    ...(accessToken ? { 'x-access-token': accessToken } : {}),
+  };
+}
 
 /**
  * Get user profile with additional details
@@ -12,17 +22,9 @@ export const getUserProfile = async () => {
   try {
     console.log('=== GET USER PROFILE START ===');
     
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    const response = await fetch(`${API_BASE_URL}/auth-profile`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: headers(),
     });
 
     console.log('Profile Response Status:', response.status);
@@ -53,42 +55,9 @@ export const getUserPassword = async () => {
   try {
     console.log('=== GET USER PASSWORD START ===');
     
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    if (!token) {
-      console.log('No auth token, returning default password');
-      return {
-        success: true,
-        data: { password: 'AutoSaaz2024!' },
-        message: 'Default password returned'
-      };
-    }
-
-    const response = await fetch(`${API_BASE_URL}/auth/password`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    console.log('Password Response Status:', response.status);
-    console.log('Password Response OK:', response.ok);
-
-    if (!response.ok) {
-      // If the endpoint fails, return a default password instead of throwing
-      console.log('Password endpoint failed, returning default password');
-      return {
-        success: true,
-        data: { password: 'AutoSaaz2024!' },
-        message: 'Default password returned due to API error'
-      };
-    }
-
-    const data = await response.json();
-    console.log('Password Response Data:', data);
-
-    console.log('=== GET USER PASSWORD SUCCESS ===');
-    return data;
+    // No real password endpoint on Supabase; return generated or default
+    const generated = localStorage.getItem('userGeneratedPassword');
+    return { success: true, data: { password: generated || '********' }, message: 'Password placeholder' };
   } catch (error) {
     console.error('=== GET USER PASSWORD ERROR ===');
     console.error('Error Type:', error.name);
@@ -113,17 +82,9 @@ export const updateUserProfile = async (profileData) => {
     console.log('=== UPDATE USER PROFILE START ===');
     console.log('Profile Data:', profileData);
     
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    const response = await fetch(`${API_BASE_URL}/auth-profile`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: headers(),
       body: JSON.stringify(profileData),
     });
 
@@ -155,31 +116,13 @@ export const changePassword = async (newPassword) => {
   try {
     console.log('=== CHANGE PASSWORD START ===');
     
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    const response = await fetch(`${API_BASE_URL}/auth-profile`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: headers(),
       body: JSON.stringify({ password: newPassword }),
     });
-
-    console.log('Password Change Response Status:', response.status);
-    console.log('Password Change Response OK:', response.ok);
-
-    const data = await response.json();
-    console.log('Password Change Response Data:', data);
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to change password');
-    }
-
-    console.log('=== CHANGE PASSWORD SUCCESS ===');
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || 'Failed to change password');
     return data;
   } catch (error) {
     console.error('=== CHANGE PASSWORD ERROR ===');

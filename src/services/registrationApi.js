@@ -4,7 +4,15 @@
  */
 
 // Use environment variable, fallback to default if not set
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://auto-saaz-server.onrender.com/api';
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+const API_BASE_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL;
+
+function authHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+  };
+}
 
 /**
  * Step 1: Personal Information (NO password)
@@ -13,14 +21,12 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://auto-saaz-server.
 export const registerStep1 = async (fullName, email, phoneNumber) => {
   try {
     console.log('=== STEP 1 REGISTRATION START ===');
-    console.log('API URL:', `${API_BASE_URL}/auth/register/step1`);
+  console.log('API URL:', `${API_BASE_URL}/auth-register-step1`);
     console.log('Request Data:', { fullName, email, phoneNumber });
 
-    const response = await fetch(`${API_BASE_URL}/auth/register/step1`, {
+    const response = await fetch(`${API_BASE_URL}/auth-register-step1`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
       body: JSON.stringify({
         fullName,
         email,
@@ -79,11 +85,9 @@ export const registerStep2 = async (address, street, state, location, coordinate
       throw new Error('Session expired. Please start registration again.');
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/register/step2`, {
+    const response = await fetch(`${API_BASE_URL}/auth-register-step2`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
       body: JSON.stringify({
         sessionId,
         address,
@@ -125,11 +129,9 @@ export const registerStep3 = async (companyLegalName, emiratesIdUrl, tradeLicens
       throw new Error('Session expired. Please start registration again.');
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/register/step3`, {
+    const response = await fetch(`${API_BASE_URL}/auth-register-step3`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
       body: JSON.stringify({
         sessionId,
         companyLegalName,
@@ -172,11 +174,9 @@ export const verifyRegistration = async (code) => {
       throw new Error('Session expired. Please start registration again.');
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+    const response = await fetch(`${API_BASE_URL}/auth-verify`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
       body: JSON.stringify({
         sessionId,
         code,
@@ -241,11 +241,9 @@ export const resendOTP = async () => {
       throw new Error('Session expired. Please start registration again.');
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/verify/resend`, {
+    const response = await fetch(`${API_BASE_URL}/auth-verify-resend`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders(),
       body: JSON.stringify({ sessionId }),
     });
 

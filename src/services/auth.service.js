@@ -3,7 +3,20 @@
  * Handles all authentication-related API calls
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+const API_BASE_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL;
+
+function authHeaders(includeAppToken = false) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+  };
+  if (includeAppToken) {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) headers['x-access-token'] = accessToken;
+  }
+  return headers;
+}
 
 /**
  * Makes an API request with proper error handling
@@ -15,10 +28,7 @@ async function apiRequest(endpoint, options = {}) {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers: { ...(options.headers || authHeaders()) },
     });
 
     const data = await response.json();
@@ -42,7 +52,7 @@ async function apiRequest(endpoint, options = {}) {
  * @returns {Promise<Object>} Login response with user data and tokens
  */
 export async function login(credentials) {
-  const data = await apiRequest('/auth/login', {
+  const data = await apiRequest('/auth-login', {
     method: 'POST',
     body: JSON.stringify(credentials),
   });
@@ -63,17 +73,10 @@ export async function login(credentials) {
  * @returns {Promise<void>}
  */
 export async function logout() {
-  const token = localStorage.getItem('accessToken');
-
   try {
-    await apiRequest('/auth/logout', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-  } catch (error) {
-    console.warn('Logout API call failed:', error.message);
+    // Stateless logout
+  } catch (err) {
+    console.warn('Logout handling error:', err?.message || err);
   } finally {
     // Always clear local storage
     localStorage.removeItem('accessToken');
@@ -131,17 +134,9 @@ export async function resetPassword(data) {
  * @returns {Promise<Object>}
  */
 export async function changePassword(data) {
-  const token = localStorage.getItem('accessToken');
-  
-  if (!token) {
-    throw new Error('Not authenticated');
-  }
-
   return await apiRequest('/auth/password/change', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
+    headers: authHeaders(true),
     body: JSON.stringify(data),
   });
 }
@@ -157,7 +152,7 @@ export async function refreshAccessToken() {
     throw new Error('No refresh token available');
   }
 
-  const data = await apiRequest('/auth/refresh', {
+  const data = await apiRequest('/auth-refresh', {
     method: 'POST',
     body: JSON.stringify({ refreshToken }),
   });
@@ -175,17 +170,9 @@ export async function refreshAccessToken() {
  * @returns {Promise<Object>}
  */
 export async function getCurrentUser() {
-  const token = localStorage.getItem('accessToken');
-  
-  if (!token) {
-    throw new Error('Not authenticated');
-  }
-
-  return await apiRequest('/auth/me', {
+  return await apiRequest('/auth-me', {
     method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
+    headers: authHeaders(true),
   });
 }
 

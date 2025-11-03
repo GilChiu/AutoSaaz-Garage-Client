@@ -43,6 +43,7 @@ const DisputeChatPage = () => {
     }
   };
 
+
   return (
     <div className="dashboard-layout">
       <Sidebar />
@@ -53,7 +54,7 @@ const DisputeChatPage = () => {
           {!loading && !dispute && <div className="rcfx-error">Dispute not found.</div>}
           {!loading && dispute && (
             <div className="rcfx-chat-wrapper">
-              <div className="rcfx-section-heading">Dispute Chat</div>
+              <div className="rcfx-section-heading" style={{ margin: 0 }}>Dispute Chat</div>
               <div className="rcfx-chat-box">
                 <div className="rcfx-messages" role="log" aria-live="polite">
                   {dispute.messages.map(m => (

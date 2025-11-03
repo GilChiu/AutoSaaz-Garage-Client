@@ -3,7 +3,8 @@
  * Handles appointment management with production-ready real API calls
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://auto-saaz-server.onrender.com/api';
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+const API_BASE_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL;
 
 /**
  * Gets authentication token from localStorage
@@ -19,10 +20,12 @@ function getAuthToken() {
  */
 function getHeaders() {
   const token = getAuthToken();
-  return {
-    'Authorization': token ? `Bearer ${token}` : '',
+  const headers = {
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
     'Content-Type': 'application/json',
   };
+  if (token) headers['x-access-token'] = token;
+  return headers;
 }
 
 /**

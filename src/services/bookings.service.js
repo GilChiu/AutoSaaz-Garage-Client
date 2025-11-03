@@ -1,9 +1,10 @@
 import { mapApiBookingToBooking } from './mappers/bookingMappers.js';
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
 
 /**
  * API base URL from environment
  */
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://auto-saaz-server.onrender.com/api';
+const API_BASE_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL;
 
 /**
  * Gets authentication token from localStorage
@@ -19,10 +20,12 @@ function getAuthToken() {
  */
 function getHeaders() {
   const token = getAuthToken();
-  return {
-    'Authorization': token ? `Bearer ${token}` : '',
+  const headers = {
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
     'Content-Type': 'application/json',
   };
+  if (token) headers['x-access-token'] = token;
+  return headers;
 }
 
 /**
@@ -49,7 +52,7 @@ export async function getBookings(signal, params = {}) {
     if (params.limit) queryParams.append('limit', params.limit.toString());
     
     const queryString = queryParams.toString();
-    const url = `${API_BASE_URL}/bookings${queryString ? `?${queryString}` : ''}`;
+  const url = `${API_BASE_URL}/bookings${queryString ? `?${queryString}` : ''}`;
 
     console.log('API URL:', url);
     console.log('Headers:', getHeaders());
@@ -111,7 +114,7 @@ export async function getBookingById(id, signal) {
     console.log('=== FETCHING BOOKING BY ID ===', id);
     
     const cleanId = id.replace('#', '');
-    const response = await fetch(`${API_BASE_URL}/bookings/${cleanId}`, {
+  const response = await fetch(`${API_BASE_URL}/bookings/${cleanId}`, {
       headers: getHeaders(),
       signal
     });
@@ -153,7 +156,7 @@ export async function createBooking(bookingData) {
   try {
     console.log('=== CREATING BOOKING ===', bookingData);
     
-    const response = await fetch(`${API_BASE_URL}/bookings`, {
+  const response = await fetch(`${API_BASE_URL}/bookings`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(bookingData),
@@ -187,7 +190,7 @@ export async function updateBooking(id, updates) {
     console.log('=== UPDATING BOOKING ===', id, updates);
     
     const cleanId = id.replace('#', '');
-    const response = await fetch(`${API_BASE_URL}/bookings/${cleanId}`, {
+  const response = await fetch(`${API_BASE_URL}/bookings/${cleanId}`, {
       method: 'PATCH',
       headers: getHeaders(),
       body: JSON.stringify(updates),
@@ -220,7 +223,7 @@ export async function deleteBooking(id) {
     console.log('=== DELETING BOOKING ===', id);
     
     const cleanId = id.replace('#', '');
-    const response = await fetch(`${API_BASE_URL}/bookings/${cleanId}`, {
+  const response = await fetch(`${API_BASE_URL}/bookings/${cleanId}`, {
       method: 'DELETE',
       headers: getHeaders(),
     });
@@ -247,7 +250,7 @@ export async function getDashboardStats() {
   try {
     console.log('=== FETCHING DASHBOARD STATS ===');
     
-    const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
+  const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
       headers: getHeaders(),
     });
 
@@ -274,7 +277,7 @@ export async function getBookingStats() {
   try {
     console.log('=== FETCHING BOOKING STATS ===');
     
-    const response = await fetch(`${API_BASE_URL}/dashboard/booking-stats`, {
+  const response = await fetch(`${API_BASE_URL}/dashboard/booking-stats`, {
       headers: getHeaders(),
     });
 
