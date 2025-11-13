@@ -3,6 +3,28 @@ import DEV_CONFIG from '../config/dev';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxibGNqeWVpd2d5YW5hZHNzcWFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA0NzU0MDEsImV4cCI6MjA0NjA1MTQwMX0.XF-wGXEwC7YWAn6xLfh2_Zey-Q-9Bz0jYRGCIDSlgzg';
 
 /**
+ * Gets authentication token from localStorage
+ * @returns {string|null}
+ */
+function getAuthToken() {
+  return localStorage.getItem('accessToken') || localStorage.getItem('token');
+}
+
+/**
+ * Creates headers with authentication
+ * @returns {HeadersInit}
+ */
+function getHeaders() {
+  const token = getAuthToken();
+  const headers = {
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+  };
+  if (token) headers['x-access-token'] = token;
+  return headers;
+}
+
+/**
  * Service for managing garage services
  */
 const garageServicesService = {
@@ -11,32 +33,14 @@ const garageServicesService = {
    * @returns {Promise<Array>} Array of service objects
    */
   async getGarageServices() {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    console.log('Fetching garage services with token:', token.substring(0, 20) + '...');
-
     const response = await fetch(`${DEV_CONFIG.API_BASE_URL}/garage-services`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': token
-      }
+      headers: getHeaders()
     });
 
-    console.log('Response status:', response.status);
-
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
-      try {
-        const error = JSON.parse(errorText);
-        throw new Error(error.message || 'Failed to fetch services');
-      } catch (e) {
-        throw new Error(errorText || 'Failed to fetch services');
-      }
+      const error = await response.json().catch(() => ({ message: 'Failed to fetch services' }));
+      throw new Error(error.message || 'Failed to fetch services');
     }
 
     const data = await response.json();
@@ -53,17 +57,9 @@ const garageServicesService = {
    * @returns {Promise<Object>} Created service object
    */
   async createService(serviceData) {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
     const response = await fetch(`${DEV_CONFIG.API_BASE_URL}/garage-services`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': token
-      },
+      headers: getHeaders(),
       body: JSON.stringify(serviceData)
     });
 
@@ -83,17 +79,9 @@ const garageServicesService = {
    * @returns {Promise<Object>} Updated service object
    */
   async updateService(id, serviceData) {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
     const response = await fetch(`${DEV_CONFIG.API_BASE_URL}/garage-services`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': token
-      },
+      headers: getHeaders(),
       body: JSON.stringify({ id, ...serviceData })
     });
 
@@ -114,24 +102,16 @@ const garageServicesService = {
   async deleteService(id) {
     const token = localStorage.getItem('accessToken');
     if (!token) {
-      throw new Error('No authentication token found');
-    }
-
+  /**
+   * Delete a service
+   * @param {string} id - Service ID
+   * @returns {Promise<boolean>} Success status
+   */
+  async deleteService(id) {
     const response = await fetch(`${DEV_CONFIG.API_BASE_URL}/garage-services?id=${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': token
-      }
+      headers: getHeaders()
     });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to delete service' }));
-      throw new Error(error.message || 'Failed to delete service');
-    }
-
-    return true;
-  }
 };
 
 export default garageServicesService;
