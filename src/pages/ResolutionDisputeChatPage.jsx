@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabase';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getDisputeById, mapDisputeDetail, postDisputeMessage } from '../services/resolutionCenter.service';
 import '../components/Dashboard/Dashboard.css';
 import '../styles/resolution-center.css';
 
-const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_ANON_KEY
-);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DisputeChatPage = () => {
   const { id } = useParams();
