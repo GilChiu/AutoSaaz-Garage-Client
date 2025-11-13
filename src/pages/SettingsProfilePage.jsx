@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getGarageProfile, updateGarageProfile } from '../services/profile.service';
+import { getGarageProfile, updateGarageProfile, uploadProfileLogo } from '../services/profile.service';
 import Sidebar from '../components/Dashboard/Sidebar';
 import '../components/Dashboard/Dashboard.css';
 import './SettingsProfile.css';
@@ -10,14 +10,15 @@ const SettingsProfilePage = () => {
     description: '',
     location: '',
     workingHours: '',
-    offDays: '',
-    logoUrl: ''
+    offDays: ''
   });
-  const [logo, setLogo] = useState(null); // Preview URL
+  const [logo, setLogo] = useState(null); // Current logo URL
+  const [logoFile, setLogoFile] = useState(null); // Selected file for upload
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const fileInputRef = useRef(null);
 
   // Load profile data on component mount
@@ -41,8 +42,7 @@ const SettingsProfilePage = () => {
           description: profileData.description || '',
           location: profileData.location || '',
           workingHours: profileData.workingHours || '',
-          offDays: profileData.offDays || '',
-          logoUrl: profileData.logoUrl || ''
+          offDays: profileData.offDays || ''
         });
 
         // Set logo preview if available
@@ -63,11 +63,6 @@ const SettingsProfilePage = () => {
     setProfile(p => ({ ...p, [name]: value }));
     setSaved(false);
     setError('');
-    
-    // Update logo preview when logoUrl changes
-    if (name === 'logoUrl') {
-      setLogo(value || null);
-    }
   };
 
   const handleLogoClick = () => fileInputRef.current?.click();
@@ -75,15 +70,31 @@ const SettingsProfilePage = () => {
   const handleLogoChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Create local preview only - user will need to upload separately and paste URL
+      // Validate file type before preview
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Invalid file type. Please upload an image (JPEG, PNG, GIF, or WebP).');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        setError('File size too large. Maximum size is 5MB.');
+        return;
+      }
+
+      // Store file for upload
+      setLogoFile(file);
+      
+      // Create preview
       const reader = new FileReader();
       reader.onload = ev => { 
         setLogo(ev.target?.result);
-        // Show message about manual upload
-        setError('Please upload this image to your preferred hosting service (e.g., Imgur, Cloudinary) and paste the URL in the Logo URL field below.');
       };
       reader.readAsDataURL(file);
       setSaved(false);
+      setError('');
     }
   };
 
@@ -93,14 +104,25 @@ const SettingsProfilePage = () => {
     setError('');
     
     try {
-      // Update profile with all fields including logoUrl
+      let logoUrl = logo; // Keep existing logo URL
+      
+      // Upload new logo if file was selected
+      if (logoFile) {
+        setUploadingLogo(true);
+        console.log('Uploading new logo...');
+        logoUrl = await uploadProfileLogo(logoFile);
+        console.log('Logo uploaded successfully:', logoUrl);
+        setUploadingLogo(false);
+      }
+
+      // Update profile with all fields
       const updateData = {
         garageName: profile.garageName,
         description: profile.description,
         location: profile.location,
         workingHours: profile.workingHours,
         offDays: profile.offDays,
-        logoUrl: profile.logoUrl || null,
+        logoUrl: logoUrl || null,
       };
 
       console.log('Updating profile with data:', updateData);
@@ -109,10 +131,16 @@ const SettingsProfilePage = () => {
       
       if (response.success) {
         setSaved(true);
+        setLogoFile(null); // Clear selected file
         
-        // Update logo preview with saved URL
+        // Update logo with saved URL
         if (response.data?.profile?.logoUrl) {
           setLogo(response.data.profile.logoUrl);
+        }
+        
+        // Clear file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
         }
         
         // Clear success message after 3 seconds
@@ -127,6 +155,7 @@ const SettingsProfilePage = () => {
       setError(err.message || 'Failed to save profile. Please try again.');
     } finally {
       setSaving(false);
+      setUploadingLogo(false);
     }
   };
 
@@ -174,6 +203,11 @@ const SettingsProfilePage = () => {
                       </div>
                     </button>
                     <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleLogoChange} />
+                    {logoFile && (
+                      <small style={{ color: '#666', fontSize: '12px', marginTop: '8px', display: 'block' }}>
+                        Selected: {logoFile.name} ({(logoFile.size / 1024).toFixed(1)} KB)
+                      </small>
+                    )}
                   </div>
                   <div className="profile-fields">
                     <label className="settings-field full">
@@ -184,19 +218,6 @@ const SettingsProfilePage = () => {
                         onChange={handleChange} 
                         placeholder="Enter your garage name" 
                       />
-                    </label>
-                    <label className="settings-field full">
-                      <span className="settings-label">Logo URL (Optional)</span>
-                      <input 
-                        name="logoUrl" 
-                        value={profile.logoUrl} 
-                        onChange={handleChange} 
-                        placeholder="https://example.com/your-logo.jpg" 
-                        type="url"
-                      />
-                      <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                        Upload your logo to a hosting service (e.g., Imgur, Cloudinary) and paste the URL here
-                      </small>
                     </label>
                     <label className="settings-field full">
                       <span className="settings-label">Description</span>
@@ -239,8 +260,8 @@ const SettingsProfilePage = () => {
                     </div>
                   </div>
                   <div className="settings-actions profile-actions">
-                    <button type="submit" className="settings-primary-btn" disabled={saving}>
-                      {saving ? 'Saving...' : 'Save Details'}
+                    <button type="submit" className="settings-primary-btn" disabled={saving || uploadingLogo}>
+                      {uploadingLogo ? 'Uploading Logo...' : saving ? 'Saving...' : 'Save Details'}
                     </button>
                     {saved && <span className="settings-save-indicator" role="status">Saved</span>}
                   </div>

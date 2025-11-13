@@ -1,4 +1,24 @@
-import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY, SUPABASE_URL } from '../config/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+/**
+ * Get authenticated Supabase client
+ * @returns {Object} Supabase client instance
+ */
+const getSupabaseClient = () => {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+  // Set the auth token if available
+  if (token) {
+    client.auth.setSession({
+      access_token: token,
+      refresh_token: token
+    });
+  }
+  
+  return client;
+};
 
 /**
  * Get garage profile settings
@@ -81,9 +101,9 @@ export const updateGarageProfile = async (profileData) => {
 };
 
 /**
- * Upload profile logo to storage
+ * Upload profile logo to Supabase Storage
  * @param {File} file - Image file to upload
- * @returns {Promise<string>} URL of uploaded logo
+ * @returns {Promise<string>} Public URL of uploaded logo
  */
 export const uploadProfileLogo = async (file) => {
   try {
@@ -105,30 +125,44 @@ export const uploadProfileLogo = async (file) => {
       throw new Error('File size too large. Maximum size is 5MB.');
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', 'logo');
+    console.log('Uploading logo file to Supabase Storage:', file.name, file.type, file.size);
 
-    console.log('Uploading logo file:', file.name, file.type, file.size);
-
-    const response = await fetch(`${FUNCTIONS_URL}/upload`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'x-access-token': token,
-      },
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to upload logo');
+    const supabase = getSupabaseClient();
+    
+    // Get user profile to use user_id in file path
+    const profile = JSON.parse(localStorage.getItem('profile') || '{}');
+    const userId = profile.user_id || profile.userId;
+    
+    if (!userId) {
+      throw new Error('User ID not found. Please log in again.');
     }
 
-    console.log('Logo uploaded successfully:', data.data.url);
+    // Generate unique file name
+    const fileExt = file.name.split('.').pop();
+    const fileName = `logo_${Date.now()}.${fileExt}`;
+    const filePath = `${userId}/${fileName}`;
 
-    return data.data.url;
+    // Upload to garage-logos bucket
+    const { error: uploadError } = await supabase.storage
+      .from('garage-logos')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError);
+      throw new Error(uploadError.message || 'Failed to upload logo');
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('garage-logos')
+      .getPublicUrl(filePath);
+
+    console.log('Logo uploaded successfully:', publicUrl);
+
+    return publicUrl;
   } catch (error) {
     console.error('Error uploading profile logo:', error);
     throw error;
