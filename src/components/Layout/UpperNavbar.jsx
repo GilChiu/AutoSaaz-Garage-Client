@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import NotificationDropdown from '../common/NotificationDropdown';
 // Dev auth toggle removed per request
 
 // UpperNavbar: persistent top bar with dynamic page title/description and quick actions
@@ -91,11 +92,7 @@ const UpperNavbar = () => {
         </div>
         <div className="header-actions">
           {/* Notification */}
-          <button className="notification-btn" aria-label="Notifications">
-            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M18.7497 22.5V23.4375C18.7497 24.4321 18.3546 25.3859 17.6513 26.0891C16.9481 26.7924 15.9942 27.1875 14.9997 27.1875C14.0051 27.1875 13.0513 26.7924 12.348 26.0891C11.6448 25.3859 11.2497 24.4321 11.2497 23.4375V22.5M25.0591 20.5916C23.5544 18.75 22.4921 17.8125 22.4921 12.7354C22.4921 8.08594 20.1178 6.42949 18.1637 5.625C17.9042 5.51836 17.6598 5.27344 17.5807 5.00684C17.238 3.84023 16.277 2.8125 14.9997 2.8125C13.7223 2.8125 12.7608 3.84082 12.4216 5.00801C12.3425 5.27754 12.0981 5.51836 11.8385 5.625C9.8821 6.43066 7.51023 8.08125 7.51023 12.7354C7.5073 17.8125 6.44499 18.75 4.9403 20.5916C4.31687 21.3545 4.86296 22.5 5.95339 22.5H24.0518C25.1364 22.5 25.679 21.351 25.0591 20.5916Z" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+          <NotificationDropdown />
           <button 
             className="settings-btn" 
             aria-label="Settings"
