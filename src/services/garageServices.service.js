@@ -11,7 +11,7 @@ const garageServicesService = {
    * @returns {Promise<Array>} Array of service objects
    */
   async getGarageServices() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       throw new Error('No authentication token found');
     }
@@ -20,8 +20,8 @@ const garageServicesService = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': token,
-        'apikey': SUPABASE_ANON_KEY
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'x-access-token': token
       }
     });
 
@@ -44,7 +44,7 @@ const garageServicesService = {
    * @returns {Promise<Object>} Created service object
    */
   async createService(serviceData) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       throw new Error('No authentication token found');
     }
@@ -53,8 +53,8 @@ const garageServicesService = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': token,
-        'apikey': SUPABASE_ANON_KEY
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'x-access-token': token
       },
       body: JSON.stringify(serviceData)
     });
@@ -75,7 +75,7 @@ const garageServicesService = {
    * @returns {Promise<Object>} Updated service object
    */
   async updateService(id, serviceData) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       throw new Error('No authentication token found');
     }
@@ -84,8 +84,8 @@ const garageServicesService = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': token,
-        'apikey': SUPABASE_ANON_KEY
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'x-access-token': token
       },
       body: JSON.stringify({ id, ...serviceData })
     });
@@ -105,7 +105,7 @@ const garageServicesService = {
    * @returns {Promise<boolean>} Success status
    */
   async deleteService(id) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       throw new Error('No authentication token found');
     }
@@ -114,8 +114,8 @@ const garageServicesService = {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': token,
-        'apikey': SUPABASE_ANON_KEY
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'x-access-token': token
       }
     });
 
