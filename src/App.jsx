@@ -26,6 +26,7 @@ import SettingsProfilePage from './pages/SettingsProfilePage';
 import SettingsServiceManagementPage from './pages/SettingsServiceManagementPage';
 import SettingsAccountPage from './pages/SettingsAccountPage';
 import SupportContactPage from './pages/SupportContactPage';
+import SupportChatPage from './pages/SupportChatPage';
 import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -117,7 +118,9 @@ const App = () => {
               <Route path="/settings/profile" element={<ProtectedRoute><SettingsProfilePage /></ProtectedRoute>} />
               <Route path="/settings/services" element={<ProtectedRoute><SettingsServiceManagementPage /></ProtectedRoute>} />   
               <Route path="/settings/account" element={<ProtectedRoute><SettingsAccountPage /></ProtectedRoute>} />
+              <Route path="/support" element={<ProtectedRoute><SupportContactPage /></ProtectedRoute>} />
               <Route path="/support/contact" element={<ProtectedRoute><SupportContactPage /></ProtectedRoute>} />
+              <Route path="/support/chat/:id" element={<ProtectedRoute><SupportChatPage /></ProtectedRoute>} />
             </Routes>
           </Layout>
         </Router>
