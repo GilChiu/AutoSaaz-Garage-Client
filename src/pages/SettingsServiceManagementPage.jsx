@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Dashboard/Sidebar';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import garageServicesService from '../services/garageServices.service';
 import '../components/Dashboard/Dashboard.css';
 import './SettingsServiceManagement.css';
@@ -13,6 +14,7 @@ const SettingsServiceManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, serviceId: null, serviceName: '' });
 
   // Fetch services on mount
   useEffect(() => {
@@ -77,8 +79,6 @@ const SettingsServiceManagementPage = () => {
   };
 
   const remove = async (id) => {
-    if (!window.confirm('Delete this service?')) return;
-
     try {
       setSaving(true);
       setError(null);
@@ -90,6 +90,20 @@ const SettingsServiceManagementPage = () => {
       setError(err.message || 'Failed to delete service');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const openDeleteDialog = (id, name) => {
+    setDeleteDialog({ isOpen: true, serviceId: id, serviceName: name });
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialog({ isOpen: false, serviceId: null, serviceName: '' });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteDialog.serviceId) {
+      remove(deleteDialog.serviceId);
     }
   };
 
@@ -110,6 +124,17 @@ const SettingsServiceManagementPage = () => {
                   {error}
                 </div>
               )}
+
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={closeDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        title="Delete Service"
+        message={`Are you sure you want to delete "${deleteDialog.serviceName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
 
               {loading && mode === 'list' ? (
                 <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
@@ -218,7 +243,7 @@ const SettingsServiceManagementPage = () => {
                       <button 
                         type="button" 
                         className="settings-danger-btn" 
-                        onClick={() => remove(form.id)}
+                        onClick={() => openDeleteDialog(form.id, form.name)}
                         disabled={saving}
                       >
                         Delete Service
