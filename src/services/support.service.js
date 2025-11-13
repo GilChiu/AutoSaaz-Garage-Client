@@ -109,9 +109,14 @@ export async function getTicketDetail(ticketId) {
 export async function addTicketMessage(ticketId, message) {
   try {
     const profileData = localStorage.getItem('profile');
+    console.log('Raw profile data from localStorage:', profileData);
+    
     const profile = profileData ? JSON.parse(profileData) : null;
+    console.log('Parsed profile:', profile);
+    console.log('Profile ID:', profile?.id);
 
     if (!profile?.id) {
+      console.error('Profile data missing or invalid:', { profileData, profile });
       throw new Error('Profile ID not found. Please log in again.');
     }
 
