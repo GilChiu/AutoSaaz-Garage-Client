@@ -2,21 +2,12 @@ import { FUNCTIONS_URL, SUPABASE_ANON_KEY, SUPABASE_URL } from '../config/supaba
 import { createClient } from '@supabase/supabase-js';
 
 /**
- * Get authenticated Supabase client
+ * Get Supabase client for storage operations
+ * Uses anon key only - no session required
  * @returns {Object} Supabase client instance
  */
 const getSupabaseClient = () => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  
-  // Set the auth token if available
-  if (token) {
-    client.auth.setSession({
-      access_token: token,
-      refresh_token: token
-    });
-  }
-  
   return client;
 };
 
