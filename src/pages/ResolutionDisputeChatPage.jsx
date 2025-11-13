@@ -155,8 +155,10 @@ const DisputeChatPage = () => {
                           </div>
                         )}
                         {isEscalationNotice && (
-                          <div className="rcfx-escalation-badge">
-                            ⚠️ Case Escalated - Urgent Attention Required
+                          <div className="rcfx-escalation-header">
+                            <div className="rcfx-escalation-badge">
+                              ⚠️ Admin Escalated this case
+                            </div>
                           </div>
                         )}
                         <div className="rcfx-msg-text">{m.text}</div>
