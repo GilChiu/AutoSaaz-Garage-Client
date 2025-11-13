@@ -17,14 +17,14 @@ function getHeaders() {
 export async function createSupportTicket(payload) {
   // Contract: { contactName, contactEmail, contactPhone, subject, message, source }
   try {
-    const userData = localStorage.getItem('user');
-    const user = userData ? JSON.parse(userData) : null;
+    const profileData = localStorage.getItem('profile');
+    const profile = profileData ? JSON.parse(profileData) : null;
 
     const res = await fetch(`${API_BASE_URL}/support-tickets`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({
-        senderId: user?.id || null,
+        senderId: profile?.id || null,
         senderType: 'garage',
         contactName: payload.contactName,
         contactEmail: payload.contactEmail,
@@ -51,12 +51,12 @@ export async function createSupportTicket(payload) {
 // Get list of support tickets for the garage
 export async function getGarageTickets(status = null) {
   try {
-    const userData = localStorage.getItem('user');
-    const user = userData ? JSON.parse(userData) : null;
+    const profileData = localStorage.getItem('profile');
+    const profile = profileData ? JSON.parse(profileData) : null;
 
     let url = `${API_BASE_URL}/support-tickets?senderType=garage`;
-    if (user?.id) {
-      url += `&senderId=${user.id}`;
+    if (profile?.id) {
+      url += `&senderId=${profile.id}`;
     }
     if (status) {
       url += `&status=${status}`;
@@ -99,15 +99,15 @@ export async function getTicketDetail(ticketId) {
 // Add message to ticket
 export async function addTicketMessage(ticketId, message) {
   try {
-    const userData = localStorage.getItem('user');
-    const user = userData ? JSON.parse(userData) : null;
+    const profileData = localStorage.getItem('profile');
+    const profile = profileData ? JSON.parse(profileData) : null;
 
     const res = await fetch(`${API_BASE_URL}/support-tickets/${ticketId}`, {
       method: 'PATCH',
       headers: getHeaders(),
       body: JSON.stringify({
         action: 'add_message',
-        senderId: user?.id,
+        senderId: profile?.id,
         senderType: 'garage',
         message: message
       })
