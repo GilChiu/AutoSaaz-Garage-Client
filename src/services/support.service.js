@@ -17,7 +17,7 @@ function getHeaders() {
 export async function createSupportTicket(payload) {
   // Contract: { contactName, contactEmail, contactPhone, subject, message, source }
   try {
-    const userData = localStorage.getItem('userData');
+    const userData = localStorage.getItem('user');
     const user = userData ? JSON.parse(userData) : null;
 
     const res = await fetch(`${API_BASE_URL}/support-tickets`, {
@@ -51,7 +51,7 @@ export async function createSupportTicket(payload) {
 // Get list of support tickets for the garage
 export async function getGarageTickets(status = null) {
   try {
-    const userData = localStorage.getItem('userData');
+    const userData = localStorage.getItem('user');
     const user = userData ? JSON.parse(userData) : null;
 
     let url = `${API_BASE_URL}/support-tickets?senderType=garage`;
@@ -99,7 +99,7 @@ export async function getTicketDetail(ticketId) {
 // Add message to ticket
 export async function addTicketMessage(ticketId, message) {
   try {
-    const userData = localStorage.getItem('userData');
+    const userData = localStorage.getItem('user');
     const user = userData ? JSON.parse(userData) : null;
 
     const res = await fetch(`${API_BASE_URL}/support-tickets/${ticketId}`, {
