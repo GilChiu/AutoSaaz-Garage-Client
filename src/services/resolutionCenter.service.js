@@ -51,13 +51,13 @@ export function mapDisputeDetail(raw) {
     resolvedAt: raw.resolvedAt || null,
     messages: (raw.messages || []).map(m => ({
       id: m.id,
-      from: m.from,
-      text: m.text,
-      ts: m.ts,
-      attachmentUrl: m.attachmentUrl,
-      attachmentType: m.attachmentType,
-      attachmentName: m.attachmentName,
-      isEvidenceRequest: m.isEvidenceRequest
+      from: m.senderType?.toLowerCase() || m.from || 'user', // Map senderType to from (admin/user)
+      text: m.body || m.text, // Backend sends 'body', UI expects 'text'
+      ts: m.createdAt || m.ts,
+      attachmentUrl: m.attachmentUrl || m.attachment_url,
+      attachmentType: m.attachmentType || m.attachment_type,
+      attachmentName: m.attachmentName || m.attachment_name,
+      isEvidenceRequest: m.isEvidenceRequest || m.is_evidence_request || false
     })),
   };
 }
