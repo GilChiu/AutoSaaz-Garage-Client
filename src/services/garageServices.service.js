@@ -16,6 +16,8 @@ const garageServicesService = {
       throw new Error('No authentication token found');
     }
 
+    console.log('Fetching garage services with token:', token.substring(0, 20) + '...');
+
     const response = await fetch(`${DEV_CONFIG.API_BASE_URL}/garage-services`, {
       method: 'GET',
       headers: {
@@ -25,9 +27,17 @@ const garageServicesService = {
       }
     });
 
+    console.log('Response status:', response.status);
+
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to fetch services' }));
-      throw new Error(error.message || 'Failed to fetch services');
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      try {
+        const error = JSON.parse(errorText);
+        throw new Error(error.message || 'Failed to fetch services');
+      } catch (e) {
+        throw new Error(errorText || 'Failed to fetch services');
+      }
     }
 
     const data = await response.json();
