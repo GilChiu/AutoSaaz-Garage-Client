@@ -18,14 +18,22 @@ export async function createSupportTicket(payload) {
   // Contract: { contactName, contactEmail, contactPhone, subject, message, source }
   try {
     const profileData = localStorage.getItem('profile');
+    console.log('Raw profile data from localStorage:', profileData);
+    
     const profile = profileData ? JSON.parse(profileData) : null;
+    console.log('Parsed profile:', profile);
 
-    if (!profile?.id) {
-      throw new Error('Profile ID not found. Please log in again.');
+    // Use user_id from profile (which is the foreign key to users table)
+    const senderId = profile?.user_id || profile?.userId || null;
+    console.log('Sender ID (user_id):', senderId);
+
+    if (!senderId) {
+      console.error('Profile data missing or invalid:', { profileData, profile });
+      throw new Error('User ID not found in profile. Please log in again.');
     }
 
     const requestPayload = {
-      senderId: profile.id,
+      senderId: senderId,
       senderType: 'garage',
       contactName: payload.contactName,
       contactEmail: payload.contactEmail,
@@ -63,9 +71,12 @@ export async function getGarageTickets(status = null) {
     const profileData = localStorage.getItem('profile');
     const profile = profileData ? JSON.parse(profileData) : null;
 
+    // Use user_id from profile
+    const senderId = profile?.user_id || profile?.userId || null;
+
     let url = `${API_BASE_URL}/support-tickets?senderType=garage`;
-    if (profile?.id) {
-      url += `&senderId=${profile.id}`;
+    if (senderId) {
+      url += `&senderId=${senderId}`;
     }
     if (status) {
       url += `&status=${status}`;
@@ -113,16 +124,19 @@ export async function addTicketMessage(ticketId, message) {
     
     const profile = profileData ? JSON.parse(profileData) : null;
     console.log('Parsed profile:', profile);
-    console.log('Profile ID:', profile?.id);
+    
+    // Use user_id from profile (which is the foreign key to users table)
+    const senderId = profile?.user_id || profile?.userId || null;
+    console.log('Sender ID (user_id):', senderId);
 
-    if (!profile?.id) {
+    if (!senderId) {
       console.error('Profile data missing or invalid:', { profileData, profile });
-      throw new Error('Profile ID not found. Please log in again.');
+      throw new Error('User ID not found in profile. Please log in again.');
     }
 
     const payload = {
       action: 'add_message',
-      senderId: profile.id,
+      senderId: senderId,
       senderType: 'garage',
       message: message
     };
