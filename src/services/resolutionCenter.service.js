@@ -53,8 +53,10 @@ export function mapDisputeDetail(raw) {
   };
 }
 
-export async function createDispute({ subject, message, contactName, contactEmail }) {
-  const res = await axios.post(url(`/resolution-center`), { subject, message, contactName, contactEmail }, { headers: headers() });
+export async function createDispute({ subject, message, contactName, contactEmail, bookingId }) {
+  const payload = { subject, message, contactName, contactEmail };
+  if (bookingId) payload.bookingId = bookingId;
+  const res = await axios.post(url(`/resolution-center`), payload, { headers: headers() });
   return res?.data?.data ?? res?.data;
 }
 
