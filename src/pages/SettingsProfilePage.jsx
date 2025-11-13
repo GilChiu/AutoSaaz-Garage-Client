@@ -138,6 +138,20 @@ const SettingsProfilePage = () => {
           setLogo(response.data.profile.logoUrl);
         }
         
+        // Update localStorage with new profile data
+        if (response.data?.profile) {
+          const existingProfile = JSON.parse(localStorage.getItem('profile') || '{}');
+          const updatedProfile = {
+            ...existingProfile,
+            ...response.data.profile
+          };
+          localStorage.setItem('profile', JSON.stringify(updatedProfile));
+          console.log('✅ Profile updated in localStorage:', updatedProfile);
+          
+          // Trigger storage event for other components (like UpperNavbar) to refresh
+          window.dispatchEvent(new Event('storage'));
+        }
+        
         // Clear file input
         if (fileInputRef.current) {
           fileInputRef.current.value = '';

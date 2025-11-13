@@ -14,15 +14,32 @@ const UpperNavbar = () => {
 
   // Load profile from localStorage to get logo
   useEffect(() => {
-    const storedProfile = localStorage.getItem('profile');
-    if (storedProfile) {
-      try {
-        const parsedProfile = JSON.parse(storedProfile);
-        setProfile(parsedProfile);
-      } catch (error) {
-        console.error('Failed to parse profile from localStorage:', error);
+    const loadProfile = () => {
+      const storedProfile = localStorage.getItem('profile');
+      if (storedProfile) {
+        try {
+          const parsedProfile = JSON.parse(storedProfile);
+          setProfile(parsedProfile);
+        } catch (error) {
+          console.error('Failed to parse profile from localStorage:', error);
+        }
       }
-    }
+    };
+
+    // Load profile initially
+    loadProfile();
+
+    // Listen for storage events (when profile is updated)
+    const handleStorageChange = () => {
+      loadProfile();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup listener on unmount
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Derive title/subtitle
