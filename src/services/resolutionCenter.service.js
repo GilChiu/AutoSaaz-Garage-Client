@@ -18,6 +18,7 @@ function url(path) {
 
 export function mapDispute(raw) {
   // Map server payload to UI card structure
+  console.log('[mapDispute] Mapping dispute:', raw?.id, raw?.code);
   return {
     id: raw.id,
     code: raw.code || raw.disputeId || raw.id,
@@ -70,16 +71,23 @@ export async function createDispute({ subject, message, contactName, contactEmai
 }
 
 export async function getDisputes(status, signal) {
+  console.log('[getDisputes] Fetching disputes with status:', status);
   const res = await axios.get(url(`/resolution-center?status=${encodeURIComponent(status || '')}`), {
     headers: headers(),
     signal,
   });
+  console.log('[getDisputes] Full response:', res?.data);
   const payload = res?.data?.data ?? res?.data;
+  console.log('[getDisputes] Extracted payload:', payload);
   // Backend returns { disputes: [...], total, page, limit }
   if (payload?.disputes && Array.isArray(payload.disputes)) {
+    console.log('[getDisputes] Returning disputes array, count:', payload.disputes.length);
+    console.log('[getDisputes] Total from API:', payload.total);
     return payload.disputes;
   }
-  return Array.isArray(payload) ? payload : [];
+  const result = Array.isArray(payload) ? payload : [];
+  console.log('[getDisputes] Fallback return, count:', result.length);
+  return result;
 }
 
 export async function getDisputeById(id, signal) {
