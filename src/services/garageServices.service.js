@@ -42,8 +42,8 @@ const garageServicesService = {
       throw new Error(error.message || 'Failed to fetch services');
     }
 
-    const data = await response.json();
-    return data.services || [];
+    const result = await response.json();
+    return result.data?.services || [];
   },
 
   /**
@@ -67,8 +67,8 @@ const garageServicesService = {
       throw new Error(error.message || 'Failed to create service');
     }
 
-    const data = await response.json();
-    return data.service;
+    const result = await response.json();
+    return result.data?.service;
   },
 
   /**
@@ -89,8 +89,8 @@ const garageServicesService = {
       throw new Error(error.message || 'Failed to update service');
     }
 
-    const data = await response.json();
-    return data.service;
+    const result = await response.json();
+    return result.data?.service;
   },
 
   /**
