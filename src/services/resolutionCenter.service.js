@@ -58,7 +58,8 @@ export function mapDisputeDetail(raw) {
       attachmentUrl: m.attachmentUrl || m.attachment_url,
       attachmentType: m.attachmentType || m.attachment_type,
       attachmentName: m.attachmentName || m.attachment_name,
-      isEvidenceRequest: m.isEvidenceRequest || m.is_evidence_request || false
+      isEvidenceRequest: m.isEvidenceRequest || m.is_evidence_request || false,
+      isEscalationNotice: m.isEscalationNotice || m.is_escalation_notice || false
     })),
   };
 }

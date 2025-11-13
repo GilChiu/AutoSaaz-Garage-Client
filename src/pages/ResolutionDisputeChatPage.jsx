@@ -143,11 +143,20 @@ const DisputeChatPage = () => {
                 <div className="rcfx-messages" role="log" aria-live="polite">
                   {dispute.messages.map(m => {
                     const isEvidenceRequest = m.isEvidenceRequest;
+                    const isEscalationNotice = m.isEscalationNotice;
                     return (
-                      <div key={m.id} className={`rcfx-msg rcfx-msg-${m.from} ${isEvidenceRequest ? 'rcfx-evidence-request' : ''}`}> 
+                      <div 
+                        key={m.id} 
+                        className={`rcfx-msg rcfx-msg-${m.from} ${isEvidenceRequest ? 'rcfx-evidence-request' : ''} ${isEscalationNotice ? 'rcfx-escalation-notice' : ''}`}
+                      > 
                         {isEvidenceRequest && (
                           <div className="rcfx-evidence-badge">
                             Evidence Request - Please upload supporting documents
+                          </div>
+                        )}
+                        {isEscalationNotice && (
+                          <div className="rcfx-escalation-badge">
+                            ⚠️ Case Escalated - Urgent Attention Required
                           </div>
                         )}
                         <div className="rcfx-msg-text">{m.text}</div>
