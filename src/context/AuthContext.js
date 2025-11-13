@@ -66,9 +66,23 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await loginUser(credentials);
             if (response.success) {
-                const { accessToken, user } = response.data;
-                // Store token (kept for backward compatibility)
-                if (accessToken) localStorage.setItem('token', accessToken);
+                const { accessToken, refreshToken, user, profile } = response.data;
+                // Store tokens
+                if (accessToken) {
+                    localStorage.setItem('token', accessToken);
+                    localStorage.setItem('accessToken', accessToken);
+                }
+                if (refreshToken) {
+                    localStorage.setItem('refreshToken', refreshToken);
+                }
+                // Store user and profile data
+                if (user) {
+                    localStorage.setItem('user', JSON.stringify(user));
+                }
+                if (profile) {
+                    localStorage.setItem('profile', JSON.stringify(profile));
+                    console.log('✅ Profile saved to localStorage:', profile);
+                }
                 setUser(user);
                 return { success: true, data: response.data, message: response.message };
             }
@@ -91,17 +105,19 @@ export const AuthProvider = ({ children }) => {
             return;
         }
 
-        // Clear all possible auth tokens
+        // Clear all possible auth tokens and data
         localStorage.removeItem('token');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
+        localStorage.removeItem('profile');
         
         // Clear session storage as well
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('accessToken');
         sessionStorage.removeItem('refreshToken');
         sessionStorage.removeItem('user');
+        sessionStorage.removeItem('profile');
         
         // Clear user state
         setUser(null);
