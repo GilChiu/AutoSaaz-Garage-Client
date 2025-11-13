@@ -75,6 +75,10 @@ export async function getDisputes(status, signal) {
     signal,
   });
   const payload = res?.data?.data ?? res?.data;
+  // Backend returns { disputes: [...], total, page, limit }
+  if (payload?.disputes && Array.isArray(payload.disputes)) {
+    return payload.disputes;
+  }
   return Array.isArray(payload) ? payload : [];
 }
 
