@@ -100,18 +100,18 @@ const garageServicesService = {
    * @returns {Promise<boolean>} Success status
    */
   async deleteService(id) {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-  /**
-   * Delete a service
-   * @param {string} id - Service ID
-   * @returns {Promise<boolean>} Success status
-   */
-  async deleteService(id) {
     const response = await fetch(`${DEV_CONFIG.API_BASE_URL}/garage-services?id=${id}`, {
       method: 'DELETE',
       headers: getHeaders()
     });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to delete service' }));
+      throw new Error(error.message || 'Failed to delete service');
+    }
+
+    return true;
+  }
 };
 
 export default garageServicesService;
