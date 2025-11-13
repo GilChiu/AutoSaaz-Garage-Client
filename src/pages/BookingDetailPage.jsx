@@ -15,6 +15,13 @@ const BookingDetailPage = () => {
     const [error, setError] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
+    const [updateForm, setUpdateForm] = useState({
+        status: '',
+        scheduledTime: '',
+        notes: '',
+        internalNotes: ''
+    });
     const [notification, setNotification] = useState({
         isVisible: false,
         message: '',
@@ -30,6 +37,16 @@ const BookingDetailPage = () => {
                 setError(null);
                 const data = await getBookingById(id, controller.signal);
                 setBooking(data);
+                
+                // Initialize form with booking data
+                if (data) {
+                    setUpdateForm({
+                        status: data.status || '',
+                        scheduledTime: data.scheduledTime || '',
+                        notes: data.notes || '',
+                        internalNotes: data.internalNotes || ''
+                    });
+                }
             } catch (err) {
                 if (err.name !== 'AbortError') {
                     setError(err.message || 'Failed to load booking');
@@ -88,16 +105,69 @@ const BookingDetailPage = () => {
         }));
     };
 
-    const handleUpdateBooking = async () => {
+    const handleUpdateModalOpen = () => {
+        // Reset form with current booking data
+        setUpdateForm({
+            status: booking.status || '',
+            scheduledTime: booking.scheduledTime || '',
+            notes: booking.notes || '',
+            internalNotes: booking.internalNotes || ''
+        });
+        setShowUpdateModal(true);
+    };
+
+    const handleUpdateFormChange = (field, value) => {
+        setUpdateForm(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleUpdateBooking = async (e) => {
+        e.preventDefault();
         setIsUpdating(true);
+        
         try {
-            // Update booking status to confirmed if it's pending
-            const updates = {
-                status: booking.status === 'pending' ? 'confirmed' : booking.status
-            };
+            // Prepare update payload - only send changed fields
+            const updates = {};
             
-            const updated = await updateBooking(id, updates);
+            // Map UI status to API status
+            if (updateForm.status && updateForm.status !== booking.status) {
+                // Convert UI status back to API status
+                let apiStatus = updateForm.status;
+                if (updateForm.status === 'in_progress') {
+                    apiStatus = 'in_progress';
+                } else if (updateForm.status === 'completed') {
+                    apiStatus = 'completed';
+                } else if (updateForm.status === 'cancelled') {
+                    apiStatus = 'cancelled';
+                }
+                updates.status = apiStatus;
+            }
+            
+            if (updateForm.scheduledTime && updateForm.scheduledTime !== booking.scheduledTime) {
+                updates.scheduled_time = updateForm.scheduledTime;
+            }
+            
+            if (updateForm.notes !== booking.notes) {
+                updates.notes = updateForm.notes || null;
+            }
+            
+            if (updateForm.internalNotes !== booking.internalNotes) {
+                updates.internal_notes = updateForm.internalNotes || null;
+            }
+            
+            // Check if there are any changes
+            if (Object.keys(updates).length === 0) {
+                showNotification('No changes to update', 'info');
+                setShowUpdateModal(false);
+                setIsUpdating(false);
+                return;
+            }
+            
+            const updated = await updateBooking(booking.uuid || id.replace('#', ''), updates);
             setBooking(updated);
+            setShowUpdateModal(false);
             showNotification('Booking updated successfully!', 'success');
         } catch (err) {
             showNotification(err.message || 'Failed to update booking', 'error');
@@ -235,11 +305,11 @@ const BookingDetailPage = () => {
                 {/* Action Buttons */}
                 <div className="booking-detail-actions">
                     <button 
-                        onClick={handleUpdateBooking}
+                        onClick={handleUpdateModalOpen}
                         disabled={isUpdating || booking.status === 'completed'}
                         className={`update-btn ${booking.status === 'completed' ? 'disabled' : ''}`}
                     >
-                        {isUpdating ? 'Updating...' : 'Update Booking'}
+                        Update Booking
                     </button>
                     
                     <button 
@@ -250,6 +320,89 @@ const BookingDetailPage = () => {
                         Cancel Booking
                     </button>
                 </div>
+
+                {/* Update Booking Modal */}
+                {showUpdateModal && (
+                    <div className="modal-overlay" onClick={(e) => {
+                        if (e.target.className === 'modal-overlay') {
+                            setShowUpdateModal(false);
+                        }
+                    }}>
+                        <div className="update-booking-modal">
+                            <h3>Update Booking</h3>
+                            <p className="modal-subtitle">Update booking details for {booking.customer}</p>
+                            
+                            <form onSubmit={handleUpdateBooking} className="update-form">
+                                <div className="form-group">
+                                    <label htmlFor="status">Status</label>
+                                    <select
+                                        id="status"
+                                        value={updateForm.status}
+                                        onChange={(e) => handleUpdateFormChange('status', e.target.value)}
+                                        className="form-control"
+                                    >
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="scheduledTime">Scheduled Time</label>
+                                    <input
+                                        type="time"
+                                        id="scheduledTime"
+                                        value={updateForm.scheduledTime}
+                                        onChange={(e) => handleUpdateFormChange('scheduledTime', e.target.value)}
+                                        className="form-control"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="notes">Customer Notes</label>
+                                    <textarea
+                                        id="notes"
+                                        value={updateForm.notes}
+                                        onChange={(e) => handleUpdateFormChange('notes', e.target.value)}
+                                        className="form-control"
+                                        rows="3"
+                                        placeholder="Notes visible to customer..."
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="internalNotes">Internal Notes</label>
+                                    <textarea
+                                        id="internalNotes"
+                                        value={updateForm.internalNotes}
+                                        onChange={(e) => handleUpdateFormChange('internalNotes', e.target.value)}
+                                        className="form-control"
+                                        rows="3"
+                                        placeholder="Internal notes (not visible to customer)..."
+                                    />
+                                </div>
+
+                                <div className="modal-actions">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowUpdateModal(false)}
+                                        className="modal-btn secondary"
+                                        disabled={isUpdating}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        className="modal-btn primary"
+                                        disabled={isUpdating}
+                                    >
+                                        {isUpdating ? 'Updating...' : 'Save Changes'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
 
                 {/* Cancel Confirmation Modal */}
                 {showCancelConfirm && (
