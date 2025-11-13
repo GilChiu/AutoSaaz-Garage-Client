@@ -1,6 +1,5 @@
 import DEV_CONFIG from '../config/dev';
-
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxibGNqeWVpd2d5YW5hZHNzcWFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA0NzU0MDEsImV4cCI6MjA0NjA1MTQwMX0.XF-wGXEwC7YWAn6xLfh2_Zey-Q-9Bz0jYRGCIDSlgzg';
+import { SUPABASE_ANON_KEY } from '../config/supabase';
 
 /**
  * Gets authentication token from localStorage
