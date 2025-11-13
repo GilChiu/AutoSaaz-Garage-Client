@@ -7,7 +7,21 @@ import { getDisputeById, mapDisputeDetail, postDisputeMessage } from '../service
 import '../components/Dashboard/Dashboard.css';
 import '../styles/resolution-center.css';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Create Supabase client with auth token
+const getSupabaseClient = () => {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+  // Set the auth token if available
+  if (token) {
+    client.auth.setSession({
+      access_token: token,
+      refresh_token: token
+    });
+  }
+  
+  return client;
+};
 
 const DisputeChatPage = () => {
   const { id } = useParams();
@@ -75,6 +89,7 @@ const DisputeChatPage = () => {
       // Upload file to Supabase Storage if selected
       if (selectedFile) {
         setUploadingFile(true);
+        const supabase = getSupabaseClient(); // Get authenticated client
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `${id}/${fileName}`;
