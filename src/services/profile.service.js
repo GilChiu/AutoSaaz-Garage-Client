@@ -1,4 +1,6 @@
-import { BACKEND_URL } from '../config/dev';
+import DEV_CONFIG from '../config/dev';
+
+const BACKEND_URL = DEV_CONFIG.API_BASE_URL;
 
 /**
  * Get garage profile settings
