@@ -20,30 +20,39 @@ export async function createSupportTicket(payload) {
     const profileData = localStorage.getItem('profile');
     const profile = profileData ? JSON.parse(profileData) : null;
 
+    if (!profile?.id) {
+      throw new Error('Profile ID not found. Please log in again.');
+    }
+
+    const requestPayload = {
+      senderId: profile.id,
+      senderType: 'garage',
+      contactName: payload.contactName,
+      contactEmail: payload.contactEmail,
+      contactPhone: payload.contactPhone || null,
+      subject: payload.subject,
+      message: payload.message,
+      source: payload.source || 'garage-portal',
+      priority: payload.priority || 'normal'
+    };
+
+    console.log('Creating ticket with payload:', requestPayload);
+
     const res = await fetch(`${API_BASE_URL}/support-tickets`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({
-        senderId: profile?.id || null,
-        senderType: 'garage',
-        contactName: payload.contactName,
-        contactEmail: payload.contactEmail,
-        contactPhone: payload.contactPhone || null,
-        subject: payload.subject,
-        message: payload.message,
-        source: payload.source || 'garage-portal',
-        priority: payload.priority || 'normal'
-      }),
+      body: JSON.stringify(requestPayload),
     });
 
     if (!res.ok) {
-      const error = await res.json();
+      const error = await res.json().catch(() => ({ error: res.statusText }));
       throw new Error(error.error || res.statusText || 'Failed');
     }
 
     const json = await res.json();
     return json.data || json;
   } catch (e) {
+    console.error('Create ticket error:', e);
     throw new Error(e?.message || 'Network error');
   }
 }
@@ -102,24 +111,34 @@ export async function addTicketMessage(ticketId, message) {
     const profileData = localStorage.getItem('profile');
     const profile = profileData ? JSON.parse(profileData) : null;
 
+    if (!profile?.id) {
+      throw new Error('Profile ID not found. Please log in again.');
+    }
+
+    const payload = {
+      action: 'add_message',
+      senderId: profile.id,
+      senderType: 'garage',
+      message: message
+    };
+
+    console.log('Sending message with payload:', payload);
+
     const res = await fetch(`${API_BASE_URL}/support-tickets/${ticketId}`, {
       method: 'PATCH',
       headers: getHeaders(),
-      body: JSON.stringify({
-        action: 'add_message',
-        senderId: profile?.id,
-        senderType: 'garage',
-        message: message
-      })
+      body: JSON.stringify(payload)
     });
 
     if (!res.ok) {
-      throw new Error(res.statusText || 'Failed');
+      const errorData = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(errorData.error || res.statusText || 'Failed');
     }
 
     const json = await res.json();
     return json.message || json;
   } catch (e) {
+    console.error('Add message error:', e);
     throw new Error(e?.message || 'Network error');
   }
 }
