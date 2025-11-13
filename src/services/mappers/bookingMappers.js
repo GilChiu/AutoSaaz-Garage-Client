@@ -23,6 +23,7 @@ export function mapApiBookingToBooking(apiBooking, index = 0) {
     status: mapApiStatusToUiStatus(apiBooking.status),
     
     // Extended fields (for detail view)
+    uuid: apiBooking.id, // Original UUID for API calls
     phone: apiBooking.customer_phone,
     email: apiBooking.customer_email,
     vehicle: vehicle || undefined,
@@ -36,6 +37,8 @@ export function mapApiBookingToBooking(apiBooking, index = 0) {
     notes: apiBooking.notes,
     internalNotes: apiBooking.internal_notes,
     bookingNumber: apiBooking.booking_number,
+    customerName: apiBooking.customer_name, // Add this for dropdown display
+    serviceName: apiBooking.service_type, // Add this for dropdown display
   };
 }
 

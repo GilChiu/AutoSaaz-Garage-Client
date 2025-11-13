@@ -102,7 +102,7 @@ const NewDisputesPage = () => {
                   >
                     <option value="">Select a booking (optional)</option>
                     {bookings.map(booking => (
-                      <option key={booking.id} value={booking.id}>
+                      <option key={booking.uuid} value={booking.uuid}>
                         {booking.bookingNumber} - {booking.customerName} ({booking.serviceName})
                       </option>
                     ))}
