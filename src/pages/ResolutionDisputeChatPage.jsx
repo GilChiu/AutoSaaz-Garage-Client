@@ -144,10 +144,17 @@ const DisputeChatPage = () => {
                   {dispute.messages.map(m => {
                     const isEvidenceRequest = m.isEvidenceRequest;
                     const isEscalationNotice = m.isEscalationNotice;
+                    const isResolutionNotice = m.isResolutionNotice;
                     return (
                       <div 
                         key={m.id} 
-                        className={`rcfx-msg rcfx-msg-${m.from} ${isEvidenceRequest ? 'rcfx-evidence-request' : ''} ${isEscalationNotice ? 'rcfx-escalation-notice' : ''}`}
+                        className={`rcfx-msg rcfx-msg-${m.from} ${
+                          isEvidenceRequest ? 'rcfx-evidence-request' : ''
+                        } ${
+                          isEscalationNotice ? 'rcfx-escalation-notice' : ''
+                        } ${
+                          isResolutionNotice ? 'rcfx-resolution-notice' : ''
+                        }`}
                       > 
                         {isEvidenceRequest && (
                           <div className="rcfx-evidence-badge">
@@ -158,6 +165,13 @@ const DisputeChatPage = () => {
                           <div className="rcfx-escalation-header">
                             <div className="rcfx-escalation-badge">
                               ⚠️ Admin Escalated this case
+                            </div>
+                          </div>
+                        )}
+                        {isResolutionNotice && (
+                          <div className="rcfx-resolution-header">
+                            <div className="rcfx-resolution-badge">
+                              ✓ Case Resolved
                             </div>
                           </div>
                         )}

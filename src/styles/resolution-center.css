@@ -107,6 +107,32 @@
   box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
 }
 
+/* Resolution notice styling */
+.rcfx-resolution-notice {
+  background-color: #d1fae5 !important;
+  border-left: 4px solid #10b981 !important;
+  padding: 14px 12px !important;
+}
+
+.rcfx-resolution-header {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #34d399;
+}
+
+.rcfx-resolution-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #065f46;
+  background: #a7f3d0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
 .rcfx-attachment {
   margin-top: 8px;
   padding-top: 8px;
