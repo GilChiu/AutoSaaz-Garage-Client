@@ -188,12 +188,15 @@ const SupportContactPage = () => {
 
               {!loading && !ticketsError && tickets.length === 0 && (
                 <div className="empty-state">
-                  <svg className="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  <svg className="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
                   <h3>No support tickets yet</h3>
-                  <p>Create a new ticket using the Contact Us form</p>
-                  <button className="btn primary" onClick={() => setActiveTab('new')}>
+                  <p>Create a new ticket using the Contact Us form to get started</p>
+                  <button className="btn-create-ticket" onClick={() => setActiveTab('new')}>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginRight: '8px'}}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
                     Create Ticket
                   </button>
                 </div>
@@ -414,26 +417,59 @@ const SupportContactPage = () => {
             
             .empty-state {
               text-align: center;
-              padding: 60px 20px;
+              padding: 80px 40px;
+              background: linear-gradient(to bottom, #fefbff, #fef9f5);
+              border-radius: 8px;
+              margin: 20px;
             }
             
             .empty-icon {
-              width: 64px;
-              height: 64px;
-              margin: 0 auto 16px;
-              color: #d1d5db;
+              width: 72px;
+              height: 72px;
+              margin: 0 auto 24px;
+              color: #fb923c;
+              opacity: 0.5;
             }
             
             .empty-state h3 {
-              font-size: 16px;
+              font-size: 20px;
               font-weight: 600;
-              margin-bottom: 8px;
+              margin-bottom: 12px;
               color: #111827;
             }
             
             .empty-state p {
               color: #6b7280;
-              margin-bottom: 20px;
+              font-size: 15px;
+              margin-bottom: 28px;
+              max-width: 400px;
+              margin-left: auto;
+              margin-right: auto;
+            }
+            
+            .btn-create-ticket {
+              display: inline-flex;
+              align-items: center;
+              background: #fb923c;
+              color: #fff;
+              border: none;
+              padding: 12px 28px;
+              border-radius: 8px;
+              font-size: 15px;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.2s;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            
+            .btn-create-ticket:hover {
+              background: #f97316;
+              box-shadow: 0 4px 6px rgba(251, 146, 60, 0.3);
+              transform: translateY(-1px);
+            }
+            
+            .btn-create-ticket:active {
+              transform: translateY(0);
             }
             
             .table-wrapper {
