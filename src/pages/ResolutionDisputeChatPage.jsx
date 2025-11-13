@@ -29,6 +29,33 @@ const DisputeChatPage = () => {
     return () => controller.abort();
   }, [id]);
 
+  // Poll for new messages every 5 seconds
+  useEffect(() => {
+    if (!id || !dispute) return;
+    
+    const pollInterval = setInterval(async () => {
+      try {
+        const raw = await getDisputeById(id);
+        const updated = mapDisputeDetail(raw);
+        // Only update messages if new messages are available
+        if (updated?.messages && dispute?.messages) {
+          if (updated.messages.length > dispute.messages.length) {
+            setDispute(prev => ({
+              ...prev,
+              messages: updated.messages
+            }));
+          }
+        }
+      } catch (e) {
+        // Silent fail for polling - don't show errors
+        console.error('Error polling messages:', e);
+      }
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(pollInterval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, dispute?.messages?.length]);
+
   const sendMessage = async () => {
     if (!message.trim()) return;
     try {
