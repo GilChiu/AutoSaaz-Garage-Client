@@ -132,7 +132,7 @@ const DisputeChatPage = () => {
                       <div key={m.id} className={`rcfx-msg rcfx-msg-${m.from} ${isEvidenceRequest ? 'rcfx-evidence-request' : ''}`}> 
                         {isEvidenceRequest && (
                           <div className="rcfx-evidence-badge">
-                            📎 Evidence Request - Please upload supporting documents
+                            Evidence Request - Please upload supporting documents
                           </div>
                         )}
                         <div className="rcfx-msg-text">{m.text}</div>
