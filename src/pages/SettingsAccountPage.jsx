@@ -49,6 +49,8 @@ const SettingsAccountPage = () => {
               const profile = profileResponse.data.profile;
               formData.email = profile.email || formData.email;
               formData.phone = profile.phoneNumber || formData.phone;
+              formData.language = profile.language || formData.language;
+              formData.timezone = profile.timezone || formData.timezone;
             }
           } catch (profileError) {
             console.warn('Failed to load profile, using defaults:', profileError.message);
