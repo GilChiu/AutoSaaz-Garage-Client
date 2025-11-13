@@ -63,3 +63,46 @@
 
 /* Success banner */
 .rcfx-success { background:#e6f7ee; border:1px solid #bcdccb; color:#0f5132; padding:10px 12px; border-radius:8px; font-size:12px; margin:8px 0 12px; }
+
+/* Evidence request styling */
+.rcfx-evidence-request {
+  background-color: #eff6ff !important;
+  border-left: 4px solid #3b82f6 !important;
+}
+
+.rcfx-evidence-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e40af;
+  background: #bfdbfe;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+.rcfx-attachment {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.rcfx-file-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 12px;
+  display: inline-block;
+  padding: 4px 8px;
+  background: #f0f9ff;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.rcfx-file-link:hover {
+  text-decoration: underline;
+  background: #e0f2fe;
+}
+
+.rcfx-upload-btn:hover {
+  background: #2563eb !important;
+}

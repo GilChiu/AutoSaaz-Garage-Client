@@ -49,7 +49,16 @@ export function mapDisputeDetail(raw) {
     resolution: raw.resolution || null,
     resolvedBy: raw.resolvedBy || null,
     resolvedAt: raw.resolvedAt || null,
-    messages: (raw.messages || []).map(m => ({ id: m.id, from: m.from, text: m.text, ts: m.ts })),
+    messages: (raw.messages || []).map(m => ({
+      id: m.id,
+      from: m.from,
+      text: m.text,
+      ts: m.ts,
+      attachmentUrl: m.attachmentUrl,
+      attachmentType: m.attachmentType,
+      attachmentName: m.attachmentName,
+      isEvidenceRequest: m.isEvidenceRequest
+    })),
   };
 }
 
@@ -74,8 +83,14 @@ export async function getDisputeById(id, signal) {
   return res?.data?.data ?? res?.data;
 }
 
-export async function postDisputeMessage(id, text) {
-  const res = await axios.post(url(`/resolution-center/${id}/messages`), { text }, { headers: headers() });
+export async function postDisputeMessage(id, text, attachmentUrl = null, attachmentType = null, attachmentName = null) {
+  const payload = { text };
+  if (attachmentUrl) {
+    payload.attachmentUrl = attachmentUrl;
+    payload.attachmentType = attachmentType;
+    payload.attachmentName = attachmentName;
+  }
+  const res = await axios.post(url(`/resolution-center/${id}/messages`), payload, { headers: headers() });
   return res?.data?.data ?? res?.data;
 }
 
