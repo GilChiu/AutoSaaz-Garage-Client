@@ -1,6 +1,4 @@
-import DEV_CONFIG from '../config/dev';
-
-const BACKEND_URL = DEV_CONFIG.API_BASE_URL;
+import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
 
 /**
  * Get garage profile settings
@@ -14,10 +12,11 @@ export const getGarageProfile = async () => {
       throw new Error('No authentication token found');
     }
 
-    const response = await fetch(`${BACKEND_URL}/auth-profile`, {
+    const response = await fetch(`${FUNCTIONS_URL}/auth-profile`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         'x-access-token': token,
       },
     });
@@ -56,10 +55,11 @@ export const updateGarageProfile = async (profileData) => {
 
     console.log('Updating garage profile:', profileData);
 
-    const response = await fetch(`${BACKEND_URL}/auth-profile`, {
+    const response = await fetch(`${FUNCTIONS_URL}/auth-profile`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         'x-access-token': token,
       },
       body: JSON.stringify(profileData),
@@ -111,9 +111,10 @@ export const uploadProfileLogo = async (file) => {
 
     console.log('Uploading logo file:', file.name, file.type, file.size);
 
-    const response = await fetch(`${BACKEND_URL}/upload`, {
+    const response = await fetch(`${FUNCTIONS_URL}/upload`, {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         'x-access-token': token,
       },
       body: formData,
