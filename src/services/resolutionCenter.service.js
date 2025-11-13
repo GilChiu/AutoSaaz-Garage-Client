@@ -77,8 +77,12 @@ export async function getDisputes(status, signal) {
     signal,
   });
   console.log('[getDisputes] Full response:', res?.data);
+  console.log('[getDisputes] Response has "disputes" key:', res?.data?.hasOwnProperty('disputes'));
+  console.log('[getDisputes] Response has "data" key:', res?.data?.hasOwnProperty('data'));
+  console.log('[getDisputes] Response keys:', Object.keys(res?.data || {}));
   const payload = res?.data?.data ?? res?.data;
   console.log('[getDisputes] Extracted payload:', payload);
+  console.log('[getDisputes] Payload type:', Array.isArray(payload) ? 'Array' : typeof payload);
   // Backend returns { disputes: [...], total, page, limit }
   if (payload?.disputes && Array.isArray(payload.disputes)) {
     console.log('[getDisputes] Returning disputes array, count:', payload.disputes.length);
@@ -87,6 +91,7 @@ export async function getDisputes(status, signal) {
   }
   const result = Array.isArray(payload) ? payload : [];
   console.log('[getDisputes] Fallback return, count:', result.length);
+  console.log('[getDisputes] First item sample:', result[0]);
   return result;
 }
 
