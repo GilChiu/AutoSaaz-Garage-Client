@@ -223,19 +223,43 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeIn 0.2s ease;
 }
 
-.cancel-confirm-modal {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cancel-confirm-modal,
+.update-booking-modal {
   background: white;
   border-radius: 12px;
   padding: 30px;
-  max-width: 400px;
+  max-width: 500px;
   width: 90%;
   text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
 }
 
-.cancel-confirm-modal h3 {
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.cancel-confirm-modal h3,
+.update-booking-modal h3 {
   margin: 0 0 15px 0;
   color: #333;
   font-size: 20px;
@@ -248,10 +272,67 @@
   line-height: 1.5;
 }
 
+.modal-subtitle {
+  margin: 0 0 25px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Update Form Styles */
+.update-form {
+  text-align: left;
+  margin-top: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.form-control::placeholder {
+  color: #999;
+}
+
+select.form-control {
+  cursor: pointer;
+  background-color: white;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
 .modal-actions {
   display: flex;
   gap: 12px;
   justify-content: center;
+  margin-top: 25px;
 }
 
 .modal-btn {
@@ -273,6 +354,15 @@
 
 .modal-btn.secondary:hover:not(:disabled) {
   background-color: #5a6268;
+}
+
+.modal-btn.primary {
+  background-color: #ff6b35;
+  color: white;
+}
+
+.modal-btn.primary:hover:not(:disabled) {
+  background-color: #e55a2b;
 }
 
 .modal-btn.danger {
@@ -374,8 +464,10 @@
     width: 100%;
   }
   
-  .cancel-confirm-modal {
+  .cancel-confirm-modal,
+  .update-booking-modal {
     margin: 20px;
+    max-width: none;
   }
   
   .modal-actions {

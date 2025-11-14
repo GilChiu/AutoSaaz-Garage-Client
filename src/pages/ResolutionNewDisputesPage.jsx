@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getDisputes, mapDispute, createDispute } from '../services/resolutionCenter.service';
+import { getBookings } from '../services/bookings.service';
 import '../components/Dashboard/Dashboard.css';
 import '../styles/resolution-center.css';
 
@@ -13,6 +14,9 @@ const NewDisputesPage = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [subject, setSubject] = useState('');
   const [initialMessage, setInitialMessage] = useState('');
+  const [selectedBookingId, setSelectedBookingId] = useState('');
+  const [bookings, setBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
@@ -20,16 +24,46 @@ const NewDisputesPage = () => {
     (async () => {
       try {
         setLoading(true);
+        console.log('[ResolutionNewDisputesPage] Fetching new disputes...');
         const data = await getDisputes('new', controller.signal);
-        setItems(data.map(mapDispute));
+        console.log('[ResolutionNewDisputesPage] Received data:', data);
+        console.log('[ResolutionNewDisputesPage] Data count:', data?.length);
+        const mapped = data.map(mapDispute);
+        console.log('[ResolutionNewDisputesPage] Mapped disputes:', mapped);
+        console.log('[ResolutionNewDisputesPage] Mapped count:', mapped.length);
+        setItems(mapped);
       } catch (e) {
-        if (e.name !== 'AbortError') setError('Failed to load disputes');
+        if (e.name !== 'AbortError') {
+          console.error('[ResolutionNewDisputesPage] Error loading disputes:', e);
+          setError('Failed to load disputes');
+        }
       } finally {
         setLoading(false);
       }
     })();
     return () => controller.abort();
   }, []);
+
+  // Fetch bookings when modal opens
+  useEffect(() => {
+    if (showCreate && bookings.length === 0) {
+      const controller = new AbortController();
+      (async () => {
+        try {
+          setLoadingBookings(true);
+          const data = await getBookings(controller.signal);
+          setBookings(data);
+        } catch (e) {
+          if (e.name !== 'AbortError') {
+            console.error('Failed to load bookings:', e);
+          }
+        } finally {
+          setLoadingBookings(false);
+        }
+      })();
+      return () => controller.abort();
+    }
+  }, [showCreate, bookings.length]);
 
   return (
     <div className="dashboard-layout">
@@ -68,7 +102,23 @@ const NewDisputesPage = () => {
                   <div id="rcfx-create-title" className="rcfx-modal-title">Create Dispute</div>
                 </div>
                 <div className="rcfx-modal-body">
-                  <label className="rcfx-label">Subject</label>
+                  <label className="rcfx-label">Order/Booking</label>
+                  <select
+                    className="rcfx-chat-input"
+                    value={selectedBookingId}
+                    onChange={e => setSelectedBookingId(e.target.value)}
+                    disabled={loadingBookings}
+                  >
+                    <option value="">Select a booking (optional)</option>
+                    {bookings.map(booking => (
+                      <option key={booking.uuid} value={booking.uuid}>
+                        {booking.bookingNumber} - {booking.customerName} ({booking.serviceName})
+                      </option>
+                    ))}
+                  </select>
+                  {loadingBookings && <p className="rcfx-label" style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Loading bookings...</p>}
+                  
+                  <label className="rcfx-label" style={{ marginTop: '16px' }}>Subject</label>
                   <input
                     className="rcfx-chat-input"
                     placeholder="Short summary (e.g., Incorrect charge on invoice)"
@@ -85,17 +135,27 @@ const NewDisputesPage = () => {
                   />
                 </div>
                 <div className="rcfx-modal-footer">
-                  <button className="rcfx-btn" onClick={() => setShowCreate(false)} disabled={creating}>Cancel</button>
+                  <button className="rcfx-btn" onClick={() => {
+                    setShowCreate(false);
+                    setSelectedBookingId('');
+                    setSubject('');
+                    setInitialMessage('');
+                  }} disabled={creating}>Cancel</button>
                   <button
                     className="rcfx-btn rcfx-btn-primary"
                     onClick={async () => {
                       if (!subject.trim()) return;
                       try {
                         setCreating(true);
-                        const created = await createDispute({ subject: subject.trim(), message: initialMessage.trim() });
+                        const created = await createDispute({ 
+                          subject: subject.trim(), 
+                          message: initialMessage.trim(),
+                          bookingId: selectedBookingId || undefined
+                        });
                         setShowCreate(false);
                         setSubject('');
                         setInitialMessage('');
+                        setSelectedBookingId('');
                         if (created?.id) navigate(`/resolution-center/disputes/${created.id}`);
                         else {
                           // Fallback: reload list

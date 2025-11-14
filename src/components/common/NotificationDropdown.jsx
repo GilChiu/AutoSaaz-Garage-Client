@@ -1,0 +1,211 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from '../../services/notifications.service';
+import './NotificationDropdown.css';
+
+const NotificationDropdown = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const dropdownRef = useRef(null);
+
+  // Load notifications when dropdown opens
+  useEffect(() => {
+    if (isOpen) {
+      loadNotifications();
+    }
+  }, [isOpen]);
+
+  // Load unread count on mount and periodically
+  useEffect(() => {
+    loadUnreadCount();
+    
+    // Poll for new notifications every 60 seconds
+    const interval = setInterval(() => {
+      loadUnreadCount();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const loadNotifications = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getNotifications({ limit: 20 });
+      setNotifications(data);
+    } catch (err) {
+      setError(err.message || 'Failed to load notifications');
+      console.error('Error loading notifications:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUnreadCount = async () => {
+    try {
+      const count = await getUnreadCount();
+      setUnreadCount(count);
+    } catch (err) {
+      console.error('Error loading unread count:', err);
+    }
+  };
+
+  const handleToggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await markNotificationAsRead(notificationId);
+      
+      // Update local state
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      );
+      
+      // Update unread count
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
+      
+      // Update local state
+      setNotifications(prev => 
+        prev.map(n => ({ ...n, is_read: true }))
+      );
+      
+      // Reset unread count
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Error marking all as read:', err);
+    }
+  };
+
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'booking':
+        return '📅';
+      case 'payment':
+        return '💰';
+      case 'promo':
+        return '🎁';
+      case 'system':
+        return '⚙️';
+      default:
+        return '🔔';
+    }
+  };
+
+  return (
+    <div className="notification-dropdown-container" ref={dropdownRef}>
+      <button 
+        className="notification-btn" 
+        aria-label="Notifications"
+        onClick={handleToggleDropdown}
+      >
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M18.7497 22.5V23.4375C18.7497 24.4321 18.3546 25.3859 17.6513 26.0891C16.9481 26.7924 15.9942 27.1875 14.9997 27.1875C14.0051 27.1875 13.0513 26.7924 12.348 26.0891C11.6448 25.3859 11.2497 24.4321 11.2497 23.4375V22.5M25.0591 20.5916C23.5544 18.75 22.4921 17.8125 22.4921 12.7354C22.4921 8.08594 20.1178 6.42949 18.1637 5.625C17.9042 5.51836 17.6598 5.27344 17.5807 5.00684C17.238 3.84023 16.277 2.8125 14.9997 2.8125C13.7223 2.8125 12.7608 3.84082 12.4216 5.00801C12.3425 5.27754 12.0981 5.51836 11.8385 5.625C9.8821 6.43066 7.51023 8.08125 7.51023 12.7354C7.5073 17.8125 6.44499 18.75 4.9403 20.5916C4.31687 21.3545 4.86296 22.5 5.95339 22.5H24.0518C25.1364 22.5 25.679 21.351 25.0591 20.5916Z" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        {unreadCount > 0 && (
+          <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="notification-dropdown">
+          <div className="notification-header">
+            <h3>Notifications</h3>
+            {notifications.length > 0 && unreadCount > 0 && (
+              <button 
+                className="mark-all-read-btn"
+                onClick={handleMarkAllAsRead}
+              >
+                Mark all as read
+              </button>
+            )}
+          </div>
+
+          <div className="notification-list">
+            {loading ? (
+              <div className="notification-loading">
+                <p>Loading notifications...</p>
+              </div>
+            ) : error ? (
+              <div className="notification-error">
+                <p>{error}</p>
+                <button onClick={loadNotifications} className="retry-btn">
+                  Retry
+                </button>
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="notification-empty">
+                <div className="empty-icon">🔔</div>
+                <p>No notifications yet</p>
+                <span>You'll see updates from the admin here</span>
+              </div>
+            ) : (
+              notifications.map((notification) => (
+                <div 
+                  key={notification.id}
+                  className={`notification-item ${!notification.is_read ? 'unread' : ''}`}
+                  onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
+                >
+                  <div className="notification-icon">
+                    {getNotificationIcon(notification.notification_type)}
+                  </div>
+                  <div className="notification-content">
+                    <div className="notification-title">{notification.title}</div>
+                    <div className="notification-message">{notification.message}</div>
+                    <div className="notification-time">{formatTimeAgo(notification.created_at)}</div>
+                  </div>
+                  {!notification.is_read && (
+                    <div className="unread-indicator"></div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default NotificationDropdown;

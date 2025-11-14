@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
 import { registerStep3 } from '../services/registrationApi';
+import { uploadEmiratesId, validateFile, formatFileSize } from '../services/uploadService';
 import { validateCompanyName, validateTradeLicense, validateVATCertification, validateEmiratesIdFile } from '../utils/registrationValidation';
 import './RegisterPage3.css';
 import { autoSaazLogo, heroRegister3 } from '../assets/images';
@@ -12,12 +13,15 @@ const RegisterPage3 = () => {
   const [tradeLicense, setTradeLicense] = useState('');
   const [vatCert, setVatCert] = useState('');
   const [error, setError] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
   const { updateRegistrationData, goToNextStep } = useRegistration();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setUploadProgress('');
 
     // Validate all required fields
     if (!companyName || !tradeLicense || !emiratesId) {
@@ -55,16 +59,36 @@ const RegisterPage3 = () => {
       }
     }
 
+    // Additional file validation using upload service
+    const fileValidation = validateFile(emiratesId);
+    if (!fileValidation.ok) {
+      setError(fileValidation.error);
+      return;
+    }
+
     try {
-      // NOTE: File upload for Emirates ID is a placeholder
-      // In a real implementation, you would:
-      // 1. Upload the file to a storage service (e.g., AWS S3, Cloudinary)
-      // 2. Get back the URL of the uploaded file
-      // 3. Pass that URL to registerStep3
-      // For now, we're using a placeholder URL
-      const emiratesIdUrl = 'placeholder-url-for-emirates-id';
+      setIsUploading(true);
       
-      // Call backend API for Step 3
+      // Get session ID from localStorage for file organization
+      const sessionId = localStorage.getItem('registrationSessionId');
+      if (!sessionId) {
+        setError('Session expired. Please start registration again.');
+        setIsUploading(false);
+        return;
+      }
+
+      // Step 1: Upload Emirates ID file to Supabase Storage
+      setUploadProgress('Uploading Emirates ID document...');
+      const emiratesIdUrl = await uploadEmiratesId(emiratesId, sessionId);
+      
+      if (!emiratesIdUrl) {
+        setError('Failed to upload Emirates ID. Please try again.');
+        setIsUploading(false);
+        return;
+      }
+
+      // Step 2: Submit business details to backend with uploaded file URL
+      setUploadProgress('Saving business details...');
       await registerStep3(companyName, emiratesIdUrl, tradeLicense, vatCert || null);
 
       // Update context with the data
@@ -76,10 +100,16 @@ const RegisterPage3 = () => {
         emiratesIdName: emiratesId?.name || '',
       });
 
+      setIsUploading(false);
+      setUploadProgress('');
+
       // Success! OTP has been sent, navigate to verification
       goToNextStep();
       navigate('/verify-account');
     } catch (err) {
+      setIsUploading(false);
+      setUploadProgress('');
+      
       // Handle session expired error
       if (err.message.includes('Session expired') || err.message.includes('Session not found')) {
         setError('Your session has expired. Redirecting to start...');
@@ -131,6 +161,7 @@ const RegisterPage3 = () => {
             </div>
 
             {error && <div className="error-message-register-page3">{error}</div>}
+            {uploadProgress && <div className="upload-progress-register-page3">{uploadProgress}</div>}
 
             <form onSubmit={handleSubmit} className="register-form-register-page3">
               <div className="form-group-register-page3">
@@ -154,12 +185,18 @@ const RegisterPage3 = () => {
                     accept="image/*,application/pdf"
                     className="file-input-hidden-register-page3"
                     required
+                    disabled={isUploading}
                   />
                   <label htmlFor="emirates-id-upload" className="file-upload-area-register-page3">
                     <span className="upload-text-register-page3">
-                      {emiratesId ? emiratesId.name : "Upload Your Emirates ID"}
+                      {emiratesId ? `${emiratesId.name} (${formatFileSize(emiratesId.size)})` : "Upload Your Emirates ID"}
                     </span>
                   </label>
+                  {emiratesId && (
+                    <div className="file-info-register-page3">
+                      <small>Accepted formats: JPG, PNG, WEBP, PDF (Max 10MB)</small>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -184,7 +221,9 @@ const RegisterPage3 = () => {
                 />
               </div>
 
-              <button type="submit" className="next-btn-register-page3">Next</button>
+              <button type="submit" className="next-btn-register-page3" disabled={isUploading}>
+                {isUploading ? 'Processing...' : 'Next'}
+              </button>
             </form>
 
             {/* Login Link */}

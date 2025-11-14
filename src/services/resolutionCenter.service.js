@@ -18,6 +18,7 @@ function url(path) {
 
 export function mapDispute(raw) {
   // Map server payload to UI card structure
+  console.log('[mapDispute] Mapping dispute:', raw?.id, raw?.code);
   return {
     id: raw.id,
     code: raw.code || raw.disputeId || raw.id,
@@ -49,22 +50,51 @@ export function mapDisputeDetail(raw) {
     resolution: raw.resolution || null,
     resolvedBy: raw.resolvedBy || null,
     resolvedAt: raw.resolvedAt || null,
-    messages: (raw.messages || []).map(m => ({ id: m.id, from: m.from, text: m.text, ts: m.ts })),
+    messages: (raw.messages || []).map(m => ({
+      id: m.id,
+      from: m.senderType?.toLowerCase() || m.from || 'user', // Map senderType to from (admin/user)
+      text: m.body || m.text, // Backend sends 'body', UI expects 'text'
+      ts: m.createdAt || m.ts,
+      attachmentUrl: m.attachmentUrl || m.attachment_url,
+      attachmentType: m.attachmentType || m.attachment_type,
+      attachmentName: m.attachmentName || m.attachment_name,
+      isEvidenceRequest: m.isEvidenceRequest || m.is_evidence_request || false,
+      isEscalationNotice: m.isEscalationNotice || m.is_escalation_notice || false,
+      isResolutionNotice: m.isResolutionNotice || m.is_resolution_notice || false
+    })),
   };
 }
 
-export async function createDispute({ subject, message, contactName, contactEmail }) {
-  const res = await axios.post(url(`/resolution-center`), { subject, message, contactName, contactEmail }, { headers: headers() });
+export async function createDispute({ subject, message, contactName, contactEmail, bookingId }) {
+  const payload = { subject, message, contactName, contactEmail };
+  if (bookingId) payload.bookingId = bookingId;
+  const res = await axios.post(url(`/resolution-center`), payload, { headers: headers() });
   return res?.data?.data ?? res?.data;
 }
 
 export async function getDisputes(status, signal) {
+  console.log('[getDisputes] Fetching disputes with status:', status);
   const res = await axios.get(url(`/resolution-center?status=${encodeURIComponent(status || '')}`), {
     headers: headers(),
     signal,
   });
-  const payload = res?.data?.data ?? res?.data;
-  return Array.isArray(payload) ? payload : [];
+  console.log('[getDisputes] Full response:', res?.data);
+  
+  // Check if response has the new paginated format
+  const responseData = res?.data?.data ?? res?.data;
+  console.log('[getDisputes] Response data:', responseData);
+  
+  // New paginated format: { disputes: [...], total, page, limit }
+  if (responseData?.disputes && Array.isArray(responseData.disputes)) {
+    console.log('[getDisputes] Using paginated format, count:', responseData.disputes.length);
+    console.log('[getDisputes] Total from API:', responseData.total);
+    return responseData.disputes;
+  }
+  
+  // Fallback for array response
+  const result = Array.isArray(responseData) ? responseData : [];
+  console.log('[getDisputes] Using fallback array, count:', result.length);
+  return result;
 }
 
 export async function getDisputeById(id, signal) {
@@ -72,8 +102,14 @@ export async function getDisputeById(id, signal) {
   return res?.data?.data ?? res?.data;
 }
 
-export async function postDisputeMessage(id, text) {
-  const res = await axios.post(url(`/resolution-center/${id}/messages`), { text }, { headers: headers() });
+export async function postDisputeMessage(id, text, attachmentUrl = null, attachmentType = null, attachmentName = null) {
+  const payload = { text };
+  if (attachmentUrl) {
+    payload.attachmentUrl = attachmentUrl;
+    payload.attachmentType = attachmentType;
+    payload.attachmentName = attachmentName;
+  }
+  const res = await axios.post(url(`/resolution-center/${id}/messages`), payload, { headers: headers() });
   return res?.data?.data ?? res?.data;
 }
 

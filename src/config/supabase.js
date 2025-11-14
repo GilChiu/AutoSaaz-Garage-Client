@@ -1,7 +1,11 @@
 // Supabase Functions configuration for the Garage client
 // Provide overrides via .env:
+// - REACT_APP_SUPABASE_URL=https://<project-ref>.supabase.co
 // - REACT_APP_FUNCTIONS_URL=https://<project-ref>.functions.supabase.co
 // - REACT_APP_SUPABASE_ANON_KEY=<anon-key>
+
+export const SUPABASE_URL =
+  process.env.REACT_APP_SUPABASE_URL || 'https://lblcjyeiwgyanadssqac.supabase.co';
 
 export const FUNCTIONS_URL =
   process.env.REACT_APP_FUNCTIONS_URL || 'https://lblcjyeiwgyanadssqac.functions.supabase.co';

@@ -63,3 +63,98 @@
 
 /* Success banner */
 .rcfx-success { background:#e6f7ee; border:1px solid #bcdccb; color:#0f5132; padding:10px 12px; border-radius:8px; font-size:12px; margin:8px 0 12px; }
+
+/* Evidence request styling */
+.rcfx-evidence-request {
+  background-color: #eff6ff !important;
+  border-left: 4px solid #3b82f6 !important;
+}
+
+.rcfx-evidence-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e40af;
+  background: #bfdbfe;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+/* Escalation notice styling */
+.rcfx-escalation-notice {
+  background-color: #fef3c7 !important;
+  border-left: 4px solid #f59e0b !important;
+  padding: 14px 12px !important;
+}
+
+.rcfx-escalation-header {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #fbbf24;
+}
+
+.rcfx-escalation-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #92400e;
+  background: #fde68a;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+}
+
+/* Resolution notice styling */
+.rcfx-resolution-notice {
+  background-color: #d1fae5 !important;
+  border-left: 4px solid #10b981 !important;
+  padding: 14px 12px !important;
+}
+
+.rcfx-resolution-header {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #34d399;
+}
+
+.rcfx-resolution-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #065f46;
+  background: #a7f3d0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.rcfx-attachment {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.rcfx-file-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 12px;
+  display: inline-block;
+  padding: 4px 8px;
+  background: #f0f9ff;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.rcfx-file-link:hover {
+  text-decoration: underline;
+  background: #e0f2fe;
+}
+
+.rcfx-upload-btn:hover {
+  background: #2563eb !important;
+}

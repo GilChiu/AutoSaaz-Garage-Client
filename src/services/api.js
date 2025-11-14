@@ -100,6 +100,10 @@ export const loginUser = async (credentials) => {
   if (data.user) {
     localStorage.setItem('user', JSON.stringify(data.user));
   }
+  if (data.profile) {
+    localStorage.setItem('profile', JSON.stringify(data.profile));
+    console.log('✅ Profile saved to localStorage:', data.profile);
+  }
   
   return response.data;
 };
