@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from '../../services/notifications.service';
 import './NotificationDropdown.css';
 
@@ -10,12 +10,68 @@ const NotificationDropdown = () => {
   const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
 
+  // Define callback functions before using them in useEffect
+  const loadNotifications = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getNotifications({ limit: 20 });
+      setNotifications(data);
+    } catch (err) {
+      setError(err.message || 'Failed to load notifications');
+      console.error('Error loading notifications:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadUnreadCount = useCallback(async () => {
+    try {
+      const count = await getUnreadCount();
+      setUnreadCount(count);
+    } catch (err) {
+      console.error('Error loading unread count:', err);
+    }
+  }, []);
+
+  const handleMarkAsRead = useCallback(async (notificationId) => {
+    try {
+      await markNotificationAsRead(notificationId);
+      
+      // Update local state
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      );
+      
+      // Update unread count
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
+  }, []);
+
+  const handleMarkAllAsRead = useCallback(async () => {
+    try {
+      await markAllNotificationsAsRead();
+      
+      // Update local state
+      setNotifications(prev => 
+        prev.map(n => ({ ...n, is_read: true }))
+      );
+      
+      // Reset unread count
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Error marking all as read:', err);
+    }
+  }, []);
+
   // Load notifications when dropdown opens
   useEffect(() => {
     if (isOpen) {
       loadNotifications();
     }
-  }, [isOpen]);
+  }, [isOpen, loadNotifications]);
 
   // Load unread count on mount and periodically
   useEffect(() => {
@@ -27,7 +83,7 @@ const NotificationDropdown = () => {
     }, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [loadUnreadCount]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -46,63 +102,8 @@ const NotificationDropdown = () => {
     };
   }, [isOpen]);
 
-  const loadNotifications = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getNotifications({ limit: 20 });
-      setNotifications(data);
-    } catch (err) {
-      setError(err.message || 'Failed to load notifications');
-      console.error('Error loading notifications:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadUnreadCount = async () => {
-    try {
-      const count = await getUnreadCount();
-      setUnreadCount(count);
-    } catch (err) {
-      console.error('Error loading unread count:', err);
-    }
-  };
-
   const handleToggleDropdown = () => {
     setIsOpen(!isOpen);
-  };
-
-  const handleMarkAsRead = async (notificationId) => {
-    try {
-      await markNotificationAsRead(notificationId);
-      
-      // Update local state
-      setNotifications(prev => 
-        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
-      );
-      
-      // Update unread count
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (err) {
-      console.error('Error marking notification as read:', err);
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllNotificationsAsRead();
-      
-      // Update local state
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, is_read: true }))
-      );
-      
-      // Reset unread count
-      setUnreadCount(0);
-    } catch (err) {
-      console.error('Error marking all as read:', err);
-    }
   };
 
   const formatTimeAgo = (dateString) => {
