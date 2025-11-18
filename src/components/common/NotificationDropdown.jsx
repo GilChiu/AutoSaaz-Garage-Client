@@ -153,14 +153,27 @@ const NotificationDropdown = () => {
         <div className="notification-dropdown">
           <div className="notification-header">
             <h3>Notifications</h3>
-            {notifications.length > 0 && unreadCount > 0 && (
+            <div className="notification-header-actions">
+              {notifications.length > 0 && unreadCount > 0 && (
+                <button 
+                  className="mark-all-read-btn"
+                  onClick={handleMarkAllAsRead}
+                  title="Mark all as read"
+                >
+                  Mark all read
+                </button>
+              )}
               <button 
-                className="mark-all-read-btn"
-                onClick={handleMarkAllAsRead}
+                className="close-btn"
+                onClick={handleToggleDropdown}
+                aria-label="Close notifications"
               >
-                Mark all as read
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
-            )}
+            </div>
           </div>
 
           <div className="notification-list">
@@ -192,17 +205,38 @@ const NotificationDropdown = () => {
                     {getNotificationIcon(notification.notification_type)}
                   </div>
                   <div className="notification-content">
-                    <div className="notification-title">{notification.title}</div>
+                    <div className="notification-title-row">
+                      <div className="notification-title">{notification.title}</div>
+                      <svg className="external-link-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                    </div>
                     <div className="notification-message">{notification.message}</div>
-                    <div className="notification-time">{formatTimeAgo(notification.created_at)}</div>
+                    <div className="notification-meta">
+                      <span className="notification-time">{formatTimeAgo(notification.created_at)}</span>
+                      <span className="notification-type-badge">
+                        {notification.notification_type === 'booking' && '• Booking'}
+                        {notification.notification_type === 'payment' && '• Payment'}
+                        {notification.notification_type === 'promo' && '• Promotion'}
+                        {notification.notification_type === 'system' && '• System'}
+                        {!notification.notification_type && '• Notification'}
+                      </span>
+                    </div>
                   </div>
-                  {!notification.is_read && (
-                    <div className="unread-indicator"></div>
-                  )}
                 </div>
               ))
             )}
           </div>
+
+          {notifications.length > 0 && (
+            <div className="notification-footer">
+              <button className="view-all-btn" onClick={handleToggleDropdown}>
+                View all notifications
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
