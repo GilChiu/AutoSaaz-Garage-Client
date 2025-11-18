@@ -122,16 +122,54 @@ const NotificationDropdown = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'booking':
+      case 'new_booking':
         return '📅';
+      case 'appointment':
+      case 'appointment_update':
+        return '🗓️';
+      case 'chat':
+      case 'new_message':
+        return '💬';
+      case 'inspection':
+      case 'inspection_request':
+        return '🔍';
       case 'payment':
+      case 'payment_received':
         return '💰';
+      case 'dispute':
+      case 'dispute_update':
+        return '⚠️';
       case 'promo':
+      case 'promotion':
         return '🎁';
       case 'system':
+      case 'system_update':
         return '⚙️';
       default:
         return '🔔';
     }
+  };
+
+  const getNotificationTypeLabel = (type) => {
+    const labels = {
+      'booking': 'New Booking',
+      'new_booking': 'New Booking',
+      'appointment': 'Appointment',
+      'appointment_update': 'Appointment',
+      'chat': 'Message',
+      'new_message': 'Message',
+      'inspection': 'Inspection',
+      'inspection_request': 'Inspection',
+      'payment': 'Payment',
+      'payment_received': 'Payment',
+      'dispute': 'Dispute',
+      'dispute_update': 'Dispute',
+      'promo': 'Promotion',
+      'promotion': 'Promotion',
+      'system': 'System',
+      'system_update': 'System'
+    };
+    return labels[type] || 'Notification';
   };
 
   return (
@@ -217,11 +255,7 @@ const NotificationDropdown = () => {
                     <div className="notification-meta">
                       <span className="notification-time">{formatTimeAgo(notification.created_at)}</span>
                       <span className="notification-type-badge">
-                        {notification.notification_type === 'booking' && '• Booking'}
-                        {notification.notification_type === 'payment' && '• Payment'}
-                        {notification.notification_type === 'promo' && '• Promotion'}
-                        {notification.notification_type === 'system' && '• System'}
-                        {!notification.notification_type && '• Notification'}
+                        • {getNotificationTypeLabel(notification.notification_type)}
                       </span>
                     </div>
                   </div>
