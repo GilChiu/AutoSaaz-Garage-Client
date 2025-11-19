@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabase';
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../services/notifications.service';
+import Sidebar from '../components/Dashboard/Sidebar';
 import './NotificationsPage.css';
+import '../components/Dashboard/Dashboard.css';
 
 // Initialize Supabase client for real-time subscriptions
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -238,64 +240,68 @@ const NotificationsPage = () => {
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
-    <div className="notifications-page">
-      <div className="notifications-page-header">
-        <div className="header-left">
-          <h1>Notifications</h1>
-          {unreadCount > 0 && (
-            <span className="unread-badge">{unreadCount} unread</span>
-          )}
-        </div>
-        <div className="header-right">
-          {unreadCount > 0 && (
-            <button 
-              className="mark-all-read-btn-page"
-              onClick={handleMarkAllAsRead}
-            >
-              Mark all as read
-            </button>
-          )}
-        </div>
-      </div>
+    <div className="dashboard-layout dashboard-tight">
+      <Sidebar />
+      <div className="dashboard-layout-main">
+        <div className="dashboard-layout-content">
+          <div className="notifications-page">
+            <div className="notifications-page-header">
+              <div className="header-left">
+                <h1>Notifications</h1>
+                {unreadCount > 0 && (
+                  <span className="unread-badge">{unreadCount} unread</span>
+                )}
+              </div>
+              <div className="header-right">
+                {unreadCount > 0 && (
+                  <button 
+                    className="mark-all-read-btn-page"
+                    onClick={handleMarkAllAsRead}
+                  >
+                    Mark all as read
+                  </button>
+                )}
+              </div>
+            </div>
 
-      <div className="notifications-page-filters">
-        <button
-          className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-          onClick={() => setFilter('all')}
-        >
-          All ({notifications.length})
-        </button>
-        <button
-          className={`filter-btn ${filter === 'unread' ? 'active' : ''}`}
-          onClick={() => setFilter('unread')}
-        >
-          Unread ({unreadCount})
-        </button>
-        <button
-          className={`filter-btn ${filter === 'read' ? 'active' : ''}`}
-          onClick={() => setFilter('read')}
-        >
-          Read ({notifications.length - unreadCount})
-        </button>
-      </div>
+            <div className="notifications-page-filters">
+              <button
+                className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+                onClick={() => setFilter('all')}
+              >
+                All ({notifications.length})
+              </button>
+              <button
+                className={`filter-btn ${filter === 'unread' ? 'active' : ''}`}
+                onClick={() => setFilter('unread')}
+              >
+                Unread ({unreadCount})
+              </button>
+              <button
+                className={`filter-btn ${filter === 'read' ? 'active' : ''}`}
+                onClick={() => setFilter('read')}
+              >
+                Read ({notifications.length - unreadCount})
+              </button>
+            </div>
 
-      <div className="notifications-page-content">
-        {loading ? (
-          <div className="notifications-loading">
-            <div className="spinner"></div>
-            <p>Loading notifications...</p>
-          </div>
-        ) : error ? (
-          <div className="notifications-error">
-            <p>{error}</p>
-            <button onClick={loadNotifications} className="retry-btn">
-              Retry
-            </button>
-          </div>
-        ) : filteredNotifications.length === 0 ? (
-          <div className="notifications-empty">
-            <div className="empty-icon">🔔</div>
-            <p>No {filter !== 'all' ? filter : ''} notifications</p>
+            <div className="notifications-page-content">
+              {loading ? (
+                <div className="notifications-loading">
+                  <div className="spinner"></div>
+                  <p>Loading notifications...</p>
+                </div>
+              ) : error ? (
+                <div className="notifications-error">
+                  <p>{error}</p>
+                  <button onClick={loadNotifications} className="retry-btn">
+                    Retry
+                  </button>
+                </div>
+              ) : filteredNotifications.length === 0 ? (
+                <div className="notifications-empty">
+                  <div className="empty-icon">🔔</div>
+                  <p>No {filter !== 'all' ? filter : ''} notifications</p>
             <span>
               {filter === 'all' 
                 ? "You'll see updates from bookings, appointments, and more here"
@@ -310,6 +316,13 @@ const NotificationsPage = () => {
                 key={notification.id}
                 className={`notification-item-page ${!notification.is_read ? 'unread' : ''}`}
                 onClick={() => handleNotificationClick(notification)}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleNotificationClick(notification);
+                  }
+                }}
               >
                 {!notification.is_read && <div className="unread-indicator"></div>}
                 
@@ -355,6 +368,9 @@ const NotificationsPage = () => {
             ))}
           </div>
         )}
+      </div>
+          </div>
+        </div>
       </div>
     </div>
   );
