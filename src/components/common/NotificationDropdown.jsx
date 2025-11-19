@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../../config/supabase';
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from '../../services/notifications.service';
 import './NotificationDropdown.css';
+
+// Initialize Supabase client for real-time subscriptions
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -77,12 +82,87 @@ const NotificationDropdown = () => {
   useEffect(() => {
     loadUnreadCount();
     
-    // Poll for new notifications every 60 seconds
+    // Poll for new notifications every 30 seconds (reduced from 60)
     const interval = setInterval(() => {
       loadUnreadCount();
-    }, 60000);
+      // Also reload notifications if dropdown is open
+      if (isOpen) {
+        loadNotifications();
+      }
+    }, 30000);
 
     return () => clearInterval(interval);
+  }, [loadUnreadCount, loadNotifications, isOpen]);
+
+  // Real-time subscription to garage_notifications table
+  useEffect(() => {
+    console.log('=== SETTING UP REAL-TIME NOTIFICATION SUBSCRIPTION ===');
+    
+    const channel = supabase
+      .channel('garage-notifications-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'garage_notifications'
+        },
+        (payload) => {
+          console.log('=== NEW NOTIFICATION RECEIVED (REAL-TIME) ===', payload);
+          
+          // Add new notification to the list
+          setNotifications(prev => [payload.new, ...prev]);
+          
+          // Increment unread count
+          setUnreadCount(prev => prev + 1);
+          
+          // Show browser notification if supported and permitted
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(payload.new.title || 'New Notification', {
+              body: payload.new.message,
+              icon: '/logo192.png',
+              badge: '/logo192.png',
+              tag: payload.new.id
+            });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'garage_notifications'
+        },
+        (payload) => {
+          console.log('=== NOTIFICATION UPDATED (REAL-TIME) ===', payload);
+          
+          // Update notification in the list
+          setNotifications(prev => 
+            prev.map(n => n.id === payload.new.id ? payload.new : n)
+          );
+          
+          // Recalculate unread count if read status changed
+          if (payload.old.is_read !== payload.new.is_read) {
+            loadUnreadCount();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('=== REAL-TIME SUBSCRIPTION STATUS ===', status);
+      });
+
+    // Request notification permission on mount
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        console.log('Notification permission:', permission);
+      });
+    }
+
+    return () => {
+      console.log('=== CLEANING UP REAL-TIME SUBSCRIPTION ===');
+      supabase.removeChannel(channel);
+    };
   }, [loadUnreadCount]);
 
   // Close dropdown when clicking outside
