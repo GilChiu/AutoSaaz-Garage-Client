@@ -17,6 +17,7 @@ import BookingDetailPage from './pages/BookingDetailPage';
 import InspectionsPage from './pages/InspectionsPage';
 import InspectionDetailPage from './pages/InspectionDetailPage';
 import ChatsPage from './pages/ChatsPage';
+import NotificationsPage from './pages/NotificationsPage';
 // import ResolutionCenterPage from './pages/ResolutionCenterPage'; // legacy placeholder (no longer used)
 import ResolutionNewDisputesPage from './pages/ResolutionNewDisputesPage';
 import ResolutionResolvedDisputesPage from './pages/ResolutionResolvedDisputesPage';
@@ -92,6 +93,11 @@ const App = () => {
               <Route path="/chats" element={
                 <ProtectedRoute>
                   <ChatsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/notifications" element={
+                <ProtectedRoute>
+                  <NotificationsPage />
                 </ProtectedRoute>
               } />
               <Route path="/resolution-center" element={

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../../config/supabase';
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from '../../services/notifications.service';
@@ -8,6 +9,7 @@ import './NotificationDropdown.css';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const NotificationDropdown = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -54,6 +56,81 @@ const NotificationDropdown = () => {
       console.error('Error marking notification as read:', err);
     }
   }, []);
+
+  const handleNotificationClick = useCallback(async (notification) => {
+    // Close dropdown
+    setIsOpen(false);
+
+    // Mark as read if unread
+    if (!notification.is_read) {
+      handleMarkAsRead(notification.id);
+    }
+
+    // Navigate based on notification type and data
+    const data = notification.data || {};
+    const relatedEntityId = notification.related_entity_id || data.booking_id || data.appointment_id || data.inspection_id || data.dispute_id;
+
+    switch (notification.notification_type) {
+      case 'new_booking':
+      case 'booking_confirmed':
+      case 'booking_cancelled':
+      case 'booking_completed':
+      case 'booking_updated':
+        if (relatedEntityId) {
+          navigate(`/bookings/${relatedEntityId}`);
+        } else {
+          navigate('/bookings');
+        }
+        break;
+
+      case 'appointment':
+      case 'appointment_update':
+        if (relatedEntityId) {
+          navigate(`/appointments/${relatedEntityId}`);
+        } else {
+          navigate('/appointments');
+        }
+        break;
+
+      case 'inspection':
+      case 'inspection_request':
+        if (relatedEntityId) {
+          navigate(`/inspections/${relatedEntityId}`);
+        } else {
+          navigate('/inspections');
+        }
+        break;
+
+      case 'dispute_opened':
+      case 'dispute_resolved':
+      case 'dispute_update':
+        if (relatedEntityId) {
+          navigate(`/resolution-center/disputes/${relatedEntityId}`);
+        } else {
+          navigate('/resolution-center');
+        }
+        break;
+
+      case 'chat':
+      case 'new_message':
+        navigate('/chats');
+        break;
+
+      case 'payment_received':
+      case 'payment_pending':
+        if (relatedEntityId) {
+          navigate(`/bookings/${relatedEntityId}`);
+        } else {
+          navigate('/bookings');
+        }
+        break;
+
+      default:
+        // For system alerts, stay or go to notifications page
+        navigate('/notifications');
+        break;
+    }
+  }, [navigate, handleMarkAsRead]);
 
   const handleMarkAllAsRead = useCallback(async () => {
     try {
@@ -317,7 +394,14 @@ const NotificationDropdown = () => {
                 <div 
                   key={notification.id}
                   className={`notification-item ${!notification.is_read ? 'unread' : ''}`}
-                  onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleNotificationClick(notification);
+                    }
+                  }}
                 >
                   <div className="notification-icon">
                     {getNotificationIcon(notification.notification_type)}
@@ -346,7 +430,13 @@ const NotificationDropdown = () => {
 
           {notifications.length > 0 && (
             <div className="notification-footer">
-              <button className="view-all-btn" onClick={handleToggleDropdown}>
+              <button 
+                className="view-all-btn" 
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate('/notifications');
+                }}
+              >
                 View all notifications
               </button>
             </div>
