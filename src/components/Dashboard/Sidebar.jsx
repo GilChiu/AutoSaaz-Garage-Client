@@ -92,13 +92,9 @@ const Sidebar = () => {
             <div className="dashboard-sidebar-header">
                 <div className="dashboard-logo">
                     <img 
-                        src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
+                        src="/autoSaaz-logo.png"
                         alt="AutoSaaz - One Stop Auto Shop" 
                         className="dashboard-logo-image"
-                        onError={(e) => {
-                            e.target.style.display = 'none';
-                            console.error('Logo failed to load');
-                        }}
                     />
                     <div className="dashboard-logo-text">
                         <span className="dashboard-logo-name">AutoSaaz</span>
