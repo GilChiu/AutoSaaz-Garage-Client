@@ -116,19 +116,33 @@ const VerificationPage = () => {
         } catch (err) {
             console.error('Verification error:', err);
             
-            // Handle specific backend errors
-            if (err.message.includes('expired') || err.message.includes('Session')) {
+            // Get the error message from the response
+            const errorMessage = err.response?.data?.message || err.message || 'Verification failed';
+            
+            console.log('Error message received:', errorMessage);
+            
+            // Handle specific backend errors with precise matching
+            if (errorMessage.includes('Invalid or expired session')) {
+                // Only this specific message triggers session expiration
                 setError('Registration session expired. Please start the registration process again.');
-                // Clear any stale session data
                 localStorage.removeItem('registrationSessionId');
                 localStorage.removeItem('sessionExpiresAt');
-                setTimeout(() => navigate('/register'), 2000);
-            } else if (err.message.includes('Invalid') || err.message.includes('code')) {
-                setError('Invalid verification code. Please try again.');
-            } else if (err.message.includes('attempts') || err.message.includes('Maximum')) {
-                setError('Too many verification attempts. Please request a new code.');
+                setTimeout(() => navigate('/register'), 3000);
+            } else if (errorMessage.includes('Invalid or expired verification code')) {
+                // Wrong code entered
+                setError('Invalid verification code. Please check and try again.');
+            } else if (errorMessage.includes('Too many verification attempts')) {
+                // Rate limit reached
+                setError('Too many attempts. Please request a new verification code.');
+            } else if (errorMessage.includes('Session ID and verification code are required')) {
+                // Missing data - likely session expired
+                setError('Session expired. Please register again.');
+                localStorage.removeItem('registrationSessionId');
+                localStorage.removeItem('sessionExpiresAt');
+                setTimeout(() => navigate('/register'), 3000);
             } else {
-                setError(err.message || 'Verification failed. Please try again.');
+                // Generic error
+                setError(errorMessage);
             }
         } finally {
             setLoading(false);
@@ -158,13 +172,21 @@ const VerificationPage = () => {
         } catch (err) {
             console.error('Resend OTP error:', err);
             
-            if (err.message.includes('expired') || err.message.includes('Session')) {
-                setError('Registration session expired. Please start the registration process again.');
+            // Get the error message from the response
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to resend code';
+            
+            console.log('Resend error message:', errorMessage);
+            
+            // Only redirect if truly a session expiration error
+            if (errorMessage.includes('Invalid or expired session') || 
+                errorMessage.includes('Session ID') || 
+                errorMessage.includes('session expired')) {
+                setError('Registration session expired. Please start over.');
                 localStorage.removeItem('registrationSessionId');
                 localStorage.removeItem('sessionExpiresAt');
-                setTimeout(() => navigate('/register'), 2000);
+                setTimeout(() => navigate('/register'), 3000);
             } else {
-                setError(err.message || 'Failed to resend code. Please try again.');
+                setError(errorMessage);
             }
         } finally {
             setResendLoading(false);
