@@ -4,6 +4,9 @@
  */
 
 import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import cache from '../utils/cache';
+import { retryApiCall } from '../utils/retry';
+
 const API_BASE_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL;
 
 function headers() {
@@ -19,23 +22,40 @@ function headers() {
  * Get user profile with additional details
  */
 export const getUserProfile = async () => {
+  const endpoint = '/auth-profile';
+  
+  // Check cache first (3 minutes TTL)
+  const cached = cache.get(endpoint);
+  if (cached) {
+    console.debug('[profileApi] GET /auth-profile FROM CACHE');
+    return cached;
+  }
+  
   try {
     console.log('=== GET USER PROFILE START ===');
     
-    const response = await fetch(`${API_BASE_URL}/auth-profile`, {
-      method: 'GET',
-      headers: headers(),
-    });
+    // Use retry logic for resilience
+    const data = await retryApiCall(async () => {
+      const response = await fetch(`${API_BASE_URL}/auth-profile`, {
+        method: 'GET',
+        headers: headers(),
+      });
 
-    console.log('Profile Response Status:', response.status);
-    console.log('Profile Response OK:', response.ok);
+      console.log('Profile Response Status:', response.status);
+      console.log('Profile Response OK:', response.ok);
 
-    const data = await response.json();
-    console.log('Profile Response Data:', data);
+      const data = await response.json();
+      console.log('Profile Response Data:', data);
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch profile');
-    }
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch profile');
+      }
+
+      return data;
+    }, `GET ${endpoint}`);
+    
+    // Cache the result (3 minutes)
+    cache.set(endpoint, {}, data, 180);
 
     console.log('=== GET USER PROFILE SUCCESS ===');
     return data;
@@ -99,6 +119,10 @@ export const updateUserProfile = async (profileData) => {
     }
 
     console.log('=== UPDATE USER PROFILE SUCCESS ===');
+    
+    // Invalidate profile cache after update
+    cache.invalidatePattern('auth-profile');
+    
     return data;
   } catch (error) {
     console.error('=== UPDATE USER PROFILE ERROR ===');
@@ -123,6 +147,10 @@ export const changePassword = async (newPassword) => {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || 'Failed to change password');
+    
+    // Invalidate profile cache after password change
+    cache.invalidatePattern('auth-profile');
+    
     return data;
   } catch (error) {
     console.error('=== CHANGE PASSWORD ERROR ===');

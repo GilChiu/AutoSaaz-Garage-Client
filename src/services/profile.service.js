@@ -1,5 +1,7 @@
 import { FUNCTIONS_URL, SUPABASE_ANON_KEY, SUPABASE_URL } from '../config/supabase';
 import { createClient } from '@supabase/supabase-js';
+import cache from '../utils/cache';
+import { retryApiCall } from '../utils/retry';
 
 /**
  * Get Supabase client for storage operations
@@ -16,6 +18,15 @@ const getSupabaseClient = () => {
  * @returns {Promise<Object>} Profile data
  */
 export const getGarageProfile = async () => {
+  const endpoint = '/auth-profile';
+  
+  // Check cache first (3 minutes TTL)
+  const cached = cache.get(endpoint);
+  if (cached) {
+    console.debug('[profile.service] GET /auth-profile FROM CACHE');
+    return cached;
+  }
+  
   try {
     const token = localStorage.getItem('accessToken');
     
@@ -23,20 +34,28 @@ export const getGarageProfile = async () => {
       throw new Error('No authentication token found');
     }
 
-    const response = await fetch(`${FUNCTIONS_URL}/auth-profile`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'x-access-token': token,
-      },
-    });
+    // Use retry logic for resilience
+    const data = await retryApiCall(async () => {
+      const response = await fetch(`${FUNCTIONS_URL}/auth-profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'x-access-token': token,
+        },
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch profile');
-    }
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch profile');
+      }
+
+      return data;
+    }, `GET ${endpoint}`);
+    
+    // Cache the result (3 minutes)
+    cache.set(endpoint, {}, data, 180);
 
     return data;
   } catch (error) {
@@ -83,6 +102,9 @@ export const updateGarageProfile = async (profileData) => {
     }
 
     console.log('Profile updated successfully:', data);
+    
+    // Invalidate profile cache after update
+    cache.invalidatePattern('auth-profile');
 
     return data;
   } catch (error) {
@@ -152,6 +174,9 @@ export const uploadProfileLogo = async (file) => {
       .getPublicUrl(filePath);
 
     console.log('Logo uploaded successfully:', publicUrl);
+    
+    // Invalidate profile cache after logo upload (profile data may include logoUrl)
+    cache.invalidatePattern('auth-profile');
 
     return publicUrl;
   } catch (error) {

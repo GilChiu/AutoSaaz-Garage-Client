@@ -1,5 +1,7 @@
 import DEV_CONFIG from '../config/dev';
 import { SUPABASE_ANON_KEY } from '../config/supabase';
+import cache from '../utils/cache';
+import { retryApiCall } from '../utils/retry';
 
 /**
  * Gets authentication token from localStorage
@@ -32,18 +34,35 @@ const garageServicesService = {
    * @returns {Promise<Array>} Array of service objects
    */
   async getGarageServices() {
-    const response = await fetch(`${DEV_CONFIG.API_BASE_URL}/garage-services`, {
-      method: 'GET',
-      headers: getHeaders()
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to fetch services' }));
-      throw new Error(error.message || 'Failed to fetch services');
+    const endpoint = '/garage-services';
+    
+    // Check cache first (3 minutes TTL)
+    const cached = cache.get(endpoint);
+    if (cached) {
+      console.debug('[garageServices.service] GET /garage-services FROM CACHE');
+      return cached;
     }
+    
+    // Use retry logic for resilience
+    const services = await retryApiCall(async () => {
+      const response = await fetch(`${DEV_CONFIG.API_BASE_URL}/garage-services`, {
+        method: 'GET',
+        headers: getHeaders()
+      });
 
-    const result = await response.json();
-    return result.data?.services || [];
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Failed to fetch services' }));
+        throw new Error(error.message || 'Failed to fetch services');
+      }
+
+      const result = await response.json();
+      return result.data?.services || [];
+    }, `GET ${endpoint}`);
+    
+    // Cache the result (3 minutes)
+    cache.set(endpoint, {}, services, 180);
+    
+    return services;
   },
 
   /**
@@ -68,6 +87,10 @@ const garageServicesService = {
     }
 
     const result = await response.json();
+    
+    // Invalidate services cache after creation
+    cache.invalidatePattern('garage-services');
+    
     return result.data?.service;
   },
 
@@ -90,6 +113,10 @@ const garageServicesService = {
     }
 
     const result = await response.json();
+    
+    // Invalidate services cache after update
+    cache.invalidatePattern('garage-services');
+    
     return result.data?.service;
   },
 
@@ -108,6 +135,9 @@ const garageServicesService = {
       const error = await response.json().catch(() => ({ message: 'Failed to delete service' }));
       throw new Error(error.message || 'Failed to delete service');
     }
+    
+    // Invalidate services cache after deletion
+    cache.invalidatePattern('garage-services');
 
     return true;
   }
