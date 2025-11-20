@@ -19,6 +19,7 @@ const SettingsProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef(null);
 
   // Load profile data on component mount
@@ -55,6 +56,8 @@ const SettingsProfilePage = () => {
       setError(err.message || 'Failed to load profile data');
     } finally {
       setLoading(false);
+      // Small delay to ensure DOM updates and CSS applies properly
+      setTimeout(() => setMounted(true), 50);
     }
   };
 
@@ -221,7 +224,7 @@ const SettingsProfilePage = () => {
                   </div>
                 </div>
               ) : (
-                <form className="profile-form" onSubmit={handleSave}>
+                <form className={`profile-form ${mounted ? 'profile-form-visible' : ''}`} onSubmit={handleSave}>
                   {error && (
                     <div style={{ 
                       padding: '12px 16px', 

@@ -1,5 +1,6 @@
 .profile-settings-card { position:relative; }
-.profile-form { display:flex; flex-direction:column; gap:28px; }
+.profile-form { display:flex; flex-direction:column; gap:28px; opacity: 0; transition: opacity 0.2s ease-in; }
+.profile-form-visible { opacity: 1; }
 .profile-avatar-block { display:flex; }
 .profile-avatar-btn { background:none; border:0; padding:0; cursor:pointer; position:relative; }
 .profile-avatar-circle { width:112px; height:112px; border-radius:50%; background:#111; color:#fff; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:600; position:relative; overflow:hidden; }
