@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { getGarageProfile, updateGarageProfile, uploadProfileLogo } from '../services/profile.service';
 import Sidebar from '../components/Dashboard/Sidebar';
 import '../components/Dashboard/Dashboard.css';
@@ -71,13 +71,16 @@ const SettingsProfilePage = () => {
       console.log('🔵 [loadProfile] Finally block - setLoading(false)');
       setLoading(false);
       console.log('🔵 [loadProfile] Loading state set to false, scheduling mounted state...');
-      // Small delay to ensure DOM updates and CSS applies properly
-      setTimeout(() => {
-        console.log('✅ [loadProfile] Setting mounted to true (50ms delay complete)');
-        setMounted(true);
-      }, 50);
     }
   };
+
+  // Use useLayoutEffect to set mounted immediately after loading changes
+  useLayoutEffect(() => {
+    if (!loading) {
+      console.log('✅ [useLayoutEffect] Loading is false, setting mounted to true immediately');
+      setMounted(true);
+    }
+  }, [loading]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
