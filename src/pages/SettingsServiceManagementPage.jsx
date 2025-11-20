@@ -28,7 +28,7 @@ const SettingsServiceManagementPage = () => {
       const fetchedServices = await garageServicesService.getGarageServices();
       setServices(fetchedServices);
     } catch (err) {
-      console.error('Error loading services:', err);
+
       setError(err.message || 'Failed to load services');
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ const SettingsServiceManagementPage = () => {
       
       cancel();
     } catch (err) {
-      console.error('Error saving service:', err);
+
       setError(err.message || 'Failed to save service');
     } finally {
       setSaving(false);
@@ -86,7 +86,7 @@ const SettingsServiceManagementPage = () => {
       setServices(s => s.filter(x => x.id !== id));
       cancel();
     } catch (err) {
-      console.error('Error deleting service:', err);
+
       setError(err.message || 'Failed to delete service');
     } finally {
       setSaving(false);

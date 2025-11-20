@@ -24,17 +24,17 @@ const NewDisputesPage = () => {
     (async () => {
       try {
         setLoading(true);
-        console.log('[ResolutionNewDisputesPage] Fetching new disputes...');
+
         const data = await getDisputes('new', controller.signal);
-        console.log('[ResolutionNewDisputesPage] Received data:', data);
-        console.log('[ResolutionNewDisputesPage] Data count:', data?.length);
+
+
         const mapped = data.map(mapDispute);
-        console.log('[ResolutionNewDisputesPage] Mapped disputes:', mapped);
-        console.log('[ResolutionNewDisputesPage] Mapped count:', mapped.length);
+
+
         setItems(mapped);
       } catch (e) {
         if (e.name !== 'AbortError') {
-          console.error('[ResolutionNewDisputesPage] Error loading disputes:', e);
+
           setError('Failed to load disputes');
         }
       } finally {
@@ -55,7 +55,7 @@ const NewDisputesPage = () => {
           setBookings(data);
         } catch (e) {
           if (e.name !== 'AbortError') {
-            console.error('Failed to load bookings:', e);
+
           }
         } finally {
           setLoadingBookings(false);

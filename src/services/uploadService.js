@@ -85,13 +85,6 @@ export const uploadEmiratesId = async (file, sessionId) => {
     // Path format: registration/{sessionId}/{fileName}
     const filePath = `registration/${sessionId}/${fileName}`;
 
-    console.log('Uploading Emirates ID:', {
-      fileName,
-      filePath,
-      fileSize: file.size,
-      fileType: file.type
-    });
-
     // Upload file to garage-documents bucket
     const { error: uploadError } = await supabase.storage
       .from('garage-documents')
@@ -102,8 +95,6 @@ export const uploadEmiratesId = async (file, sessionId) => {
       });
 
     if (uploadError) {
-      console.error('Supabase upload error:', uploadError);
-      
       // Handle specific error cases
       if (uploadError.message.includes('Duplicate')) {
         throw new Error('File already exists. Please try again.');
@@ -117,11 +108,8 @@ export const uploadEmiratesId = async (file, sessionId) => {
       .from('garage-documents')
       .getPublicUrl(filePath);
 
-    console.log('Emirates ID uploaded successfully:', publicUrl);
-
     return publicUrl;
   } catch (error) {
-    console.error('Error uploading Emirates ID:', error);
     throw error;
   }
 };
@@ -143,27 +131,21 @@ export const deleteEmiratesId = async (fileUrl) => {
     // URL format: https://{project}.supabase.co/storage/v1/object/public/garage-documents/{path}
     const urlParts = fileUrl.split('/garage-documents/');
     if (urlParts.length < 2) {
-      console.warn('Invalid file URL format:', fileUrl);
       return false;
     }
 
     const filePath = urlParts[1];
-
-    console.log('Deleting Emirates ID file:', filePath);
 
     const { error } = await supabase.storage
       .from('garage-documents')
       .remove([filePath]);
 
     if (error) {
-      console.error('Error deleting file:', error);
       return false;
     }
 
-    console.log('File deleted successfully');
     return true;
   } catch (error) {
-    console.error('Error in deleteEmiratesId:', error);
     return false;
   }
 };

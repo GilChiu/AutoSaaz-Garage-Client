@@ -39,8 +39,6 @@ function getHeaders() {
  */
 export async function getAppointments(signal, params = {}) {
   try {
-    console.log('=== FETCHING APPOINTMENTS FROM API ===');
-    
     // Build query string
     const queryParams = new URLSearchParams();
     if (params.status) queryParams.append('status', params.status);
@@ -59,13 +57,11 @@ export async function getAppointments(signal, params = {}) {
     if (!signal?.aborted) {
       const cached = cache.get(endpoint);
       if (cached) {
-        console.log('=== APPOINTMENTS FROM CACHE ===');
         return cached;
       }
     }
 
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log('API URL:', url);
 
     // Use retry logic for resilience
     const result = await retryApiCall(async () => {
@@ -73,8 +69,6 @@ export async function getAppointments(signal, params = {}) {
         headers: getHeaders(),
         signal
       });
-
-      console.log('Response Status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -84,24 +78,15 @@ export async function getAppointments(signal, params = {}) {
       return await response.json();
     }, `GET ${endpoint}`);
     
-    console.log('API Response:', result);
-    
     // Handle both array response and paginated response
     const apiAppointments = Array.isArray(result.data) ? result.data : (result.data?.appointments || []);
     
     // Cache the result
     cache.set(endpoint, {}, apiAppointments);
     
-    console.log('Raw API Appointments:', apiAppointments);
-    console.log('=== APPOINTMENTS FETCH SUCCESS ===');
-    
     return apiAppointments;
 
   } catch (error) {
-    console.error('=== APPOINTMENTS FETCH ERROR ===');
-    console.error('Error Type:', error.name);
-    console.error('Error Message:', error.message);
-    
     if (error.name === 'AbortError') {
       throw error; // Don't handle aborted requests
     }
@@ -119,15 +104,12 @@ export async function getAppointments(signal, params = {}) {
  */
 export async function getAppointmentById(id, signal) {
   try {
-    console.log('=== FETCHING APPOINTMENT BY ID ===', id);
-    
     const endpoint = `/appointments/${id}`;
     
     // Check cache first
     if (!signal?.aborted) {
       const cached = cache.get(endpoint);
       if (cached) {
-        console.log('=== APPOINTMENT FROM CACHE ===');
         return cached;
       }
     }
@@ -138,8 +120,6 @@ export async function getAppointmentById(id, signal) {
         headers: getHeaders(),
         signal
       });
-
-      console.log('Response Status:', response.status);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -161,13 +141,9 @@ export async function getAppointmentById(id, signal) {
     // Cache the result
     cache.set(endpoint, {}, appointment);
     
-    console.log('=== APPOINTMENT FETCH SUCCESS ===');
     return appointment;
 
   } catch (error) {
-    console.error('=== APPOINTMENT FETCH ERROR ===');
-    console.error('Error:', error.message);
-    
     if (error.name === 'AbortError') {
       throw error;
     }
@@ -184,8 +160,6 @@ export async function getAppointmentById(id, signal) {
  */
 export async function updateAppointment(id, updateData) {
   try {
-    console.log('=== UPDATING APPOINTMENT ===', id, updateData);
-    
     const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
       method: 'PATCH',
       headers: getHeaders(),
@@ -205,11 +179,9 @@ export async function updateAppointment(id, updateData) {
     cache.invalidate(`/appointments/${id}`);
     cache.invalidatePattern('dashboard');
     
-    console.log('=== APPOINTMENT UPDATED ===');
     return appointment;
 
   } catch (error) {
-    console.error('Failed to update appointment:', error);
     throw error;
   }
 }
@@ -221,8 +193,6 @@ export async function updateAppointment(id, updateData) {
  */
 export async function createAppointment(appointmentData) {
   try {
-    console.log('=== CREATING APPOINTMENT ===', appointmentData);
-    
     const response = await fetch(`${API_BASE_URL}/appointments`, {
       method: 'POST',
       headers: getHeaders(),
@@ -241,11 +211,9 @@ export async function createAppointment(appointmentData) {
     cache.invalidatePattern('appointments');
     cache.invalidatePattern('dashboard');
     
-    console.log('=== APPOINTMENT CREATED ===');
     return appointment;
 
   } catch (error) {
-    console.error('Failed to create appointment:', error);
     throw error;
   }
 }
@@ -257,8 +225,6 @@ export async function createAppointment(appointmentData) {
  */
 export async function deleteAppointment(id) {
   try {
-    console.log('=== DELETING APPOINTMENT ===', id);
-    
     const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
       method: 'DELETE',
       headers: getHeaders(),
@@ -274,11 +240,9 @@ export async function deleteAppointment(id) {
     cache.invalidate(`/appointments/${id}`);
     cache.invalidatePattern('dashboard');
 
-    console.log('=== APPOINTMENT DELETED ===');
     return true;
 
   } catch (error) {
-    console.error('Failed to delete appointment:', error);
     throw error;
   }
 }
@@ -340,8 +304,6 @@ export function mapDetailedAppointment(raw) {
  */
 export async function acceptAppointment(id) {
   try {
-    console.log('=== ACCEPTING APPOINTMENT ===', id);
-    
     const response = await fetch(`${API_BASE_URL}/appointments/${id}/accept`, {
       method: 'POST',
       headers: getHeaders(),
@@ -355,11 +317,9 @@ export async function acceptAppointment(id) {
     const result = await response.json();
     const appointment = result.data || result;
     
-    console.log('=== APPOINTMENT ACCEPTED ===');
     return appointment;
 
   } catch (error) {
-    console.error('Failed to accept appointment:', error);
     throw error;
   }
 }
@@ -371,8 +331,6 @@ export async function acceptAppointment(id) {
  */
 export async function cancelAppointment(id) {
   try {
-    console.log('=== CANCELLING APPOINTMENT ===', id);
-    
     const response = await fetch(`${API_BASE_URL}/appointments/${id}/cancel`, {
       method: 'POST',
       headers: getHeaders(),
@@ -386,11 +344,9 @@ export async function cancelAppointment(id) {
     const result = await response.json();
     const appointment = result.data || result;
     
-    console.log('=== APPOINTMENT CANCELLED ===');
     return appointment;
 
   } catch (error) {
-    console.error('Failed to cancel appointment:', error);
     throw error;
   }
 }

@@ -24,7 +24,7 @@ const InspectionsPage = ({ type }) => {
                 setInspections(data);
             } catch (err) {
                 setError('Failed to load inspections');
-                console.error('Error fetching inspections:', err);
+
             } finally {
                 setLoading(false);
             }

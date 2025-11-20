@@ -50,7 +50,7 @@ const SettingsProfilePage = () => {
         }
       }
     } catch (err) {
-      console.error('Error loading profile:', err);
+
       setError(err.message || 'Failed to load profile data');
     } finally {
       setLoading(false);
@@ -108,9 +108,9 @@ const SettingsProfilePage = () => {
       // Upload new logo if file was selected
       if (logoFile) {
         setUploadingLogo(true);
-        console.log('Uploading new logo...');
+
         logoUrl = await uploadProfileLogo(logoFile);
-        console.log('Logo uploaded successfully:', logoUrl);
+
         setUploadingLogo(false);
       }
 
@@ -123,8 +123,6 @@ const SettingsProfilePage = () => {
         offDays: profile.offDays,
         logoUrl: logoUrl || null,
       };
-
-      console.log('Updating profile with data:', updateData);
 
       const response = await updateGarageProfile(updateData);
       
@@ -145,8 +143,7 @@ const SettingsProfilePage = () => {
             ...response.data.profile
           };
           localStorage.setItem('profile', JSON.stringify(updatedProfile));
-          console.log('✅ Profile updated in localStorage:', updatedProfile);
-          
+
           // Trigger storage event for other components (like UpperNavbar) to refresh
           window.dispatchEvent(new Event('storage'));
         }
@@ -164,7 +161,7 @@ const SettingsProfilePage = () => {
         throw new Error(response.message || 'Update failed');
       }
     } catch (err) {
-      console.error('Error saving profile:', err);
+
       setError(err.message || 'Failed to save profile. Please try again.');
     } finally {
       setSaving(false);

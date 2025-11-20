@@ -26,7 +26,7 @@ const NotificationDropdown = () => {
       setNotifications(data);
     } catch (err) {
       setError(err.message || 'Failed to load notifications');
-      console.error('Error loading notifications:', err);
+
     } finally {
       setLoading(false);
     }
@@ -37,7 +37,7 @@ const NotificationDropdown = () => {
       const count = await getUnreadCount();
       setUnreadCount(count);
     } catch (err) {
-      console.error('Error loading unread count:', err);
+
     }
   }, []);
 
@@ -53,7 +53,7 @@ const NotificationDropdown = () => {
       // Update unread count
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (err) {
-      console.error('Error marking notification as read:', err);
+
     }
   }, []);
 
@@ -144,7 +144,7 @@ const NotificationDropdown = () => {
       // Reset unread count
       setUnreadCount(0);
     } catch (err) {
-      console.error('Error marking all as read:', err);
+
     }
   }, []);
 
@@ -173,8 +173,7 @@ const NotificationDropdown = () => {
 
   // Real-time subscription to garage_notifications table
   useEffect(() => {
-    console.log('=== SETTING UP REAL-TIME NOTIFICATION SUBSCRIPTION ===');
-    
+
     const channel = supabase
       .channel('garage-notifications-realtime')
       .on(
@@ -185,8 +184,7 @@ const NotificationDropdown = () => {
           table: 'garage_notifications'
         },
         (payload) => {
-          console.log('=== NEW NOTIFICATION RECEIVED (REAL-TIME) ===', payload);
-          
+
           // Add new notification to the list
           setNotifications(prev => [payload.new, ...prev]);
           
@@ -212,8 +210,7 @@ const NotificationDropdown = () => {
           table: 'garage_notifications'
         },
         (payload) => {
-          console.log('=== NOTIFICATION UPDATED (REAL-TIME) ===', payload);
-          
+
           // Update notification in the list
           setNotifications(prev => 
             prev.map(n => n.id === payload.new.id ? payload.new : n)
@@ -226,18 +223,18 @@ const NotificationDropdown = () => {
         }
       )
       .subscribe((status) => {
-        console.log('=== REAL-TIME SUBSCRIPTION STATUS ===', status);
+
       });
 
     // Request notification permission on mount
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission().then(permission => {
-        console.log('Notification permission:', permission);
+
       });
     }
 
     return () => {
-      console.log('=== CLEANING UP REAL-TIME SUBSCRIPTION ===');
+
       supabase.removeChannel(channel);
     };
   }, [loadUnreadCount]);

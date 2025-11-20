@@ -108,12 +108,10 @@ const get = (endpoint, params = {}) => {
     const { data, expiresAt } = memoryCache.get(key);
     
     if (Date.now() < expiresAt) {
-      console.log(`[Cache] Memory hit: ${key}`);
       return data;
     } else {
       // Expired - remove from memory
       memoryCache.delete(key);
-      console.log(`[Cache] Memory expired: ${key}`);
     }
   }
   
@@ -127,20 +125,17 @@ const get = (endpoint, params = {}) => {
         if (Date.now() < expiresAt) {
           // Restore to memory cache for faster subsequent access
           memoryCache.set(key, { data, expiresAt });
-          console.log(`[Cache] localStorage hit: ${key}`);
           return data;
         } else {
           // Expired - remove from localStorage
           localStorage.removeItem(`cache_${key}`);
-          console.log(`[Cache] localStorage expired: ${key}`);
         }
       }
     } catch (error) {
-      console.warn(`[Cache] localStorage read error:`, error);
+      // localStorage read error handled silently
     }
   }
   
-  console.log(`[Cache] Miss: ${key}`);
   return null;
 };
 
@@ -158,15 +153,12 @@ const set = (endpoint, params = {}, data, customTTL = null) => {
   
   // Always cache in memory (fast access)
   memoryCache.set(key, { data, expiresAt });
-  console.log(`[Cache] Memory set: ${key} TTL: ${ttl}s`);
   
   // Also cache in localStorage (persistent) unless sensitive
   if (!isMemoryOnly(key)) {
     try {
       localStorage.setItem(`cache_${key}`, JSON.stringify({ data, expiresAt }));
-      console.log(`[Cache] localStorage set: ${key}`);
     } catch (error) {
-      console.warn(`[Cache] localStorage write error:`, error);
       // localStorage might be full or disabled - continue with memory cache only
     }
   }
@@ -183,9 +175,8 @@ const invalidate = (endpoint, params = {}) => {
   memoryCache.delete(key);
   try {
     localStorage.removeItem(`cache_${key}`);
-    console.log(`[Cache] Invalidated: ${key}`);
   } catch (error) {
-    console.warn(`[Cache] Invalidation error:`, error);
+    // Invalidation error handled silently
   }
 };
 
@@ -194,13 +185,10 @@ const invalidate = (endpoint, params = {}) => {
  * @param {string} pattern - Pattern to match (e.g., 'bookings', 'appointments')
  */
 const invalidatePattern = (pattern) => {
-  let count = 0;
-  
   // Invalidate memory cache
   for (const key of memoryCache.keys()) {
     if (key.includes(pattern)) {
       memoryCache.delete(key);
-      count++;
     }
   }
   
@@ -214,12 +202,9 @@ const invalidatePattern = (pattern) => {
       }
     }
     keysToRemove.forEach(key => localStorage.removeItem(key));
-    count += keysToRemove.length;
   } catch (error) {
-    console.warn(`[Cache] Pattern invalidation error:`, error);
+    // Pattern invalidation error handled silently
   }
-  
-  console.log(`[Cache] Invalidated ${count} entries matching: ${pattern}`);
 };
 
 /**
@@ -237,9 +222,8 @@ const clear = () => {
       }
     }
     keysToRemove.forEach(key => localStorage.removeItem(key));
-    console.log(`[Cache] Cleared all cache (${keysToRemove.length} entries)`);
   } catch (error) {
-    console.warn(`[Cache] Clear error:`, error);
+    // Clear error handled silently
   }
 };
 
@@ -247,14 +231,12 @@ const clear = () => {
  * Cleanup expired entries (run periodically)
  */
 const cleanup = () => {
-  let count = 0;
   const now = Date.now();
   
   // Cleanup memory cache
   for (const [key, { expiresAt }] of memoryCache.entries()) {
     if (now >= expiresAt) {
       memoryCache.delete(key);
-      count++;
     }
   }
   
@@ -276,13 +258,8 @@ const cleanup = () => {
       }
     }
     keysToRemove.forEach(key => localStorage.removeItem(key));
-    count += keysToRemove.length;
   } catch (error) {
-    console.warn(`[Cache] Cleanup error:`, error);
-  }
-  
-  if (count > 0) {
-    console.log(`[Cache] Cleaned up ${count} expired entries`);
+    // Cleanup error handled silently
   }
 };
 

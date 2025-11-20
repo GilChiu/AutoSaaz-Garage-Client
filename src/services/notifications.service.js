@@ -36,8 +36,6 @@ function getHeaders() {
  */
 export async function getNotifications(params = {}) {
   try {
-    console.log('=== FETCHING NOTIFICATIONS ===');
-    
     // Build query string
     const queryParams = new URLSearchParams();
     if (params.limit) queryParams.append('limit', params.limit.toString());
@@ -46,13 +44,9 @@ export async function getNotifications(params = {}) {
     const queryString = queryParams.toString();
     const url = `${API_BASE_URL}/garage-notifications${queryString ? `?${queryString}` : ''}`;
 
-    console.log('Notifications URL:', url);
-
     const response = await fetch(url, {
       headers: getHeaders(),
     });
-
-    console.log('Response Status:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -60,16 +54,11 @@ export async function getNotifications(params = {}) {
     }
 
     const result = await response.json();
-    console.log('Notifications Response:', result);
-    
     const notifications = result.data || result.notifications || [];
     
-    console.log('=== NOTIFICATIONS FETCH SUCCESS ===');
     return notifications;
 
   } catch (error) {
-    console.error('=== NOTIFICATIONS FETCH ERROR ===');
-    console.error('Error:', error.message);
     throw new Error(`Failed to fetch notifications: ${error.message}`);
   }
 }
@@ -81,8 +70,6 @@ export async function getNotifications(params = {}) {
  */
 export async function markNotificationAsRead(notificationId) {
   try {
-    console.log('=== MARKING NOTIFICATION AS READ ===', notificationId);
-    
     const response = await fetch(`${API_BASE_URL}/garage-notifications/${notificationId}/read`, {
       method: 'POST',
       headers: getHeaders(),
@@ -93,11 +80,9 @@ export async function markNotificationAsRead(notificationId) {
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
 
-    console.log('=== NOTIFICATION MARKED AS READ ===');
     return true;
 
   } catch (error) {
-    console.error('Failed to mark notification as read:', error);
     throw error;
   }
 }
@@ -108,8 +93,6 @@ export async function markNotificationAsRead(notificationId) {
  */
 export async function markAllNotificationsAsRead() {
   try {
-    console.log('=== MARKING ALL NOTIFICATIONS AS READ ===');
-    
     const response = await fetch(`${API_BASE_URL}/garage-notifications/read-all`, {
       method: 'POST',
       headers: getHeaders(),
@@ -120,11 +103,9 @@ export async function markAllNotificationsAsRead() {
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
 
-    console.log('=== ALL NOTIFICATIONS MARKED AS READ ===');
     return true;
 
   } catch (error) {
-    console.error('Failed to mark all notifications as read:', error);
     throw error;
   }
 }
@@ -148,7 +129,6 @@ export async function getUnreadCount() {
     return result.data?.count || result.count || 0;
 
   } catch (error) {
-    console.error('Failed to fetch unread count:', error);
     return 0; // Return 0 on error to avoid breaking the UI
   }
 }

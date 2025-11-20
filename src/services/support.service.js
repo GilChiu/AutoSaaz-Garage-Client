@@ -20,17 +20,12 @@ export async function createSupportTicket(payload) {
   // Contract: { contactName, contactEmail, contactPhone, subject, message, source }
   try {
     const profileData = localStorage.getItem('profile');
-    console.log('Raw profile data from localStorage:', profileData);
-    
     const profile = profileData ? JSON.parse(profileData) : null;
-    console.log('Parsed profile:', profile);
 
     // Use user_id from profile (which is the foreign key to users table)
     const senderId = profile?.user_id || profile?.userId || null;
-    console.log('Sender ID (user_id):', senderId);
 
     if (!senderId) {
-      console.error('Profile data missing or invalid:', { profileData, profile });
       throw new Error('User ID not found in profile. Please log in again.');
     }
 
@@ -45,8 +40,6 @@ export async function createSupportTicket(payload) {
       source: payload.source || 'garage-portal',
       priority: payload.priority || 'normal'
     };
-
-    console.log('Creating ticket with payload:', requestPayload);
 
     const res = await fetch(`${API_BASE_URL}/support-tickets`, {
       method: 'POST',
@@ -66,7 +59,6 @@ export async function createSupportTicket(payload) {
     
     return json.data || json;
   } catch (e) {
-    console.error('Create ticket error:', e);
     throw new Error(e?.message || 'Network error');
   }
 }
@@ -91,7 +83,6 @@ export async function getGarageTickets(status = null) {
     // Check cache first
     const cached = cache.get(endpoint);
     if (cached) {
-      console.log('[Support] Tickets FROM CACHE');
       return cached;
     }
 
@@ -128,7 +119,6 @@ export async function getTicketDetail(ticketId) {
     // Check cache first
     const cached = cache.get(endpoint);
     if (cached) {
-      console.log('[Support] Ticket detail FROM CACHE, id:', ticketId);
       return cached;
     }
     
@@ -159,17 +149,12 @@ export async function getTicketDetail(ticketId) {
 export async function addTicketMessage(ticketId, message) {
   try {
     const profileData = localStorage.getItem('profile');
-    console.log('Raw profile data from localStorage:', profileData);
-    
     const profile = profileData ? JSON.parse(profileData) : null;
-    console.log('Parsed profile:', profile);
     
     // Use user_id from profile (which is the foreign key to users table)
     const senderId = profile?.user_id || profile?.userId || null;
-    console.log('Sender ID (user_id):', senderId);
 
     if (!senderId) {
-      console.error('Profile data missing or invalid:', { profileData, profile });
       throw new Error('User ID not found in profile. Please log in again.');
     }
 
@@ -179,8 +164,6 @@ export async function addTicketMessage(ticketId, message) {
       senderType: 'garage',
       message: message
     };
-
-    console.log('Sending message with payload:', payload);
 
     const res = await fetch(`${API_BASE_URL}/support-tickets/${ticketId}`, {
       method: 'PATCH',
@@ -200,7 +183,6 @@ export async function addTicketMessage(ticketId, message) {
     
     return json.message || json;
   } catch (e) {
-    console.error('Add message error:', e);
     throw new Error(e?.message || 'Network error');
   }
 }

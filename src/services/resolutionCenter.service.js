@@ -20,7 +20,6 @@ function url(path) {
 
 export function mapDispute(raw) {
   // Map server payload to UI card structure
-  console.log('[mapDispute] Mapping dispute:', raw?.id, raw?.code);
   return {
     id: raw.id,
     code: raw.code || raw.disputeId || raw.id,
@@ -79,15 +78,12 @@ export async function createDispute({ subject, message, contactName, contactEmai
 }
 
 export async function getDisputes(status, signal) {
-  console.log('[getDisputes] Fetching disputes with status:', status);
-  
   const endpoint = `/resolution-center?status=${encodeURIComponent(status || '')}`;
   
   // Check cache first (skip if aborted)
   if (!signal?.aborted) {
     const cached = cache.get(endpoint);
     if (cached) {
-      console.log('[getDisputes] FROM CACHE, count:', cached.length);
       return cached;
     }
   }
@@ -100,22 +96,16 @@ export async function getDisputes(status, signal) {
     });
   }, `GET ${endpoint}`);
   
-  console.log('[getDisputes] Full response:', res?.data);
-  
   // Check if response has the new paginated format
   const responseData = res?.data?.data ?? res?.data;
-  console.log('[getDisputes] Response data:', responseData);
   
   // New paginated format: { disputes: [...], total, page, limit }
   let result;
   if (responseData?.disputes && Array.isArray(responseData.disputes)) {
-    console.log('[getDisputes] Using paginated format, count:', responseData.disputes.length);
-    console.log('[getDisputes] Total from API:', responseData.total);
     result = responseData.disputes;
   } else {
     // Fallback for array response
     result = Array.isArray(responseData) ? responseData : [];
-    console.log('[getDisputes] Using fallback array, count:', result.length);
   }
   
   // Cache the result
@@ -131,7 +121,6 @@ export async function getDisputeById(id, signal) {
   if (!signal?.aborted) {
     const cached = cache.get(endpoint);
     if (cached) {
-      console.log('[getDisputeById] FROM CACHE, id:', id);
       return cached;
     }
   }

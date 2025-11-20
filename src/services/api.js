@@ -102,7 +102,6 @@ export const loginUser = async (credentials) => {
   }
   if (data.profile) {
     localStorage.setItem('profile', JSON.stringify(data.profile));
-    console.log('✅ Profile saved to localStorage:', data.profile);
   }
   
   return response.data;
@@ -130,7 +129,7 @@ export const logoutUser = async () => {
   try {
     // Stateless JWT: nothing to call on server; clear storage below
   } catch (error) {
-    console.error('Logout error:', error);
+    // Logout error handled silently
   } finally {
     // Clear all storage
     localStorage.removeItem('accessToken');

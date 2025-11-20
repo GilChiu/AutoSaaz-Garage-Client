@@ -17,7 +17,7 @@ const LoginPage = () => {
     // Redirect if already logged in
     useEffect(() => {
         if (user) {
-            console.log('User already logged in, redirecting to dashboard');
+
             navigate('/dashboard');
         }
     }, [user, navigate]);
@@ -35,22 +35,19 @@ const LoginPage = () => {
         }
 
         try {
-            console.log('Attempting login with:', { email, password: '***' });
+
             const response = await login({ email, password });
-            
-            console.log('Login response:', response);
-            
+
             if (response && response.success) {
-                console.log('Login successful, navigating to dashboard');
+
                 navigate('/dashboard');
             } else {
                 const errorMsg = response?.message || 'Login failed. Please try again.';
-                console.log('Login failed:', errorMsg);
+
                 setError(errorMsg);
             }
         } catch (err) {
-            console.error('Login error:', err);
-            
+
             // Handle specific error messages
             const errorMessage = err.message || 'An error occurred. Please try again.';
             

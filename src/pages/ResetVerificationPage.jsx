@@ -81,8 +81,7 @@ const ResetVerificationPage = () => {
                 setError(response.message || 'Invalid verification code. Please try again.');
             }
         } catch (err) {
-            console.error('Verification error:', err);
-            
+
             const errorMessage = err.message || 'An error occurred';
             
             if (errorMessage.includes('401') || errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('expired')) {
@@ -111,7 +110,7 @@ const ResetVerificationPage = () => {
                 inputRefs.current[0]?.focus();
             }
         } catch (err) {
-            console.error('Resend error:', err);
+
             setError('Failed to resend code. Please try again later.');
         } finally {
             setResending(false);

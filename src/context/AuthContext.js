@@ -24,24 +24,17 @@ export const AuthProvider = ({ children }) => {
                 }
 
                 const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-                console.log('Checking for existing token:', token ? 'Found' : 'Not found');
                 
                 if (token) {
-                    console.log('Validating token with Supabase Functions...');
                     const response = await getCurrentUser();
                     if (response.success && response.data?.user) {
-                        console.log('Token valid, user authenticated:', response.data.user);
                         setUser(response.data.user);
                     } else {
-                        console.log('Invalid token response, clearing auth');
                         throw new Error('Invalid user data');
                     }
                 } else {
-                    console.log('No token found, user not authenticated');
                 }
             } catch (error) {
-                console.error('Failed to validate token:', error.response?.status, error.response?.data?.message || error.message);
-                
                 // Clear all auth data on token validation failure
                 setUser(null);
                 localStorage.removeItem('token');
@@ -82,14 +75,12 @@ export const AuthProvider = ({ children }) => {
                 }
                 if (profile) {
                     localStorage.setItem('profile', JSON.stringify(profile));
-                    console.log('✅ Profile saved to localStorage:', profile);
                 }
                 setUser(user);
                 return { success: true, data: response.data, message: response.message };
             }
             return { success: false, message: response.message || 'Login failed' };
         } catch (error) {
-            console.error('Login error:', error);
             return {
                 success: false,
                 message: error.response?.data?.message || 'Login failed'
@@ -98,8 +89,6 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        console.log('Logout called');
-        
         // Clear all cache on logout (security best practice)
         cache.clear();
         
@@ -125,8 +114,6 @@ export const AuthProvider = ({ children }) => {
         
         // Clear user state
         setUser(null);
-        
-        console.log('Logout completed - all tokens and cache cleared');
     };
 
     const register = async (userData) => {
@@ -152,10 +139,7 @@ export const AuthProvider = ({ children }) => {
             // Store token for legacy checks
             localStorage.setItem('token', accessToken);
             setUser(userData);
-            
-            console.log('✅ Auto-login successful with token');
         } catch (error) {
-            console.error('Auto-login with token failed:', error);
         }
     };
 

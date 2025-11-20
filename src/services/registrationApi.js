@@ -20,10 +20,6 @@ function authHeaders() {
  */
 export const registerStep1 = async (fullName, email, phoneNumber) => {
   try {
-    console.log('=== STEP 1 REGISTRATION START ===');
-  console.log('API URL:', `${API_BASE_URL}/auth-register-step1`);
-    console.log('Request Data:', { fullName, email, phoneNumber });
-
     const response = await fetch(`${API_BASE_URL}/auth-register-step1`, {
       method: 'POST',
       headers: authHeaders(),
@@ -34,38 +30,22 @@ export const registerStep1 = async (fullName, email, phoneNumber) => {
       }),
     });
 
-    console.log('Response Status:', response.status);
-    console.log('Response OK:', response.ok);
-    console.log('Response Headers:', Object.fromEntries(response.headers.entries()));
-
     const data = await response.json();
-    console.log('Response Data:', data);
 
     if (!response.ok) {
-      console.error('Registration failed with status:', response.status);
       throw new Error(data.message || 'Registration failed');
     }
 
     // Save sessionId to localStorage
     if (data.success && data.data?.sessionId) {
-      console.log('Saving sessionId to localStorage:', data.data.sessionId);
       localStorage.setItem('registrationSessionId', data.data.sessionId);
       localStorage.setItem('sessionExpiresAt', data.data.expiresAt);
     }
 
-    console.log('=== STEP 1 REGISTRATION SUCCESS ===');
     return data;
   } catch (error) {
-    console.error('=== STEP 1 REGISTRATION ERROR ===');
-    console.error('Error Type:', error.name);
-    console.error('Error Message:', error.message);
-    console.error('Error Stack:', error.stack);
-    
     // Check if it's a network/CORS error
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      console.error('🚨 CORS ERROR DETECTED 🚨');
-      console.error('This is a backend CORS configuration issue.');
-      console.error('The backend needs to allow requests from:', window.location.origin);
       throw new Error('Unable to connect to server. Please check your internet connection or contact support.');
     }
     
@@ -111,7 +91,6 @@ export const registerStep2 = async (address, street, state, location, coordinate
 
     return data;
   } catch (error) {
-    console.error('Step 2 Registration Error:', error);
     throw error;
   }
 };
@@ -154,7 +133,6 @@ export const registerStep3 = async (companyLegalName, emiratesIdUrl, tradeLicens
 
     return data;
   } catch (error) {
-    console.error('Step 3 Registration Error:', error);
     throw error;
   }
 };
@@ -165,10 +143,7 @@ export const registerStep3 = async (companyLegalName, emiratesIdUrl, tradeLicens
  */
 export const verifyRegistration = async (code) => {
   try {
-    console.log('=== STEP 4 VERIFICATION START ===');
     const sessionId = localStorage.getItem('registrationSessionId');
-    console.log('SessionId:', sessionId);
-    console.log('OTP Code:', code);
     
     if (!sessionId) {
       throw new Error('Session expired. Please start registration again.');
@@ -183,11 +158,7 @@ export const verifyRegistration = async (code) => {
       }),
     });
 
-    console.log('Response Status:', response.status);
-    console.log('Response OK:', response.ok);
-
     const data = await response.json();
-    console.log('Response Data:', data);
 
     if (!response.ok) {
       throw new Error(data.message || 'Verification failed');
@@ -201,30 +172,21 @@ export const verifyRegistration = async (code) => {
     if (data.success && data.data) {
       if (data.data.accessToken) {
         localStorage.setItem('accessToken', data.data.accessToken);
-        console.log('✅ Access token saved');
       }
       if (data.data.refreshToken) {
         localStorage.setItem('refreshToken', data.data.refreshToken);
-        console.log('✅ Refresh token saved');
       }
       if (data.data.user) {
         localStorage.setItem('user', JSON.stringify(data.data.user));
-        console.log('✅ User data saved');
       }
       // Save generated password if available (development mode)
       if (data.data.generatedPassword) {
         localStorage.setItem('userGeneratedPassword', data.data.generatedPassword);
-        console.log('✅ Generated password saved for account settings');
       }
     }
 
-    console.log('=== STEP 4 VERIFICATION SUCCESS ===');
     return data;
   } catch (error) {
-    console.error('=== STEP 4 VERIFICATION ERROR ===');
-    console.error('Error Type:', error.name);
-    console.error('Error Message:', error.message);
-    console.error('Error Stack:', error.stack);
     throw error;
   }
 };
@@ -255,7 +217,6 @@ export const resendOTP = async () => {
 
     return data;
   } catch (error) {
-    console.error('Resend OTP Error:', error);
     throw error;
   }
 };

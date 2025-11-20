@@ -23,7 +23,7 @@ export const getGarageProfile = async () => {
   // Check cache first (3 minutes TTL)
   const cached = cache.get(endpoint);
   if (cached) {
-    console.debug('[profile.service] GET /auth-profile FROM CACHE');
+
     return cached;
   }
   
@@ -59,7 +59,7 @@ export const getGarageProfile = async () => {
 
     return data;
   } catch (error) {
-    console.error('Error fetching garage profile:', error);
+
     throw error;
   }
 };
@@ -83,8 +83,6 @@ export const updateGarageProfile = async (profileData) => {
       throw new Error('No authentication token found');
     }
 
-    console.log('Updating garage profile:', profileData);
-
     const response = await fetch(`${FUNCTIONS_URL}/auth-profile`, {
       method: 'PUT',
       headers: {
@@ -101,14 +99,12 @@ export const updateGarageProfile = async (profileData) => {
       throw new Error(data.message || 'Failed to update profile');
     }
 
-    console.log('Profile updated successfully:', data);
-    
     // Invalidate profile cache after update
     cache.invalidatePattern('auth-profile');
 
     return data;
   } catch (error) {
-    console.error('Error updating garage profile:', error);
+
     throw error;
   }
 };
@@ -138,8 +134,6 @@ export const uploadProfileLogo = async (file) => {
       throw new Error('File size too large. Maximum size is 5MB.');
     }
 
-    console.log('Uploading logo file to Supabase Storage:', file.name, file.type, file.size);
-
     const supabase = getSupabaseClient();
     
     // Get user profile to use user_id in file path
@@ -164,7 +158,7 @@ export const uploadProfileLogo = async (file) => {
       });
 
     if (uploadError) {
-      console.error('Supabase upload error:', uploadError);
+
       throw new Error(uploadError.message || 'Failed to upload logo');
     }
 
@@ -173,14 +167,12 @@ export const uploadProfileLogo = async (file) => {
       .from('garage-logos')
       .getPublicUrl(filePath);
 
-    console.log('Logo uploaded successfully:', publicUrl);
-    
     // Invalidate profile cache after logo upload (profile data may include logoUrl)
     cache.invalidatePattern('auth-profile');
 
     return publicUrl;
   } catch (error) {
-    console.error('Error uploading profile logo:', error);
+
     throw error;
   }
 };

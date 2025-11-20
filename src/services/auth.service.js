@@ -39,7 +39,6 @@ async function apiRequest(endpoint, options = {}) {
 
     return data;
   } catch (error) {
-    console.error('API request failed:', error);
     throw error;
   }
 }
@@ -76,7 +75,7 @@ export async function logout() {
   try {
     // Stateless logout
   } catch (err) {
-    console.warn('Logout handling error:', err?.message || err);
+    // Logout handling error silently ignored
   } finally {
     // Always clear local storage
     localStorage.removeItem('accessToken');

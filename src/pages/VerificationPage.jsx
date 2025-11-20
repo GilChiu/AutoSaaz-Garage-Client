@@ -82,30 +82,26 @@ const VerificationPage = () => {
         }
 
         try {
-            console.log('=== REAL VERIFICATION MODE ===');
-            console.log('OTP Code entered:', codeString);
-            console.log('Calling real backend verification endpoint...');
+
+
 
             // Call the real backend verification API
             const response = await verifyRegistration(codeString);
 
             if (response && response.success) {
-                console.log('✅ Real verification successful:', response);
-                
+
                 // The backend returns: response.data.data.user and response.data.data.accessToken
                 const userData = response.data?.user;
                 const accessToken = response.data?.accessToken;
                 
                 if (userData && accessToken) {
-                    console.log('✅ User data and token received:', userData);
-                    
+
                     // Use AuthContext's loginWithToken method for proper auto-login
                     loginWithToken(accessToken, userData);
                     
                     // Clear registration context
                     resetRegistration();
-                    
-                    console.log('✅ Auto-login completed, navigating to dashboard...');
+
                     navigate('/dashboard');
                 } else {
                     throw new Error('Invalid response data from verification - missing user or token');
@@ -114,13 +110,10 @@ const VerificationPage = () => {
                 throw new Error(response?.message || 'Verification failed');
             }
         } catch (err) {
-            console.error('Verification error:', err);
-            
+
             // Get the error message from the response
             const errorMessage = err.response?.data?.message || err.message || 'Verification failed';
-            
-            console.log('Error message received:', errorMessage);
-            
+
             // Handle specific backend errors with precise matching
             if (errorMessage.includes('Invalid or expired session')) {
                 // Only this specific message triggers session expiration
@@ -155,13 +148,12 @@ const VerificationPage = () => {
         setError('');
 
         try {
-            console.log('=== RESENDING OTP VIA REAL API ===');
-            console.log('Calling backend resend endpoint...');
-            
+
+
             const response = await resendOTP();
             
             if (response && response.success) {
-                console.log('✅ OTP resent successfully via backend');
+
                 setResendSuccess(true);
                 setTimeout(() => {
                     setResendSuccess(false);
@@ -170,13 +162,10 @@ const VerificationPage = () => {
                 throw new Error(response?.message || 'Failed to resend code');
             }
         } catch (err) {
-            console.error('Resend OTP error:', err);
-            
+
             // Get the error message from the response
             const errorMessage = err.response?.data?.message || err.message || 'Failed to resend code';
-            
-            console.log('Resend error message:', errorMessage);
-            
+
             // Only redirect if truly a session expiration error
             if (errorMessage.includes('Invalid or expired session') || 
                 errorMessage.includes('Session ID') || 

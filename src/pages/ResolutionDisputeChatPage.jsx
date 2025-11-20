@@ -69,7 +69,7 @@ const DisputeChatPage = () => {
         }
       } catch (e) {
         // Silent fail for polling - don't show errors
-        console.error('Error polling messages:', e);
+
       }
     }, 5000); // Poll every 5 seconds
 
@@ -99,7 +99,7 @@ const DisputeChatPage = () => {
           .upload(filePath, selectedFile);
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
+
           throw new Error('Failed to upload file');
         }
 

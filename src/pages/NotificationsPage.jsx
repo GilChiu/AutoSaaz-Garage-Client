@@ -25,7 +25,7 @@ const NotificationsPage = () => {
       setNotifications(data);
     } catch (err) {
       setError(err.message || 'Failed to load notifications');
-      console.error('Error loading notifications:', err);
+
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ const NotificationsPage = () => {
           prev.map(n => n.id === notification.id ? { ...n, is_read: true } : n)
         );
       } catch (err) {
-        console.error('Error marking notification as read:', err);
+
       }
     }
 
@@ -155,7 +155,7 @@ const NotificationsPage = () => {
         prev.map(n => ({ ...n, is_read: true }))
       );
     } catch (err) {
-      console.error('Error marking all as read:', err);
+
     }
   };
 

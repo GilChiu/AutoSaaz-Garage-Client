@@ -18,14 +18,14 @@ const BookingSummary = () => {
             
             // Check if the date is valid
             if (isNaN(date.getTime())) {
-                console.warn(`Invalid date: ${dateString}`);
+
                 return dateString; // Return original string if date is invalid
             }
             
             // Return the date in YYYY-MM-DD format
             return date.toISOString().split('T')[0];
         } catch (error) {
-            console.error(`Error parsing date: ${dateString}`, error);
+
             return dateString; // Return original string if there's an error
         }
     };

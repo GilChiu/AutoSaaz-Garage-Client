@@ -22,7 +22,7 @@ const UpperNavbar = () => {
           const parsedProfile = JSON.parse(storedProfile);
           setProfile(parsedProfile);
         } catch (error) {
-          console.error('Failed to parse profile from localStorage:', error);
+
         }
       }
     };

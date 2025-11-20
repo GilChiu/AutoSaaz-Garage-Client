@@ -25,7 +25,7 @@ const InspectionDetailPage = () => {
                 }
             } catch (err) {
                 setError('Failed to load inspection details');
-                console.error('Error fetching inspection:', err);
+
             } finally {
                 setLoading(false);
             }
@@ -51,7 +51,7 @@ const InspectionDetailPage = () => {
                 navigate('/inspections/completed');
             }, 300);
         } catch (err) {
-            console.error('Error completing inspection:', err);
+
             // Optionally surface a toast/message here
         } finally {
             setUpdating(false);

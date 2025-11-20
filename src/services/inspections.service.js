@@ -52,8 +52,6 @@ function getHeaders() {
  */
 export async function getInspections(signal, params = {}) {
   try {
-    console.log('=== FETCHING INSPECTIONS FROM API ===');
-    
     // Build query string
     const queryParams = new URLSearchParams();
     if (params.status) queryParams.append('status', params.status);
@@ -71,13 +69,11 @@ export async function getInspections(signal, params = {}) {
     if (!signal?.aborted) {
       const cached = cache.get(endpoint);
       if (cached) {
-        console.log('=== INSPECTIONS FROM CACHE ===');
         return cached;
       }
     }
 
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log('API URL:', url);
 
     // Use retry logic for resilience
     const result = await retryApiCall(async () => {
@@ -85,8 +81,6 @@ export async function getInspections(signal, params = {}) {
         headers: getHeaders(),
         signal
       });
-
-      console.log('Response Status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -96,12 +90,8 @@ export async function getInspections(signal, params = {}) {
       return await response.json();
     }, `GET ${endpoint}`);
     
-    console.log('API Response:', result);
-    
     // Handle both array response and paginated response
     const apiInspections = Array.isArray(result.data) ? result.data : (result.data?.inspections || []);
-    
-    console.log('Raw API Inspections:', apiInspections);
     
     // Map API response to UI model
     const mappedInspections = apiInspections.map((inspection, index) => 
@@ -111,17 +101,9 @@ export async function getInspections(signal, params = {}) {
     // Cache the mapped results
     cache.set(endpoint, {}, mappedInspections);
     
-    console.log('Mapped Inspections:', mappedInspections);
-    console.log('=== INSPECTIONS FETCH SUCCESS ===');
-    
     return mappedInspections;
 
   } catch (error) {
-    console.error('=== INSPECTIONS FETCH ERROR ===');
-    console.error('Error Type:', error.name);
-    console.error('Error Message:', error.message);
-    console.error('Error Stack:', error.stack);
-    
     if (error.name === 'AbortError') {
       throw error; // Don't handle aborted requests
     }
@@ -139,8 +121,6 @@ export async function getInspections(signal, params = {}) {
  */
 export async function getInspectionById(id, signal) {
   try {
-    console.log('=== FETCHING INSPECTION BY ID ===', id);
-    
     const cleanId = id.toString().replace('#', '');
     const endpoint = `/inspections/${cleanId}`;
     
@@ -148,7 +128,6 @@ export async function getInspectionById(id, signal) {
     if (!signal?.aborted) {
       const cached = cache.get(endpoint);
       if (cached) {
-        console.log('=== INSPECTION FROM CACHE ===');
         return cached;
       }
     }
@@ -159,8 +138,6 @@ export async function getInspectionById(id, signal) {
         headers: getHeaders(),
         signal
       });
-
-      console.log('Response Status:', response.status);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -183,13 +160,9 @@ export async function getInspectionById(id, signal) {
     // Cache the result
     cache.set(endpoint, {}, mappedInspection);
     
-    console.log('=== INSPECTION FETCH SUCCESS ===');
     return mappedInspection;
 
   } catch (error) {
-    console.error('=== INSPECTION FETCH ERROR ===');
-    console.error('Error:', error.message);
-    
     if (error.name === 'AbortError') {
       throw error;
     }
@@ -205,8 +178,6 @@ export async function getInspectionById(id, signal) {
  */
 export async function createInspection(inspectionData) {
   try {
-    console.log('=== CREATING INSPECTION ===', inspectionData);
-    
     const response = await fetch(`${API_BASE_URL}/inspections`, {
       method: 'POST',
       headers: getHeaders(),
@@ -225,11 +196,9 @@ export async function createInspection(inspectionData) {
     cache.invalidatePattern('inspections');
     cache.invalidatePattern('dashboard');
     
-    console.log('=== INSPECTION CREATED ===');
     return mapApiInspectionToInspection(apiInspection);
 
   } catch (error) {
-    console.error('Failed to create inspection:', error);
     throw error;
   }
 }
@@ -242,8 +211,6 @@ export async function createInspection(inspectionData) {
  */
 export async function updateInspection(id, updates) {
   try {
-    console.log('=== UPDATING INSPECTION ===', id, updates);
-    
     const cleanId = id.toString().replace('#', '');
     const response = await fetch(`${API_BASE_URL}/inspections/${cleanId}`, {
       method: 'PATCH',
@@ -264,11 +231,9 @@ export async function updateInspection(id, updates) {
     cache.invalidate(`/inspections/${cleanId}`);
     cache.invalidatePattern('dashboard');
     
-    console.log('=== INSPECTION UPDATED ===');
     return mapApiInspectionToInspection(apiInspection);
 
   } catch (error) {
-    console.error('Failed to update inspection:', error);
     throw error;
   }
 }
@@ -280,8 +245,6 @@ export async function updateInspection(id, updates) {
  */
 export async function deleteInspection(id) {
   try {
-    console.log('=== DELETING INSPECTION ===', id);
-    
     const cleanId = id.toString().replace('#', '');
     const response = await fetch(`${API_BASE_URL}/inspections/${cleanId}`, {
       method: 'DELETE',
@@ -293,11 +256,9 @@ export async function deleteInspection(id) {
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
 
-    console.log('=== INSPECTION DELETED ===');
     return true;
 
   } catch (error) {
-    console.error('Failed to delete inspection:', error);
     throw error;
   }
 }
@@ -310,8 +271,6 @@ export async function deleteInspection(id) {
  */
 export async function completeInspection(id, completionData) {
   try {
-    console.log('=== COMPLETING INSPECTION ===', id, completionData);
-    
     const cleanId = id.toString().replace('#', '');
     const response = await fetch(`${API_BASE_URL}/inspections/${cleanId}/complete`, {
       method: 'PATCH',
@@ -327,11 +286,9 @@ export async function completeInspection(id, completionData) {
     const result = await response.json();
     const apiInspection = result.data || result.inspection || result;
     
-    console.log('=== INSPECTION COMPLETED ===');
     return mapApiInspectionToInspection(apiInspection);
 
   } catch (error) {
-    console.error('Failed to complete inspection:', error);
     throw error;
   }
 }
@@ -342,8 +299,6 @@ export async function completeInspection(id, completionData) {
  */
 export async function getInspectionStats() {
   try {
-    console.log('=== FETCHING INSPECTION STATS ===');
-    
     const response = await fetch(`${API_BASE_URL}/inspections/stats`, {
       headers: getHeaders(),
     });
@@ -354,11 +309,9 @@ export async function getInspectionStats() {
     }
 
     const result = await response.json();
-    console.log('=== INSPECTION STATS SUCCESS ===');
     return result.data || result.stats || result;
 
   } catch (error) {
-    console.error('Failed to fetch inspection stats:', error.message);
     throw new Error(`Failed to fetch inspection statistics: ${error.message}`);
   }
 }

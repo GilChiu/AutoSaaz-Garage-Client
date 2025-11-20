@@ -40,7 +40,7 @@ const Register = () => {
                 setError(response.message || 'Registration failed');
             }
         } catch (err) {
-            console.error('Registration error:', err);
+
             setError(err.response?.data?.message || 'Registration failed');
         } finally {
             setLoading(false);

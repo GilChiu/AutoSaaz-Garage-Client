@@ -130,7 +130,7 @@ export const retry = async (
       
       // Success - log if this was a retry
       if (attempt > 0) {
-        console.log(`[API Retry] ${operationName} - Succeeded on attempt ${attempt + 1}/${maxRetries + 1}`);
+        // Retry succeeded
       }
       
       return result;
@@ -143,18 +143,11 @@ export const retry = async (
       
       if (!shouldRetryError || isLastAttempt) {
         // Don't retry or no more attempts left
-        if (isLastAttempt && shouldRetryError) {
-          console.error(`[API Retry] ${operationName} - All ${maxRetries + 1} attempts failed:`, error.message);
-        }
         throw error;
       }
       
       // Calculate delay for next retry
       const delay = calculateBackoff(attempt, baseDelay, maxDelay);
-      
-      console.warn(
-        `[API Retry] ${operationName} - Attempt ${attempt + 1}/${maxRetries + 1} failed: ${error.message}. Retrying in ${delay}ms...`
-      );
       
       // Wait before retrying
       await sleep(delay);

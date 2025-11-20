@@ -9,16 +9,16 @@ const Sidebar = () => {
     const { logout } = useAuth();
 
     const handleLogout = () => {
-        console.log('Logout button clicked in Sidebar');
+
         logout();
-        console.log('Logout completed, navigating to login');
+
         navigate('/login');
     };
 
     // Debug version marker so user can confirm updated Sidebar is mounted
     useEffect(() => {
         // eslint-disable-next-line no-console
-        console.log('[Sidebar v2] mounted – inspections group enhanced');
+
     }, []);
 
     const isInInspections = location.pathname.startsWith('/inspections');
@@ -96,14 +96,14 @@ const Sidebar = () => {
                         alt="AutoSaaz - One Stop Auto Shop" 
                         className="dashboard-logo-image"
                         onLoad={() => {
-                            console.log('✅ Logo loaded successfully from:', `${process.env.PUBLIC_URL}/autoSaaz-logo.png`);
-                            console.log('PUBLIC_URL:', process.env.PUBLIC_URL);
+
+
                         }}
                         onError={(e) => {
-                            console.error('❌ Logo failed to load from:', `${process.env.PUBLIC_URL}/autoSaaz-logo.png`);
-                            console.error('PUBLIC_URL value:', process.env.PUBLIC_URL);
-                            console.error('Full path attempted:', e.target.src);
-                            console.error('Current window location:', window.location.href);
+
+
+
+
                         }}
                     />
                     <div className="dashboard-logo-text">

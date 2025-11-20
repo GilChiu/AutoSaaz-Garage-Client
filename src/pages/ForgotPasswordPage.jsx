@@ -38,8 +38,7 @@ const ForgotPasswordPage = () => {
                 setError(response.message || 'Failed to send reset code. Please try again.');
             }
         } catch (err) {
-            console.error('Send reset code error:', err);
-            
+
             // Always show a generic success message for security (prevent email enumeration)
             // But navigate to verification page anyway
             navigate('/reset-verification', { state: { email } });

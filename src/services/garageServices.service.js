@@ -39,7 +39,6 @@ const garageServicesService = {
     // Check cache first (3 minutes TTL)
     const cached = cache.get(endpoint);
     if (cached) {
-      console.debug('[garageServices.service] GET /garage-services FROM CACHE');
       return cached;
     }
     

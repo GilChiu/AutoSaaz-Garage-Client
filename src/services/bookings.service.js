@@ -43,8 +43,6 @@ function getHeaders() {
  */
 export async function getBookings(signal, params = {}) {
   try {
-    console.log('=== FETCHING BOOKINGS FROM API ===');
-    
     // Build query string
     const queryParams = new URLSearchParams();
     if (params.status) queryParams.append('status', params.status);
@@ -60,13 +58,11 @@ export async function getBookings(signal, params = {}) {
     if (!signal?.aborted) {
       const cached = cache.get(endpoint);
       if (cached) {
-        console.log('=== BOOKINGS FROM CACHE ===');
         return cached;
       }
     }
 
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log('API URL:', url);
 
     // Use retry logic for resilience
     const result = await retryApiCall(async () => {
@@ -74,8 +70,6 @@ export async function getBookings(signal, params = {}) {
         headers: getHeaders(),
         signal
       });
-
-      console.log('Response Status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -85,12 +79,8 @@ export async function getBookings(signal, params = {}) {
       return await response.json();
     }, `GET ${endpoint}`);
     
-    console.log('API Response:', result);
-    
     // Handle both array response and paginated response
     const apiBookings = Array.isArray(result.data) ? result.data : (result.data?.bookings || []);
-    
-    console.log('Raw API Bookings:', apiBookings);
     
     // Map API response to UI model
     const mappedBookings = apiBookings.map((booking, index) => 
@@ -100,16 +90,9 @@ export async function getBookings(signal, params = {}) {
     // Cache the mapped results
     cache.set(endpoint, {}, mappedBookings);
     
-    console.log('Mapped Bookings:', mappedBookings);
-    console.log('=== BOOKINGS FETCH SUCCESS ===');
-    
     return mappedBookings;
 
   } catch (error) {
-    console.error('=== BOOKINGS FETCH ERROR ===');
-    console.error('Error Type:', error.name);
-    console.error('Error Message:', error.message);
-    
     if (error.name === 'AbortError') {
       throw error; // Don't handle aborted requests
     }
@@ -127,8 +110,6 @@ export async function getBookings(signal, params = {}) {
  */
 export async function getBookingById(id, signal) {
   try {
-    console.log('=== FETCHING BOOKING BY ID ===', id);
-    
     const cleanId = id.replace('#', '');
     const endpoint = `/bookings/${cleanId}`;
     
@@ -136,7 +117,6 @@ export async function getBookingById(id, signal) {
     if (!signal?.aborted) {
       const cached = cache.get(endpoint);
       if (cached) {
-        console.log('=== BOOKING FROM CACHE ===');
         return cached;
       }
     }
@@ -147,8 +127,6 @@ export async function getBookingById(id, signal) {
         headers: getHeaders(),
         signal
       });
-
-      console.log('Response Status:', response.status);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -171,13 +149,9 @@ export async function getBookingById(id, signal) {
     // Cache the result
     cache.set(endpoint, {}, mappedBooking);
     
-    console.log('=== BOOKING FETCH SUCCESS ===');
     return mappedBooking;
 
   } catch (error) {
-    console.error('=== BOOKING FETCH ERROR ===');
-    console.error('Error:', error.message);
-    
     if (error.name === 'AbortError') {
       throw error;
     }
@@ -193,8 +167,6 @@ export async function getBookingById(id, signal) {
  */
 export async function createBooking(bookingData) {
   try {
-    console.log('=== CREATING BOOKING ===', bookingData);
-    
   const response = await fetch(`${API_BASE_URL}/bookings`, {
       method: 'POST',
       headers: getHeaders(),
@@ -213,11 +185,9 @@ export async function createBooking(bookingData) {
     cache.invalidatePattern('bookings');
     cache.invalidatePattern('dashboard');
     
-    console.log('=== BOOKING CREATED ===');
     return mapApiBookingToBooking(apiBooking);
 
   } catch (error) {
-    console.error('Failed to create booking:', error);
     throw error;
   }
 }
@@ -230,8 +200,6 @@ export async function createBooking(bookingData) {
  */
 export async function updateBooking(id, updates) {
   try {
-    console.log('=== UPDATING BOOKING ===', id, updates);
-    
     const cleanId = id.replace('#', '');
   const response = await fetch(`${API_BASE_URL}/bookings/${cleanId}`, {
       method: 'PATCH',
@@ -252,11 +220,9 @@ export async function updateBooking(id, updates) {
     cache.invalidate(`/bookings/${cleanId}`);
     cache.invalidatePattern('dashboard');
     
-    console.log('=== BOOKING UPDATED ===');
     return mapApiBookingToBooking(apiBooking);
 
   } catch (error) {
-    console.error('Failed to update booking:', error);
     throw error;
   }
 }
@@ -268,8 +234,6 @@ export async function updateBooking(id, updates) {
  */
 export async function deleteBooking(id) {
   try {
-    console.log('=== DELETING BOOKING ===', id);
-    
     const cleanId = id.replace('#', '');
   const response = await fetch(`${API_BASE_URL}/bookings/${cleanId}`, {
       method: 'DELETE',
@@ -286,11 +250,9 @@ export async function deleteBooking(id) {
     cache.invalidate(`/bookings/${cleanId}`);
     cache.invalidatePattern('dashboard');
 
-    console.log('=== BOOKING DELETED ===');
     return true;
 
   } catch (error) {
-    console.error('Failed to delete booking:', error);
     throw error;
   }
 }
@@ -301,14 +263,11 @@ export async function deleteBooking(id) {
  */
 export async function getDashboardStats() {
   try {
-    console.log('=== FETCHING DASHBOARD STATS ===');
-    
     const endpoint = '/dashboard/stats';
     
     // Check cache first
     const cached = cache.get(endpoint);
     if (cached) {
-      console.log('=== DASHBOARD STATS FROM CACHE ===');
       return cached;
     }
     
@@ -331,11 +290,9 @@ export async function getDashboardStats() {
     // Cache the result
     cache.set(endpoint, {}, stats);
     
-    console.log('=== DASHBOARD STATS SUCCESS ===');
     return stats;
 
   } catch (error) {
-    console.error('Failed to fetch dashboard stats:', error.message);
     throw new Error(`Failed to fetch dashboard statistics: ${error.message}`);
   }
 }
@@ -346,14 +303,11 @@ export async function getDashboardStats() {
  */
 export async function getBookingStats() {
   try {
-    console.log('=== FETCHING BOOKING STATS ===');
-    
     const endpoint = '/dashboard/booking-stats';
     
     // Check cache first
     const cached = cache.get(endpoint);
     if (cached) {
-      console.log('=== BOOKING STATS FROM CACHE ===');
       return cached;
     }
     
@@ -376,11 +330,9 @@ export async function getBookingStats() {
     // Cache the result
     cache.set(endpoint, {}, stats);
     
-    console.log('=== BOOKING STATS SUCCESS ===');
     return stats;
 
   } catch (error) {
-    console.error('Failed to fetch booking stats:', error.message);
     throw new Error(`Failed to fetch booking statistics: ${error.message}`);
   }
 }

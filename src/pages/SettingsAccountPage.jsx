@@ -29,8 +29,7 @@ const SettingsAccountPage = () => {
         setError('');
         
         try {
-          console.log('Loading user profile...');
-          
+
           // Always start with user data from context
           let formData = {
             email: user.email || '',
@@ -42,8 +41,7 @@ const SettingsAccountPage = () => {
           // Try to fetch additional profile data
           try {
             const profileResponse = await getUserProfile();
-            console.log('Profile data:', profileResponse);
-            
+
             if (profileResponse.success && profileResponse.data?.profile) {
               const profile = profileResponse.data.profile;
               formData.email = profile.email || formData.email;
@@ -52,13 +50,13 @@ const SettingsAccountPage = () => {
               formData.timezone = profile.timezone || formData.timezone;
             }
           } catch (profileError) {
-            console.warn('Failed to load profile, using defaults:', profileError.message);
+
           }
 
           // Set the form data
           setForm(formData);
         } catch (err) {
-          console.error('Error loading user data:', err);
+
           setError('Failed to load user data. Please refresh the page.');
           
           // Fallback to user context data
@@ -114,8 +112,7 @@ const SettingsAccountPage = () => {
     setError('');
     
     try {
-      console.log('Updating user profile:', form);
-      
+
       const response = await updateUserProfile({
         email: form.email,
         phone: form.phone,
@@ -125,8 +122,7 @@ const SettingsAccountPage = () => {
 
       if (response.success) {
         setSaved(true);
-        console.log('Profile updated successfully');
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => {
           setSaved(false);
@@ -135,7 +131,7 @@ const SettingsAccountPage = () => {
         throw new Error(response.message || 'Update failed');
       }
     } catch (err) {
-      console.error('Error updating profile:', err);
+
       setError(err.message || 'Failed to update profile. Please try again.');
     } finally {
       setSaving(false);

@@ -63,8 +63,7 @@ const CreateNewPasswordPage = () => {
                 setError(response.message || 'Failed to reset password. Please try again.');
             }
         } catch (err) {
-            console.error('Password reset error:', err);
-            
+
             const errorMessage = err.message || '';
             
             if (errorMessage.includes('401') || errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('expired')) {
