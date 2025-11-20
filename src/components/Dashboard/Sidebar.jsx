@@ -91,9 +91,11 @@ const Sidebar = () => {
         <aside className="dashboard-sidebar" role="navigation" aria-label="Main navigation">
             <div className="dashboard-sidebar-header">
                 <div className="dashboard-logo">
-                    <div className="dashboard-logo-icon" aria-hidden="true">
-                        <span>A</span>
-                    </div>
+                    <img 
+                        src="/auto-saaz-logo.pdf.png" 
+                        alt="AutoSaaz - One Stop Auto Shop" 
+                        className="dashboard-logo-image"
+                    />
                     <div className="dashboard-logo-text">
                         <span className="dashboard-logo-name">AutoSaaz</span>
                         <span className="dashboard-logo-subtitle">One Stop Auto Shop</span>
