@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { getGarageProfile, updateGarageProfile, uploadProfileLogo } from '../services/profile.service';
 import Sidebar from '../components/Dashboard/Sidebar';
 import '../components/Dashboard/Dashboard.css';
@@ -19,7 +19,6 @@ const SettingsProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef(null);
 
   // Load profile data on component mount
@@ -73,14 +72,6 @@ const SettingsProfilePage = () => {
       console.log('🔵 [loadProfile] Loading state set to false, scheduling mounted state...');
     }
   };
-
-  // Use useLayoutEffect to set mounted immediately after loading changes
-  useLayoutEffect(() => {
-    if (!loading) {
-      console.log('✅ [useLayoutEffect] Loading is false, setting mounted to true immediately');
-      setMounted(true);
-    }
-  }, [loading]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -210,7 +201,7 @@ const SettingsProfilePage = () => {
               </div>
               
               {(() => {
-                console.log('🎨 [Render] loading:', loading, '| mounted:', mounted);
+                console.log('🎨 [Render] loading:', loading);
                 return null;
               })()}
               
@@ -251,7 +242,7 @@ const SettingsProfilePage = () => {
                 </div>
               ) : (
                 <form 
-                  className={`profile-form ${mounted ? 'profile-form-visible' : ''}`} 
+                  className="profile-form" 
                   onSubmit={handleSave}
                   ref={(el) => {
                     if (el) {
