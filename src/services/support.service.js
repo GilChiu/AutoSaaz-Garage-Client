@@ -1,5 +1,7 @@
 // Support tickets service for garage client
 import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import cache from '../utils/cache';
+import { retryApiCall } from '../utils/retry';
 
 const API_BASE_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL;
 
@@ -58,6 +60,10 @@ export async function createSupportTicket(payload) {
     }
 
     const json = await res.json();
+    
+    // Invalidate support tickets cache after creation
+    cache.invalidatePattern('support-tickets');
+    
     return json.data || json;
   } catch (e) {
     console.error('Create ticket error:', e);
@@ -74,25 +80,41 @@ export async function getGarageTickets(status = null) {
     // Use user_id from profile
     const senderId = profile?.user_id || profile?.userId || null;
 
-    let url = `${API_BASE_URL}/support-tickets?senderType=garage`;
+    let endpoint = `/support-tickets?senderType=garage`;
     if (senderId) {
-      url += `&senderId=${senderId}`;
+      endpoint += `&senderId=${senderId}`;
     }
     if (status) {
-      url += `&status=${status}`;
+      endpoint += `&status=${status}`;
+    }
+    
+    // Check cache first
+    const cached = cache.get(endpoint);
+    if (cached) {
+      console.log('[Support] Tickets FROM CACHE');
+      return cached;
     }
 
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: getHeaders()
-    });
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'GET',
+        headers: getHeaders()
+      });
 
-    if (!res.ok) {
-      throw new Error(res.statusText || 'Failed');
-    }
+      if (!res.ok) {
+        throw new Error(res.statusText || 'Failed');
+      }
 
-    const json = await res.json();
-    return json.tickets || [];
+      return await res.json();
+    }, `GET ${endpoint}`);
+
+    const tickets = result.tickets || [];
+    
+    // Cache the result
+    cache.set(endpoint, {}, tickets);
+    
+    return tickets;
   } catch (e) {
     throw new Error(e?.message || 'Network error');
   }
@@ -101,16 +123,33 @@ export async function getGarageTickets(status = null) {
 // Get ticket detail with conversation
 export async function getTicketDetail(ticketId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/support-tickets/${ticketId}`, {
-      method: 'GET',
-      headers: getHeaders()
-    });
-
-    if (!res.ok) {
-      throw new Error(res.statusText || 'Failed');
+    const endpoint = `/support-tickets/${ticketId}`;
+    
+    // Check cache first
+    const cached = cache.get(endpoint);
+    if (cached) {
+      console.log('[Support] Ticket detail FROM CACHE, id:', ticketId);
+      return cached;
     }
+    
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'GET',
+        headers: getHeaders()
+      });
 
-    return await res.json();
+      if (!res.ok) {
+        throw new Error(res.statusText || 'Failed');
+      }
+
+      return await res.json();
+    }, `GET ${endpoint}`);
+    
+    // Cache the result
+    cache.set(endpoint, {}, result);
+    
+    return result;
   } catch (e) {
     throw new Error(e?.message || 'Network error');
   }
@@ -155,6 +194,10 @@ export async function addTicketMessage(ticketId, message) {
     }
 
     const json = await res.json();
+    
+    // Invalidate ticket detail cache after adding message
+    cache.invalidate(`/support-tickets/${ticketId}`);
+    
     return json.message || json;
   } catch (e) {
     console.error('Add message error:', e);

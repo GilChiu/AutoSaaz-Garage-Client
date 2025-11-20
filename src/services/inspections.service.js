@@ -1,5 +1,7 @@
 import { mapApiInspectionToInspection } from './mappers/inspectionMappers.js';
 import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import cache from '../utils/cache';
+import { retryApiCall } from '../utils/retry';
 
 /**
  * API base URL from environment
@@ -63,25 +65,37 @@ export async function getInspections(signal, params = {}) {
     if (params.limit) queryParams.append('limit', params.limit.toString());
     
     const queryString = queryParams.toString();
-    const url = `${API_BASE_URL}/inspections${queryString ? `?${queryString}` : ''}`;
-
-    console.log('API URL:', url);
-    console.log('Headers:', getHeaders());
-
-    const response = await fetch(url, {
-      headers: getHeaders(),
-      signal
-    });
-
-    console.log('Response Status:', response.status);
-    console.log('Response OK:', response.ok);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const endpoint = `/inspections${queryString ? `?${queryString}` : ''}`;
+    
+    // Check cache first (skip if aborted)
+    if (!signal?.aborted) {
+      const cached = cache.get(endpoint);
+      if (cached) {
+        console.log('=== INSPECTIONS FROM CACHE ===');
+        return cached;
+      }
     }
 
-    const result = await response.json();
+    const url = `${API_BASE_URL}${endpoint}`;
+    console.log('API URL:', url);
+
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const response = await fetch(url, {
+        headers: getHeaders(),
+        signal
+      });
+
+      console.log('Response Status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    }, `GET ${endpoint}`);
+    
     console.log('API Response:', result);
     
     // Handle both array response and paginated response
@@ -93,6 +107,9 @@ export async function getInspections(signal, params = {}) {
     const mappedInspections = apiInspections.map((inspection, index) => 
       mapApiInspectionToInspection(inspection, index)
     );
+    
+    // Cache the mapped results
+    cache.set(endpoint, {}, mappedInspections);
     
     console.log('Mapped Inspections:', mappedInspections);
     console.log('=== INSPECTIONS FETCH SUCCESS ===');
@@ -125,26 +142,49 @@ export async function getInspectionById(id, signal) {
     console.log('=== FETCHING INSPECTION BY ID ===', id);
     
     const cleanId = id.toString().replace('#', '');
-    const response = await fetch(`${API_BASE_URL}/inspections/${cleanId}`, {
-      headers: getHeaders(),
-      signal
-    });
-
-    console.log('Response Status:', response.status);
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
+    const endpoint = `/inspections/${cleanId}`;
+    
+    // Check cache first
+    if (!signal?.aborted) {
+      const cached = cache.get(endpoint);
+      if (cached) {
+        console.log('=== INSPECTION FROM CACHE ===');
+        return cached;
       }
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
+    
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: getHeaders(),
+        signal
+      });
 
-    const result = await response.json();
+      console.log('Response Status:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    }, `GET ${endpoint}`);
+    
+    if (result === null) {
+      return null;
+    }
+    
     const apiInspection = result.data || result.inspection || result;
+    const mappedInspection = mapApiInspectionToInspection(apiInspection);
+    
+    // Cache the result
+    cache.set(endpoint, {}, mappedInspection);
     
     console.log('=== INSPECTION FETCH SUCCESS ===');
-    return mapApiInspectionToInspection(apiInspection);
+    return mappedInspection;
 
   } catch (error) {
     console.error('=== INSPECTION FETCH ERROR ===');
@@ -181,6 +221,10 @@ export async function createInspection(inspectionData) {
     const result = await response.json();
     const apiInspection = result.data || result.inspection || result;
     
+    // Invalidate inspections cache after creation
+    cache.invalidatePattern('inspections');
+    cache.invalidatePattern('dashboard');
+    
     console.log('=== INSPECTION CREATED ===');
     return mapApiInspectionToInspection(apiInspection);
 
@@ -214,6 +258,11 @@ export async function updateInspection(id, updates) {
 
     const result = await response.json();
     const apiInspection = result.data || result.inspection || result;
+    
+    // Invalidate inspections cache after update
+    cache.invalidatePattern('inspections');
+    cache.invalidate(`/inspections/${cleanId}`);
+    cache.invalidatePattern('dashboard');
     
     console.log('=== INSPECTION UPDATED ===');
     return mapApiInspectionToInspection(apiInspection);

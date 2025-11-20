@@ -1,6 +1,8 @@
 // Resolution Center service wired to Supabase Edge Functions (no mocks)
 import axios from 'axios';
 import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import cache from '../utils/cache';
+import { retryApiCall } from '../utils/retry';
 
 function headers() {
   const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
@@ -69,15 +71,35 @@ export async function createDispute({ subject, message, contactName, contactEmai
   const payload = { subject, message, contactName, contactEmail };
   if (bookingId) payload.bookingId = bookingId;
   const res = await axios.post(url(`/resolution-center`), payload, { headers: headers() });
+  
+  // Invalidate disputes cache after creation
+  cache.invalidatePattern('resolution-center');
+  
   return res?.data?.data ?? res?.data;
 }
 
 export async function getDisputes(status, signal) {
   console.log('[getDisputes] Fetching disputes with status:', status);
-  const res = await axios.get(url(`/resolution-center?status=${encodeURIComponent(status || '')}`), {
-    headers: headers(),
-    signal,
-  });
+  
+  const endpoint = `/resolution-center?status=${encodeURIComponent(status || '')}`;
+  
+  // Check cache first (skip if aborted)
+  if (!signal?.aborted) {
+    const cached = cache.get(endpoint);
+    if (cached) {
+      console.log('[getDisputes] FROM CACHE, count:', cached.length);
+      return cached;
+    }
+  }
+  
+  // Use retry logic for resilience
+  const res = await retryApiCall(async () => {
+    return await axios.get(url(endpoint), {
+      headers: headers(),
+      signal,
+    });
+  }, `GET ${endpoint}`);
+  
   console.log('[getDisputes] Full response:', res?.data);
   
   // Check if response has the new paginated format
@@ -85,21 +107,46 @@ export async function getDisputes(status, signal) {
   console.log('[getDisputes] Response data:', responseData);
   
   // New paginated format: { disputes: [...], total, page, limit }
+  let result;
   if (responseData?.disputes && Array.isArray(responseData.disputes)) {
     console.log('[getDisputes] Using paginated format, count:', responseData.disputes.length);
     console.log('[getDisputes] Total from API:', responseData.total);
-    return responseData.disputes;
+    result = responseData.disputes;
+  } else {
+    // Fallback for array response
+    result = Array.isArray(responseData) ? responseData : [];
+    console.log('[getDisputes] Using fallback array, count:', result.length);
   }
   
-  // Fallback for array response
-  const result = Array.isArray(responseData) ? responseData : [];
-  console.log('[getDisputes] Using fallback array, count:', result.length);
+  // Cache the result
+  cache.set(endpoint, {}, result);
+  
   return result;
 }
 
 export async function getDisputeById(id, signal) {
-  const res = await axios.get(url(`/resolution-center/${id}`), { headers: headers(), signal });
-  return res?.data?.data ?? res?.data;
+  const endpoint = `/resolution-center/${id}`;
+  
+  // Check cache first (skip if aborted)
+  if (!signal?.aborted) {
+    const cached = cache.get(endpoint);
+    if (cached) {
+      console.log('[getDisputeById] FROM CACHE, id:', id);
+      return cached;
+    }
+  }
+  
+  // Use retry logic for resilience
+  const res = await retryApiCall(async () => {
+    return await axios.get(url(endpoint), { headers: headers(), signal });
+  }, `GET ${endpoint}`);
+  
+  const result = res?.data?.data ?? res?.data;
+  
+  // Cache the result
+  cache.set(endpoint, {}, result);
+  
+  return result;
 }
 
 export async function postDisputeMessage(id, text, attachmentUrl = null, attachmentType = null, attachmentName = null) {
@@ -110,10 +157,19 @@ export async function postDisputeMessage(id, text, attachmentUrl = null, attachm
     payload.attachmentName = attachmentName;
   }
   const res = await axios.post(url(`/resolution-center/${id}/messages`), payload, { headers: headers() });
+  
+  // Invalidate dispute detail cache after adding message
+  cache.invalidate(`/resolution-center/${id}`);
+  
   return res?.data?.data ?? res?.data;
 }
 
 export async function resolveDispute(id, resolutionText) {
   const res = await axios.put(url(`/resolution-center/${id}/resolve`), { resolution: resolutionText }, { headers: headers() });
+  
+  // Invalidate disputes cache after resolution
+  cache.invalidatePattern('resolution-center');
+  cache.invalidate(`/resolution-center/${id}`);
+  
   return res?.data?.data ?? res?.data;
 }
