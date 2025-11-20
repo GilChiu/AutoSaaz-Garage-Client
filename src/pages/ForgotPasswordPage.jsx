@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { forgotPassword } from '../services/auth.service';
 import './ForgotPasswordPage.css';
 
 const ForgotPasswordPage = () => {
-    const [email, setEmail] = useState('');
+    const location = useLocation();
+    const [email, setEmail] = useState(location.state?.email || '');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    // Pre-fill email if coming from account settings
+    useEffect(() => {
+        if (location.state?.email) {
+            setEmail(location.state.email);
+        }
+    }, [location.state]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

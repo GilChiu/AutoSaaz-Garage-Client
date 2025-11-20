@@ -1,55 +1,47 @@
 .account-form { display:flex; flex-direction:column; gap:22px; max-width:720px; }
 .account-actions { justify-content:flex-start; }
 
-/* Password toggle styling */
-.password-input-container {
-  position: relative;
+/* Password change button styling */
+.password-change-container {
   display: flex;
   align-items: center;
+  gap: 16px;
+  padding: 11px 14px;
+  border: 1px solid #d3d8dc;
+  border-radius: 6px;
+  background: #f9fafb;
 }
 
-.password-input {
-  width: 100%;
-  padding-right: 45px !important; /* Make room for the toggle button */
-  border: 1px solid #d3d8dc;
-  padding: 11px 14px;
+.password-dots {
+  flex: 1;
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: #666;
+}
+
+.change-password-btn {
+  background: #ff8a34;
+  color: white;
+  border: none;
+  padding: 8px 20px;
   border-radius: 6px;
   font-size: 14px;
-  background: #fff;
-}
-
-.password-input:focus {
-  outline: 2px solid rgba(255,138,52,.4);
-  outline-offset: 1px;
-}
-
-.password-toggle-btn {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
+  font-weight: 500;
   cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  transition: color 0.2s ease;
-  border-radius: 4px;
-  z-index: 1;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
 }
 
-.password-toggle-btn:hover {
-  color: #ff8a34;
-  background-color: rgba(255, 138, 52, 0.08);
+.change-password-btn:hover {
+  background: #e67a29;
+  transform: translateY(-1px);
 }
 
-.password-toggle-btn:focus {
+.change-password-btn:active {
+  transform: translateY(0);
+}
+
+.change-password-btn:focus {
   outline: 2px solid rgba(255,138,52,.4);
-  outline-offset: 1px;
-}
-
-.password-toggle-btn svg {
-  width: 20px;
-  height: 20px;
+  outline-offset: 2px;
 }
