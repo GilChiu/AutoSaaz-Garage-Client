@@ -92,7 +92,7 @@ export async function logout() {
  * @returns {Promise<Object>}
  */
 export async function forgotPassword(email) {
-  return await apiRequest('/auth/password/forgot', {
+  return await apiRequest('/auth-forgot-password', {
     method: 'POST',
     body: JSON.stringify({ email }),
   });
@@ -105,7 +105,7 @@ export async function forgotPassword(email) {
  * @returns {Promise<Object>}
  */
 export async function verifyResetCode(email, code) {
-  return await apiRequest('/auth/password/verify-code', {
+  return await apiRequest('/auth-verify-reset-code', {
     method: 'POST',
     body: JSON.stringify({ email, code }),
   });
@@ -120,7 +120,7 @@ export async function verifyResetCode(email, code) {
  * @returns {Promise<Object>}
  */
 export async function resetPassword(data) {
-  return await apiRequest('/auth/password/reset', {
+  return await apiRequest('/auth-reset-password', {
     method: 'POST',
     body: JSON.stringify(data),
   });
