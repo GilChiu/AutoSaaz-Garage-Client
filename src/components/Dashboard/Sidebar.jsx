@@ -95,6 +95,16 @@ const Sidebar = () => {
                         src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
                         alt="AutoSaaz - One Stop Auto Shop" 
                         className="dashboard-logo-image"
+                        onLoad={() => {
+                            console.log('✅ Logo loaded successfully from:', `${process.env.PUBLIC_URL}/autoSaaz-logo.png`);
+                            console.log('PUBLIC_URL:', process.env.PUBLIC_URL);
+                        }}
+                        onError={(e) => {
+                            console.error('❌ Logo failed to load from:', `${process.env.PUBLIC_URL}/autoSaaz-logo.png`);
+                            console.error('PUBLIC_URL value:', process.env.PUBLIC_URL);
+                            console.error('Full path attempted:', e.target.src);
+                            console.error('Current window location:', window.location.href);
+                        }}
                     />
                     <div className="dashboard-logo-text">
                         <span className="dashboard-logo-name">AutoSaaz</span>
