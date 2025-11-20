@@ -1,5 +1,7 @@
 import { mapApiBookingToBooking } from './mappers/bookingMappers.js';
 import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import cache from '../utils/cache';
+import { retryApiCall } from '../utils/retry';
 
 /**
  * API base URL from environment
@@ -52,25 +54,37 @@ export async function getBookings(signal, params = {}) {
     if (params.limit) queryParams.append('limit', params.limit.toString());
     
     const queryString = queryParams.toString();
-  const url = `${API_BASE_URL}/bookings${queryString ? `?${queryString}` : ''}`;
-
-    console.log('API URL:', url);
-    console.log('Headers:', getHeaders());
-
-    const response = await fetch(url, {
-      headers: getHeaders(),
-      signal
-    });
-
-    console.log('Response Status:', response.status);
-    console.log('Response OK:', response.ok);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const endpoint = `/bookings${queryString ? `?${queryString}` : ''}`;
+    
+    // Check cache first (skip if aborted)
+    if (!signal?.aborted) {
+      const cached = cache.get(endpoint);
+      if (cached) {
+        console.log('=== BOOKINGS FROM CACHE ===');
+        return cached;
+      }
     }
 
-    const result = await response.json();
+    const url = `${API_BASE_URL}${endpoint}`;
+    console.log('API URL:', url);
+
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const response = await fetch(url, {
+        headers: getHeaders(),
+        signal
+      });
+
+      console.log('Response Status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    }, `GET ${endpoint}`);
+    
     console.log('API Response:', result);
     
     // Handle both array response and paginated response
@@ -83,6 +97,9 @@ export async function getBookings(signal, params = {}) {
       mapApiBookingToBooking(booking, index)
     );
     
+    // Cache the mapped results
+    cache.set(endpoint, {}, mappedBookings);
+    
     console.log('Mapped Bookings:', mappedBookings);
     console.log('=== BOOKINGS FETCH SUCCESS ===');
     
@@ -92,7 +109,6 @@ export async function getBookings(signal, params = {}) {
     console.error('=== BOOKINGS FETCH ERROR ===');
     console.error('Error Type:', error.name);
     console.error('Error Message:', error.message);
-    console.error('Error Stack:', error.stack);
     
     if (error.name === 'AbortError') {
       throw error; // Don't handle aborted requests
@@ -114,26 +130,49 @@ export async function getBookingById(id, signal) {
     console.log('=== FETCHING BOOKING BY ID ===', id);
     
     const cleanId = id.replace('#', '');
-  const response = await fetch(`${API_BASE_URL}/bookings/${cleanId}`, {
-      headers: getHeaders(),
-      signal
-    });
-
-    console.log('Response Status:', response.status);
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
+    const endpoint = `/bookings/${cleanId}`;
+    
+    // Check cache first
+    if (!signal?.aborted) {
+      const cached = cache.get(endpoint);
+      if (cached) {
+        console.log('=== BOOKING FROM CACHE ===');
+        return cached;
       }
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
+    
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: getHeaders(),
+        signal
+      });
 
-    const result = await response.json();
+      console.log('Response Status:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    }, `GET ${endpoint}`);
+    
+    if (result === null) {
+      return null;
+    }
+    
     const apiBooking = result.data || result.booking || result;
+    const mappedBooking = mapApiBookingToBooking(apiBooking);
+    
+    // Cache the result
+    cache.set(endpoint, {}, mappedBooking);
     
     console.log('=== BOOKING FETCH SUCCESS ===');
-    return mapApiBookingToBooking(apiBooking);
+    return mappedBooking;
 
   } catch (error) {
     console.error('=== BOOKING FETCH ERROR ===');
@@ -170,6 +209,10 @@ export async function createBooking(bookingData) {
     const result = await response.json();
     const apiBooking = result.data || result.booking || result;
     
+    // Invalidate bookings cache after creation
+    cache.invalidatePattern('bookings');
+    cache.invalidatePattern('dashboard');
+    
     console.log('=== BOOKING CREATED ===');
     return mapApiBookingToBooking(apiBooking);
 
@@ -204,6 +247,11 @@ export async function updateBooking(id, updates) {
     const result = await response.json();
     const apiBooking = result.data || result.booking || result;
     
+    // Invalidate bookings cache after update
+    cache.invalidatePattern('bookings');
+    cache.invalidate(`/bookings/${cleanId}`);
+    cache.invalidatePattern('dashboard');
+    
     console.log('=== BOOKING UPDATED ===');
     return mapApiBookingToBooking(apiBooking);
 
@@ -233,6 +281,11 @@ export async function deleteBooking(id) {
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
 
+    // Invalidate bookings cache after deletion
+    cache.invalidatePattern('bookings');
+    cache.invalidate(`/bookings/${cleanId}`);
+    cache.invalidatePattern('dashboard');
+
     console.log('=== BOOKING DELETED ===');
     return true;
 
@@ -250,18 +303,36 @@ export async function getDashboardStats() {
   try {
     console.log('=== FETCHING DASHBOARD STATS ===');
     
-  const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const endpoint = '/dashboard/stats';
+    
+    // Check cache first
+    const cached = cache.get(endpoint);
+    if (cached) {
+      console.log('=== DASHBOARD STATS FROM CACHE ===');
+      return cached;
     }
+    
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: getHeaders(),
+      });
 
-    const result = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    }, `GET ${endpoint}`);
+    
+    const stats = result.data || result.stats || result;
+    
+    // Cache the result
+    cache.set(endpoint, {}, stats);
+    
     console.log('=== DASHBOARD STATS SUCCESS ===');
-    return result.data || result.stats || result;
+    return stats;
 
   } catch (error) {
     console.error('Failed to fetch dashboard stats:', error.message);
@@ -277,18 +348,36 @@ export async function getBookingStats() {
   try {
     console.log('=== FETCHING BOOKING STATS ===');
     
-  const response = await fetch(`${API_BASE_URL}/dashboard/booking-stats`, {
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const endpoint = '/dashboard/booking-stats';
+    
+    // Check cache first
+    const cached = cache.get(endpoint);
+    if (cached) {
+      console.log('=== BOOKING STATS FROM CACHE ===');
+      return cached;
     }
+    
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: getHeaders(),
+      });
 
-    const result = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    }, `GET ${endpoint}`);
+    
+    const stats = result.data || result.stats || result;
+    
+    // Cache the result
+    cache.set(endpoint, {}, stats);
+    
     console.log('=== BOOKING STATS SUCCESS ===');
-    return result.data || result.stats || result;
+    return stats;
 
   } catch (error) {
     console.error('Failed to fetch booking stats:', error.message);

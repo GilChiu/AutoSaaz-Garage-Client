@@ -4,6 +4,9 @@
  */
 
 import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import cache from '../utils/cache';
+import { retryApiCall } from '../utils/retry';
+
 const API_BASE_URL = process.env.REACT_APP_FUNCTIONS_URL || FUNCTIONS_URL;
 
 /**
@@ -50,29 +53,44 @@ export async function getAppointments(signal, params = {}) {
     if (params.offset) queryParams.append('offset', params.offset.toString());
     
     const queryString = queryParams.toString();
-    const url = `${API_BASE_URL}/appointments${queryString ? `?${queryString}` : ''}`;
-
-    console.log('API URL:', url);
-    console.log('Headers:', getHeaders());
-
-    const response = await fetch(url, {
-      headers: getHeaders(),
-      signal
-    });
-
-    console.log('Response Status:', response.status);
-    console.log('Response OK:', response.ok);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const endpoint = `/appointments${queryString ? `?${queryString}` : ''}`;
+    
+    // Check cache first (skip if aborted)
+    if (!signal?.aborted) {
+      const cached = cache.get(endpoint);
+      if (cached) {
+        console.log('=== APPOINTMENTS FROM CACHE ===');
+        return cached;
+      }
     }
 
-    const result = await response.json();
+    const url = `${API_BASE_URL}${endpoint}`;
+    console.log('API URL:', url);
+
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const response = await fetch(url, {
+        headers: getHeaders(),
+        signal
+      });
+
+      console.log('Response Status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    }, `GET ${endpoint}`);
+    
     console.log('API Response:', result);
     
     // Handle both array response and paginated response
     const apiAppointments = Array.isArray(result.data) ? result.data : (result.data?.appointments || []);
+    
+    // Cache the result
+    cache.set(endpoint, {}, apiAppointments);
     
     console.log('Raw API Appointments:', apiAppointments);
     console.log('=== APPOINTMENTS FETCH SUCCESS ===');
@@ -83,7 +101,6 @@ export async function getAppointments(signal, params = {}) {
     console.error('=== APPOINTMENTS FETCH ERROR ===');
     console.error('Error Type:', error.name);
     console.error('Error Message:', error.message);
-    console.error('Error Stack:', error.stack);
     
     if (error.name === 'AbortError') {
       throw error; // Don't handle aborted requests
@@ -104,23 +121,45 @@ export async function getAppointmentById(id, signal) {
   try {
     console.log('=== FETCHING APPOINTMENT BY ID ===', id);
     
-    const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
-      headers: getHeaders(),
-      signal
-    });
-
-    console.log('Response Status:', response.status);
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
+    const endpoint = `/appointments/${id}`;
+    
+    // Check cache first
+    if (!signal?.aborted) {
+      const cached = cache.get(endpoint);
+      if (cached) {
+        console.log('=== APPOINTMENT FROM CACHE ===');
+        return cached;
       }
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
+    
+    // Use retry logic for resilience
+    const result = await retryApiCall(async () => {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: getHeaders(),
+        signal
+      });
 
-    const result = await response.json();
+      console.log('Response Status:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    }, `GET ${endpoint}`);
+    
+    if (result === null) {
+      return null;
+    }
+    
     const appointment = result.data || result;
+    
+    // Cache the result
+    cache.set(endpoint, {}, appointment);
     
     console.log('=== APPOINTMENT FETCH SUCCESS ===');
     return appointment;
@@ -161,6 +200,11 @@ export async function updateAppointment(id, updateData) {
     const result = await response.json();
     const appointment = result.data || result;
     
+    // Invalidate appointments cache after update
+    cache.invalidatePattern('appointments');
+    cache.invalidate(`/appointments/${id}`);
+    cache.invalidatePattern('dashboard');
+    
     console.log('=== APPOINTMENT UPDATED ===');
     return appointment;
 
@@ -193,6 +237,10 @@ export async function createAppointment(appointmentData) {
     const result = await response.json();
     const appointment = result.data || result;
     
+    // Invalidate appointments cache after creation
+    cache.invalidatePattern('appointments');
+    cache.invalidatePattern('dashboard');
+    
     console.log('=== APPOINTMENT CREATED ===');
     return appointment;
 
@@ -220,6 +268,11 @@ export async function deleteAppointment(id) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
+
+    // Invalidate appointments cache after deletion
+    cache.invalidatePattern('appointments');
+    cache.invalidate(`/appointments/${id}`);
+    cache.invalidatePattern('dashboard');
 
     console.log('=== APPOINTMENT DELETED ===');
     return true;

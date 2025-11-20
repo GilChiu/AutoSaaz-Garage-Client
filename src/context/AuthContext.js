@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import DEV_CONFIG from '../config/dev';
 import { loginUser, getCurrentUser } from '../services/api';
+import cache from '../utils/cache';
 
 const AuthContext = createContext();
 
@@ -99,6 +100,9 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         console.log('Logout called');
         
+        // Clear all cache on logout (security best practice)
+        cache.clear();
+        
         // If auth is disabled, just clear user
         if (!DEV_CONFIG.ENABLE_AUTH) {
             setUser(null);
@@ -122,7 +126,7 @@ export const AuthProvider = ({ children }) => {
         // Clear user state
         setUser(null);
         
-        console.log('Logout completed - all tokens cleared');
+        console.log('Logout completed - all tokens and cache cleared');
     };
 
     const register = async (userData) => {
