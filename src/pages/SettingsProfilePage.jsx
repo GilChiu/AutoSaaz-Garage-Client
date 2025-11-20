@@ -186,8 +186,39 @@ const SettingsProfilePage = () => {
               </div>
               
               {loading ? (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-                  Loading profile...
+                <div className="profile-form">
+                  <div className="profile-avatar-block">
+                    <div className="profile-avatar-circle skeleton-loader">
+                      <span className="avatar-letter">A</span>
+                    </div>
+                  </div>
+                  <div className="profile-fields">
+                    <label className="settings-field full">
+                      <span className="settings-label">Business Name</span>
+                      <div className="skeleton-input"></div>
+                    </label>
+                    <label className="settings-field full">
+                      <span className="settings-label">Description</span>
+                      <div className="skeleton-textarea"></div>
+                    </label>
+                    <label className="settings-field full">
+                      <span className="settings-label">Location</span>
+                      <div className="skeleton-input"></div>
+                    </label>
+                    <div className="profile-two-col">
+                      <label className="settings-field">
+                        <span className="settings-label">Working Hours</span>
+                        <div className="skeleton-input"></div>
+                      </label>
+                      <label className="settings-field">
+                        <span className="settings-label">Off Days / Holidays</span>
+                        <div className="skeleton-input"></div>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="settings-actions profile-actions">
+                    <div className="skeleton-button"></div>
+                  </div>
                 </div>
               ) : (
                 <form className="profile-form" onSubmit={handleSave}>
