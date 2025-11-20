@@ -23,53 +23,37 @@ const SettingsProfilePage = () => {
 
   // Load profile data on component mount
   useEffect(() => {
-    console.log('🔵 [SettingsProfilePage] Component mounted, starting loadProfile()');
     loadProfile();
   }, []);
 
   const loadProfile = async () => {
     try {
-      console.log('🔵 [loadProfile] Starting profile fetch, setLoading(true)');
       setLoading(true);
       setError('');
       
-      console.log('🔵 [loadProfile] Calling getGarageProfile()...');
       const response = await getGarageProfile();
-      console.log('✅ [loadProfile] Profile loaded successfully:', response);
-      console.log('✅ [loadProfile] Profile loaded successfully:', response);
 
       if (response.success && response.data?.profile) {
         const profileData = response.data.profile;
-        console.log('🔵 [loadProfile] Profile data extracted:', profileData);
         
-        const newProfile = {
+        setProfile({
           garageName: profileData.garageName || '',
           description: profileData.description || '',
           location: profileData.location || '',
           workingHours: profileData.workingHours || '',
           offDays: profileData.offDays || ''
-        };
-        console.log('🔵 [loadProfile] Setting profile state:', newProfile);
-        
-        setProfile(newProfile);
+        });
 
         // Set logo preview if available
         if (profileData.logoUrl) {
-          console.log('🔵 [loadProfile] Setting logo URL:', profileData.logoUrl);
           setLogo(profileData.logoUrl);
-        } else {
-          console.log('⚠️ [loadProfile] No logo URL found in profile data');
         }
-      } else {
-        console.warn('⚠️ [loadProfile] Invalid response structure:', response);
       }
     } catch (err) {
-      console.error('❌ [loadProfile] Error loading profile:', err);
+      console.error('Error loading profile:', err);
       setError(err.message || 'Failed to load profile data');
     } finally {
-      console.log('🔵 [loadProfile] Finally block - setLoading(false)');
       setLoading(false);
-      console.log('🔵 [loadProfile] Loading state set to false, scheduling mounted state...');
     }
   };
 
@@ -200,11 +184,6 @@ const SettingsProfilePage = () => {
                 <h2>Profile Settings</h2>
               </div>
               
-              {(() => {
-                console.log('🎨 [Render] loading:', loading);
-                return null;
-              })()}
-              
               {loading ? (
                 <div className="profile-form">
                   <div className="profile-avatar-block">
@@ -244,14 +223,6 @@ const SettingsProfilePage = () => {
                 <form 
                   className="profile-form" 
                   onSubmit={handleSave}
-                  ref={(el) => {
-                    if (el) {
-                      console.log('📐 [Form Ref] Form element classes:', el.className);
-                      console.log('📐 [Form Ref] Form computed display:', window.getComputedStyle(el).display);
-                      console.log('📐 [Form Ref] Form computed opacity:', window.getComputedStyle(el).opacity);
-                      console.log('📐 [Form Ref] Form computed gap:', window.getComputedStyle(el).gap);
-                    }
-                  }}
                 >
                   {error && (
                     <div style={{ 
