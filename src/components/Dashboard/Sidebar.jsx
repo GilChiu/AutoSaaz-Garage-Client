@@ -92,7 +92,7 @@ const Sidebar = () => {
             <div className="dashboard-sidebar-header">
                 <div className="dashboard-logo">
                     <img 
-                        src="/autoSaaz-logo.png"
+                        src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
                         alt="AutoSaaz - One Stop Auto Shop" 
                         className="dashboard-logo-image"
                     />
