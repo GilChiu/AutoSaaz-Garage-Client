@@ -18,15 +18,16 @@ export const SUPABASE_ANON_KEY =
 
 // Create a single shared Supabase client instance
 let supabaseClient = null;
+let lastToken = null;
 
 export const getSupabaseClient = () => {
+  const currentToken = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  
   if (!supabaseClient) {
     supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        storage: window.localStorage,
-        storageKey: 'supabase.auth.token',
+        persistSession: false, // We manage sessions manually
+        autoRefreshToken: false,
       },
       realtime: {
         params: {
@@ -34,22 +35,32 @@ export const getSupabaseClient = () => {
         }
       }
     });
-    
-    // Set auth token if available
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-    if (token) {
-      // Set the session asynchronously
-      supabaseClient.auth.setSession({
-        access_token: token,
-        refresh_token: token
-      }).catch(err => {
-        console.warn('[Supabase] Failed to set session:', err);
-      });
-    }
+  }
+  
+  // Update auth token if it changed
+  if (currentToken && currentToken !== lastToken) {
+    lastToken = currentToken;
+    // Set auth header for API calls
+    supabaseClient.rest.headers = {
+      ...supabaseClient.rest.headers,
+      'Authorization': `Bearer ${currentToken}`
+    };
+    // Set auth header for storage calls
+    supabaseClient.storage.headers = {
+      ...supabaseClient.storage.headers,
+      'Authorization': `Bearer ${currentToken}`
+    };
+    console.log('[Supabase] Updated auth token');
   }
   
   return supabaseClient;
 };
 
-// Export the client directly for convenience
-export const supabase = getSupabaseClient();
+// Export a function that always gets fresh client with current auth
+export const supabase = new Proxy({}, {
+  get(target, prop) {
+    const client = getSupabaseClient();
+    const value = client[prop];
+    return typeof value === 'function' ? value.bind(client) : value;
+  }
+});
