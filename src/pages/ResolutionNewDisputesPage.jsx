@@ -75,13 +75,15 @@ const NewDisputesPage = () => {
           schema: 'public',
           table: 'disputes'
         },
-        async () => {
+        async (payload) => {
+          console.log('[Real-time] Dispute change detected:', payload);
           // Refresh the disputes list when any change occurs
           try {
             cache.invalidate('/resolution-center?status=new');
             const data = await getDisputes('new');
             const mapped = data.map(mapDispute);
             setItems(mapped);
+            console.log('[Real-time] New disputes list updated:', mapped.length, 'items');
           } catch (e) {
             console.error('Failed to refresh disputes:', e);
           }

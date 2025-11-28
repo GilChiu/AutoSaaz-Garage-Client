@@ -56,13 +56,15 @@ const ResolvedDisputesPage = () => {
           schema: 'public',
           table: 'disputes'
         },
-        async () => {
+        async (payload) => {
+          console.log('[Real-time] Dispute change detected:', payload);
           // Refresh the resolved disputes list when any change occurs
           try {
             cache.invalidate('/resolution-center?status=resolved');
             const data = await getDisputes('resolved');
             const mapped = data.map(mapDispute);
             setItems(mapped);
+            console.log('[Real-time] Resolved disputes list updated:', mapped.length, 'items');
           } catch (e) {
             console.error('Failed to refresh resolved disputes:', e);
           }

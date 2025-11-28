@@ -68,15 +68,23 @@ const DisputeChatPage = () => {
           filter: `ticket_id=eq.${id}`
         },
         async (payload) => {
+          console.log('[Real-time] New message received:', payload.new);
+          // Invalidate cache immediately
+          import('../utils/cache').then(cacheModule => {
+            cacheModule.default.invalidate(`/resolution-center/${id}`);
+          });
+          
           // Fetch fresh dispute data to get the new message properly formatted
           try {
             const raw = await getDisputeById(id);
             const updated = mapDisputeDetail(raw);
             if (updated) {
               setDispute(updated);
+              console.log('[Real-time] Dispute updated with new message');
               
               // If it's a resolution notice, invalidate cache for dispute lists
               if (payload.new.is_resolution_notice) {
+                console.log('[Real-time] Resolution notice detected, invalidating lists');
                 import('../utils/cache').then(cacheModule => {
                   cacheModule.default.invalidatePattern('resolution-center');
                 });
