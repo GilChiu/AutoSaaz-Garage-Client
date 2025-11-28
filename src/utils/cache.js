@@ -24,7 +24,7 @@ const DEFAULT_TTLS = {
   bookings: 180,         // 3 minutes - order data
   appointments: 180,     // 3 minutes - appointment data
   inspections: 180,      // 3 minutes - inspection data
-  disputes: 180,         // 3 minutes - dispute data
+  disputes: 30,          // 30 seconds - dispute data needs to be fresh for chat
   support: 180,          // 3 minutes - support tickets
   profile: 300,          // 5 minutes - user profile data
   settings: 300,         // 5 minutes - settings data

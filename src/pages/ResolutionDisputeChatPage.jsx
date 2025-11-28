@@ -45,7 +45,7 @@ const DisputeChatPage = () => {
     const pollInterval = setInterval(async () => {
       if (!isActive) return;
       try {
-        const raw = await getDisputeById(id);
+        const raw = await getDisputeById(id, null, true); // skipCache=true for polling
         const updated = mapDisputeDetail(raw);
         if (updated && updated.messages?.length > lastMessageCount) {
           console.log('[Polling] New messages detected');

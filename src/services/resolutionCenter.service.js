@@ -114,15 +114,18 @@ export async function getDisputes(status, signal) {
   return result;
 }
 
-export async function getDisputeById(id, signal) {
+export async function getDisputeById(id, signal, skipCache = false) {
   const endpoint = `/resolution-center/${id}`;
   
-  // Check cache first (skip if aborted)
-  if (!signal?.aborted) {
+  // Check cache first (skip if aborted or skipCache flag set)
+  if (!signal?.aborted && !skipCache) {
     const cached = cache.get(endpoint);
     if (cached) {
+      console.log('[Cache] localStorage hit for dispute:', id);
       return cached;
     }
+  } else if (skipCache) {
+    console.log('[Polling] Bypassing cache for fresh data');
   }
   
   // Use retry logic for resilience
