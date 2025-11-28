@@ -1,5 +1,7 @@
 /**
  * Maps API inspection response to UI inspection model
+ * Note: formatDate and formatTime here are data transformers, not display formatters
+ * Display formatting is handled by GST utilities in the UI components
  * @param {import('../../types/inspection.js').InspectionApiResponse} apiInspection
  * @param {number} index - Index for generating inspection ID if not available
  * @returns {import('../../types/inspection.js').Inspection}

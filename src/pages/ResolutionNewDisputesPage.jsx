@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../config/supabase';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getDisputes, mapDispute, createDispute } from '../services/resolutionCenter.service';
+import { formatCompactDateTimeGST } from '../utils/gstDateTime';
 import { getBookings } from '../services/bookings.service';
 import cache from '../utils/cache';
 import '../components/Dashboard/Dashboard.css';
@@ -125,7 +126,7 @@ const NewDisputesPage = () => {
                   <div className="rcfx-dispute-line"><strong>Order ID:</strong> {d.orderId}</div>
                   <div className="rcfx-dispute-line"><strong>Customer:</strong> {d.customer}</div>
                   <div className="rcfx-dispute-line rcfx-reason"><strong>Reason:</strong> {d.reason}</div>
-                  <div className="rcfx-dispute-line"><strong>Raised On:</strong> {new Date(d.raisedAt).toLocaleString()}</div>
+                  <div className="rcfx-dispute-line"><strong>Raised On:</strong> {formatCompactDateTimeGST(d.raisedAt)}</div>
                 </div>
                 <button className="rcfx-btn rcfx-btn-primary" onClick={() => navigate(`/resolution-center/disputes/${d.id}`)}>Respond Now</button>
               </div>

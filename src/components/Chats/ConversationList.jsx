@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDateGST } from '../../utils/gstDateTime';
 
 function formatTime(iso) {
   if (!iso) return '';
@@ -9,7 +10,7 @@ function formatTime(iso) {
   if (diffMin < 60) return `${diffMin}m`;
   const diffH = Math.floor(diffMin / 60);
   if (diffH < 24) return `${diffH}h`;
-  return d.toLocaleDateString();
+  return formatDateGST(iso, 'short');
 }
 
 function ConversationListItem({ item, selected, onClick }) {

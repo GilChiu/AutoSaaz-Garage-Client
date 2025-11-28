@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getAppointmentById, mapDetailedAppointment, acceptAppointment, cancelAppointment } from '../services/appointments.service';
+import { formatDateTimeGST, formatDateGST, formatTimeGST } from '../utils/gstDateTime';
 import '../styles/appointment-detail.css';
-
-const fmtDate = iso => new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
 const DetailSkeleton = () => (
   <div className="apptfx-detail-card apptfx-detail-skel">
@@ -76,11 +75,13 @@ const AppointmentDetailPage = () => {
             </div>
             <div className="apptfx-detail-row">
               <span className="apptfx-detail-icon" aria-hidden="true">📅</span>
-              <span className="apptfx-detail-value">{fmtDate(item.date)}</span>
+              <span className="apptfx-detail-label">Date:</span>
+              <span className="apptfx-detail-value">{formatDateGST(item.date)}</span>
             </div>
             <div className="apptfx-detail-row">
               <span className="apptfx-detail-icon" aria-hidden="true">🕒</span>
-              <span className="apptfx-detail-value">Requested today</span>
+              <span className="apptfx-detail-label">Time:</span>
+              <span className="apptfx-detail-value">{formatTimeGST(item.date)}</span>
             </div>
           </div>
           {item.status === 'pending' && (

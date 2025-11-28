@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getInspectionById, completeInspection } from '../services/inspections.service';
 import Sidebar from '../components/Dashboard/Sidebar';
+import { formatDateGST } from '../utils/gstDateTime';
 import '../components/Dashboard/Dashboard.css';
 import './InspectionDetailPage.css';
 
@@ -212,11 +213,7 @@ const InspectionDetailPage = () => {
                                 <div className="inspection-detail-info-row">
                                     <span className="inspection-detail-info-label">Date:</span>
                                     <span className="inspection-detail-info-value">
-                                        {new Date(inspection.date).toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}
+                                        {formatDateGST(inspection.date)}
                                     </span>
                                 </div>
                                 

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../config/supabase';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getDisputeById, mapDisputeDetail, postDisputeMessage } from '../services/resolutionCenter.service';
+import { formatMessageTimeGST } from '../utils/gstDateTime';
 import '../components/Dashboard/Dashboard.css';
 import '../styles/resolution-center.css';
 
@@ -220,7 +221,7 @@ const DisputeChatPage = () => {
                             📎 Upload Document
                           </button>
                         )}
-                        <div className="rcfx-msg-time">{new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        <div className="rcfx-msg-time">{formatMessageTimeGST(m.ts)}</div>
                       </div>
                     );
                   })}
