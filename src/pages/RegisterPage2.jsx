@@ -143,22 +143,30 @@ const RegisterPage2 = () => {
 
                             <div className="form-group-register-page2">
                                 <label>State <span className="required-asterisk-register-page2">*</span></label>
-                                <input
-                                    type="text"
+                                <select
                                     value={state}
                                     onChange={(e) => setState(e.target.value)}
-                                    placeholder="Enter State"
                                     required
-                                />
+                                    className="state-select-register-page2"
+                                >
+                                    <option value="" disabled>Select State</option>
+                                    <option value="Abu Dhabi">Abu Dhabi</option>
+                                    <option value="Dubai">Dubai</option>
+                                    <option value="Sharjah">Sharjah</option>
+                                    <option value="Ajman">Ajman</option>
+                                    <option value="Umm Al Quwain">Umm Al Quwain</option>
+                                    <option value="Ras Al Khaimah">Ras Al Khaimah</option>
+                                    <option value="Fujairah">Fujairah</option>
+                                </select>
                             </div>
 
                             <div className="form-group-register-page2">
-                                <label>Location <span className="required-asterisk-register-page2">*</span></label>
+                                <label>Nearest Landmark <span className="required-asterisk-register-page2">*</span></label>
                                 <input
                                     type="text"
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
-                                    placeholder="Enter Location"
+                                    placeholder="Enter Nearest Landmark"
                                     required
                                 />
                             </div>

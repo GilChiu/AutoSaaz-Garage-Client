@@ -174,6 +174,53 @@
   font-weight: 400;
 }
 
+/* Select/Dropdown Styling */
+.form-group-register-page2 select,
+.state-select-register-page2 {
+  width: 90%;
+  height: 44px;
+  padding: 12px 16px;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  font-size: 16px;
+  background-color: #fafafa;
+  color: #333;
+  box-sizing: border-box;
+  font-weight: 400;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 20px;
+  padding-right: 40px;
+}
+
+.form-group-register-page2 select:focus,
+.state-select-register-page2:focus {
+  outline: none;
+  border-color: #ff6b35;
+  background-color: white;
+}
+
+.form-group-register-page2 select option {
+  padding: 10px;
+  font-weight: 400;
+}
+
+.form-group-register-page2 select option[value=""] {
+  color: #999;
+}
+
+.form-group-register-page2 select:invalid {
+  color: #999;
+}
+
+.form-group-register-page2 select:valid {
+  color: #333;
+}
+
 /* Next Button */
 .next-btn-register-page2 {
   width: 90%;

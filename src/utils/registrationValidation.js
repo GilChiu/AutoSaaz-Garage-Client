@@ -204,14 +204,13 @@ export const validateState = (state) => {
     'Fujairah'
   ];
   
-  // Optional: Check if it's a valid UAE emirate (case-insensitive)
-  // You can remove this check if users can enter any state
+  // Check if it's a valid UAE emirate (case-insensitive)
   const isValidEmirate = validEmirates.some(
-    emirate => emirate.toLowerCase() === state.toLowerCase()
+    emirate => emirate.toLowerCase() === state.trim().toLowerCase()
   );
   
   if (!isValidEmirate) {
-    return `Please enter a valid UAE emirate (${validEmirates.join(', ')})`;
+    return 'Please select a valid UAE emirate';
   }
   
   return null;
