@@ -43,7 +43,7 @@ const ResolvedDisputesPage = () => {
                   <div className="rcfx-dispute-line"><strong>Order ID:</strong> {d.orderId}</div>
                   <div className="rcfx-dispute-line"><strong>Customer:</strong> {d.customer}</div>
                   <div className="rcfx-dispute-line"><strong>Resolution:</strong> {d.resolution || '—'}</div>
-                  <div className="rcfx-dispute-line"><strong>Date:</strong> {d.resolvedAt ? new Date(d.resolvedAt).toLocaleDateString() : '—'}</div>
+                  <div className="rcfx-dispute-line"><strong>Date:</strong> {d.resolvedAt ? new Date(d.resolvedAt).toLocaleString() : '—'}</div>
                 </div>
               </div>
             ))}
