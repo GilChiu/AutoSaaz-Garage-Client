@@ -1,9 +1,24 @@
 import React, { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabase';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getDisputes, mapDispute } from '../services/resolutionCenter.service';
 import cache from '../utils/cache';
 import '../components/Dashboard/Dashboard.css';
 import '../styles/resolution-center.css';
+
+// Create Supabase client
+const getSupabaseClient = () => {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (token) {
+    client.auth.setSession({
+      access_token: token,
+      refresh_token: token
+    });
+  }
+  return client;
+};
 
 const ResolvedDisputesPage = () => {
   const [items, setItems] = useState([]);
@@ -27,26 +42,38 @@ const ResolvedDisputesPage = () => {
     return () => controller.abort();
   }, []);
 
-  // Poll for updates every 10 seconds to detect newly resolved disputes
+  // Real-time subscription for newly resolved disputes
   useEffect(() => {
-    const pollInterval = setInterval(async () => {
-      try {
-        // Invalidate cache before polling to get fresh data
-        cache.invalidate('/resolution-center?status=resolved');
-        const data = await getDisputes('resolved');
-        const mapped = data.map(mapDispute);
-        
-        // Only update if the list has changed (new dispute was resolved)
-        if (mapped.length !== items.length) {
-          setItems(mapped);
-        }
-      } catch (e) {
-        // Silent fail for polling
-      }
-    }, 10000); // Poll every 10 seconds
+    const supabase = getSupabaseClient();
 
-    return () => clearInterval(pollInterval);
-  }, [items.length]);
+    // Subscribe to disputes table for any changes
+    const channel = supabase
+      .channel('resolved-disputes-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'disputes'
+        },
+        async () => {
+          // Refresh the resolved disputes list when any change occurs
+          try {
+            cache.invalidate('/resolution-center?status=resolved');
+            const data = await getDisputes('resolved');
+            const mapped = data.map(mapDispute);
+            setItems(mapped);
+          } catch (e) {
+            console.error('Failed to refresh resolved disputes:', e);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return (
     <div className="dashboard-layout">

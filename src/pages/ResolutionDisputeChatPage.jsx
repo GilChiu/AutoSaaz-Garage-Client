@@ -50,41 +50,81 @@ const DisputeChatPage = () => {
     return () => controller.abort();
   }, [id]);
 
-  // Poll for new messages every 5 seconds
+  // Real-time subscription for dispute updates and new messages
   useEffect(() => {
-    if (!id || !dispute) return;
-    
-    const pollInterval = setInterval(async () => {
-      try {
-        const raw = await getDisputeById(id);
-        const updated = mapDisputeDetail(raw);
-        
-        // Update the entire dispute if status changed or new messages arrived
-        if (updated) {
-          const statusChanged = updated.status !== dispute.status;
-          const newMessages = updated.messages?.length > dispute.messages?.length;
-          
-          if (statusChanged || newMessages) {
-            setDispute(updated);
-            
-            // If dispute was resolved, invalidate the cache so lists update
-            if (statusChanged && updated.status === 'resolved') {
-              // Import cache dynamically to invalidate
+    if (!id) return;
+
+    const supabase = getSupabaseClient();
+
+    // Subscribe to dispute_messages for new messages
+    const messagesChannel = supabase
+      .channel(`dispute-messages-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'dispute_messages',
+          filter: `ticket_id=eq.${id}`
+        },
+        async (payload) => {
+          // Fetch fresh dispute data to get the new message properly formatted
+          try {
+            const raw = await getDisputeById(id);
+            const updated = mapDisputeDetail(raw);
+            if (updated) {
+              setDispute(updated);
+              
+              // If it's a resolution notice, invalidate cache for dispute lists
+              if (payload.new.is_resolution_notice) {
+                import('../utils/cache').then(cacheModule => {
+                  cacheModule.default.invalidatePattern('resolution-center');
+                });
+              }
+            }
+          } catch (e) {
+            console.error('Failed to refresh dispute after new message:', e);
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to disputes table for status changes
+    const disputeChannel = supabase
+      .channel(`dispute-status-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'disputes',
+          filter: `id=eq.${id}`
+        },
+        async (payload) => {
+          // Refresh dispute data when status changes
+          try {
+            const raw = await getDisputeById(id);
+            const updated = mapDisputeDetail(raw);
+            if (updated) {
+              setDispute(updated);
+              
+              // Invalidate cache when status changes
               import('../utils/cache').then(cacheModule => {
                 cacheModule.default.invalidatePattern('resolution-center');
               });
             }
+          } catch (e) {
+            console.error('Failed to refresh dispute after status change:', e);
           }
         }
-      } catch (e) {
-        // Silent fail for polling - don't show errors
+      )
+      .subscribe();
 
-      }
-    }, 3000); // Poll every 3 seconds for more responsive updates
-
-    return () => clearInterval(pollInterval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, dispute?.messages?.length, dispute?.status]);
+    return () => {
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(disputeChannel);
+    };
+  }, [id]);
 
   const sendMessage = async () => {
     if (!message.trim() && !selectedFile) return;
