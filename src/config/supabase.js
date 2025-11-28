@@ -18,38 +18,18 @@ export const SUPABASE_ANON_KEY =
 
 // Create a single shared Supabase client instance
 let supabaseClient = null;
-let authInitialized = false;
 
-const ensureAuth = async (client) => {
-  if (authInitialized) return; // Don't set multiple times
-  
+// Custom fetch wrapper that adds our backend JWT to requests
+const customFetch = (url, options = {}) => {
   const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   if (token) {
-    try {
-      // Set the session for realtime subscriptions
-      const { error } = await client.auth.setSession({
-        access_token: token,
-        refresh_token: token
-      });
-      
-      if (error) {
-        console.warn('[Supabase] Failed to set session:', error);
-      } else {
-        authInitialized = true;
-        console.log('[Supabase] Auth session set for realtime');
-      }
-    } catch (err) {
-      console.warn('[Supabase] Exception setting session:', err);
-    }
-    
-    // Also set auth headers for storage operations
-    client.storage.headers = {
-      ...client.storage.headers,
-      'Authorization': `Bearer ${token}`
+    options.headers = {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`,
+      'apikey': SUPABASE_ANON_KEY, // Still need anon key for Supabase
     };
-  } else {
-    console.warn('[Supabase] No auth token found in localStorage');
   }
+  return fetch(url, options);
 };
 
 export const getSupabaseClient = () => {
@@ -63,10 +43,16 @@ export const getSupabaseClient = () => {
         params: {
           eventsPerSecond: 10
         }
+      },
+      global: {
+        headers: {
+          // Add custom header for backend token
+          'X-Custom-Auth': localStorage.getItem('accessToken') || localStorage.getItem('token') || ''
+        }
       }
     });
-    // Initialize auth asynchronously
-    ensureAuth(supabaseClient);
+    
+    console.log('[Supabase] Client initialized (using anon key for realtime)');
   }
   return supabaseClient;
 };
@@ -76,8 +62,13 @@ export const supabase = getSupabaseClient();
 
 // Helper to update auth token before storage operations
 export const updateSupabaseAuth = async () => {
-  if (supabaseClient) {
-    authInitialized = false; // Allow re-initialization
-    await ensureAuth(supabaseClient);
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  if (supabaseClient && token) {
+    // Update storage headers with backend JWT
+    supabaseClient.storage.headers = {
+      ...supabaseClient.storage.headers,
+      'Authorization': `Bearer ${token}`
+    };
+    console.log('[Supabase] Storage auth updated');
   }
 };

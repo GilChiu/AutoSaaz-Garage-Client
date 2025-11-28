@@ -33,150 +33,52 @@ const DisputeChatPage = () => {
     return () => controller.abort();
   }, [id]);
 
-  // Real-time subscription for dispute updates and new messages
+  // Polling for new messages (realtime doesn't work with custom JWT auth)
   useEffect(() => {
     if (!id) return;
 
-    console.log('[Real-time] Setting up subscriptions for dispute:', id);
+    console.log('[Polling] Setting up message polling for dispute:', id);
     let isActive = true;
+    let lastMessageCount = dispute?.messages?.length || 0;
     
-    // Wait a moment for auth to be set, then subscribe
-    const setupSubscriptions = async () => {
-      // Ensure auth is set before subscribing
-      await updateSupabaseAuth();
-      
-      // Small delay to ensure auth propagates
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+    // Poll every 3 seconds for responsive updates
+    const pollInterval = setInterval(async () => {
       if (!isActive) return;
-    
-      // Subscribe to dispute_messages for new messages
-      const messagesChannel = supabase
-        .channel(`dispute-messages-${id}`)
-        .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'dispute_messages',
-          filter: `ticket_id=eq.${id}`
-        },
-        async (payload) => {
-          if (!isActive) return;
-          console.log('[Real-time] New message received:', payload.new);
-          // Invalidate cache immediately
-          import('../utils/cache').then(cacheModule => {
-            cacheModule.default.invalidate(`/resolution-center/${id}`);
-          });
+      try {
+        const raw = await getDisputeById(id);
+        const updated = mapDisputeDetail(raw);
+        if (updated && updated.messages?.length > lastMessageCount) {
+          console.log('[Polling] New messages detected');
+          lastMessageCount = updated.messages.length;
+          if (isActive) setDispute(updated);
           
-          // Fetch fresh dispute data to get the new message properly formatted
-          try {
-            const raw = await getDisputeById(id);
-            const updated = mapDisputeDetail(raw);
-            if (updated && isActive) {
-              setDispute(updated);
-              console.log('[Real-time] Dispute updated with new message');
-              
-              // If it's a resolution notice, invalidate cache for dispute lists
-              if (payload.new.is_resolution_notice) {
-                console.log('[Real-time] Resolution notice detected, invalidating lists');
-                import('../utils/cache').then(cacheModule => {
-                  cacheModule.default.invalidatePattern('resolution-center');
-                });
-              }
-            }
-          } catch (e) {
-            console.error('Failed to refresh dispute after new message:', e);
+          // Invalidate cache for dispute lists if status changed
+          if (updated.status !== dispute?.status) {
+            import('../utils/cache').then(cacheModule => {
+              cacheModule.default.invalidatePattern('resolution-center');
+            });
+          }
+        } else if (updated) {
+          lastMessageCount = updated.messages?.length || 0;
+          // Update if status changed even without new messages
+          if (updated.status !== dispute?.status && isActive) {
+            setDispute(updated);
+            import('../utils/cache').then(cacheModule => {
+              cacheModule.default.invalidatePattern('resolution-center');
+            });
           }
         }
-      )
-      .subscribe((status) => {
-        console.log('[Real-time] Messages channel status:', status);
-        if (status === 'SUBSCRIBED') {
-          console.log('[Real-time] Successfully subscribed to messages');
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error('[Real-time] Subscription failed:', status);
-        }
-      });
+      } catch (e) {
+        // Silent fail for polling
+      }
+    }, 3000);
 
-    // Subscribe to disputes table for status changes
-    const disputeChannel = supabase
-      .channel(`dispute-status-${id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'disputes',
-          filter: `id=eq.${id}`
-        },
-        async (payload) => {
-          if (!isActive) return;
-          console.log('[Real-time] Dispute status changed:', payload.new);
-          // Refresh dispute data when status changes
-          try {
-            const raw = await getDisputeById(id);
-            const updated = mapDisputeDetail(raw);
-            if (updated && isActive) {
-              setDispute(updated);
-              console.log('[Real-time] Dispute updated after status change');
-              
-              // Invalidate cache when status changes
-              import('../utils/cache').then(cacheModule => {
-                cacheModule.default.invalidatePattern('resolution-center');
-              });
-            }
-          } catch (e) {
-            console.error('Failed to refresh dispute after status change:', e);
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('[Real-time] Dispute channel status:', status);
-        if (status === 'SUBSCRIBED') {
-          console.log('[Real-time] Successfully subscribed to dispute updates');
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error('[Real-time] Dispute subscription failed:', status);
-        }
-      });
-
-      // Fallback polling if real-time fails (runs every 5 seconds)
-      let lastMessageCount = 0;
-      const pollInterval = setInterval(async () => {
-        if (!isActive) return;
-        try {
-          const raw = await getDisputeById(id);
-          const updated = mapDisputeDetail(raw);
-          if (updated && updated.messages?.length > lastMessageCount) {
-            console.log('[Fallback] New messages detected via polling');
-            lastMessageCount = updated.messages.length;
-            if (isActive) setDispute(updated);
-          } else if (updated) {
-            lastMessageCount = updated.messages?.length || 0;
-          }
-        } catch (e) {
-          // Silent fail for polling
-        }
-      }, 5000);
-
-      return () => {
-        isActive = false;
-        console.log('[Real-time] Cleaning up subscriptions');
-        supabase.removeChannel(messagesChannel);
-        supabase.removeChannel(disputeChannel);
-        clearInterval(pollInterval);
-      };
-    };
-
-    // Start the subscription setup
-    const cleanup = setupSubscriptions();
-    
-    // Return cleanup function
     return () => {
       isActive = false;
-      cleanup.then(cleanupFn => cleanupFn && cleanupFn());
+      console.log('[Polling] Cleaning up');
+      clearInterval(pollInterval);
     };
-  }, [id]);
+  }, [id, dispute?.messages?.length, dispute?.status]);
 
   const sendMessage = async () => {
     if (!message.trim() && !selectedFile) return;
