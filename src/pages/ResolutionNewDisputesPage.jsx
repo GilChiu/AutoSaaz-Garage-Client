@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getDisputes, mapDispute, createDispute } from '../services/resolutionCenter.service';
 import { getBookings } from '../services/bookings.service';
+import cache from '../utils/cache';
 import '../components/Dashboard/Dashboard.css';
 import '../styles/resolution-center.css';
 
@@ -18,12 +19,20 @@ const NewDisputesPage = () => {
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleRefresh = () => {
+    // Invalidate resolution-center cache to force fresh data
+    cache.invalidatePattern('resolution-center');
+    setRefreshKey(prev => prev + 1);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
     (async () => {
       try {
         setLoading(true);
+        setError(null);
 
         const data = await getDisputes('new', controller.signal);
 
@@ -42,7 +51,7 @@ const NewDisputesPage = () => {
       }
     })();
     return () => controller.abort();
-  }, []);
+  }, [refreshKey]);
 
   // Fetch bookings when modal opens
   useEffect(() => {
@@ -74,7 +83,12 @@ const NewDisputesPage = () => {
             <div className="rcfx-toolbar-left">
               <h2 className="rcfx-section-heading" style={{ margin: 0 }}>New Disputes</h2>
             </div>
-            <button className="rcfx-btn rcfx-btn-primary" onClick={() => setShowCreate(true)}>New Dispute</button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="rcfx-btn" onClick={handleRefresh} disabled={loading} title="Refresh disputes list">
+                🔄 Refresh
+              </button>
+              <button className="rcfx-btn rcfx-btn-primary" onClick={() => setShowCreate(true)}>New Dispute</button>
+            </div>
           </div>
           {error && <div className="rcfx-error" role="alert">{error}</div>}
           {loading && <div className="rcfx-loading">Loading...</div>}
