@@ -53,9 +53,9 @@ export function mapDisputeDetail(raw) {
     resolvedAt: raw.resolvedAt || null,
     messages: (raw.messages || []).map(m => ({
       id: m.id,
-      from: m.senderType?.toLowerCase() || m.from || 'user', // Map senderType to from (admin/user)
-      text: m.body || m.text, // Backend sends 'body', UI expects 'text'
-      ts: m.createdAt || m.ts,
+      from: m.from || m.senderType?.toLowerCase() || 'user', // Backend now returns correct 'from' field
+      text: m.text || m.body, // Support both field names
+      ts: m.ts || m.createdAt,
       attachmentUrl: m.attachmentUrl || m.attachment_url,
       attachmentType: m.attachmentType || m.attachment_type,
       attachmentName: m.attachmentName || m.attachment_name,

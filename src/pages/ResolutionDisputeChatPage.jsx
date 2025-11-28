@@ -40,10 +40,20 @@ const DisputeChatPage = () => {
     console.log('[Real-time] Setting up subscriptions for dispute:', id);
     let isActive = true;
     
-    // Subscribe to dispute_messages for new messages
-    const messagesChannel = supabase
-      .channel(`dispute-messages-${id}`)
-      .on(
+    // Wait a moment for auth to be set, then subscribe
+    const setupSubscriptions = async () => {
+      // Ensure auth is set before subscribing
+      await updateSupabaseAuth();
+      
+      // Small delay to ensure auth propagates
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (!isActive) return;
+    
+      // Subscribe to dispute_messages for new messages
+      const messagesChannel = supabase
+        .channel(`dispute-messages-${id}`)
+        .on(
         'postgres_changes',
         {
           event: 'INSERT',
@@ -130,31 +140,41 @@ const DisputeChatPage = () => {
         }
       });
 
-    // Fallback polling if real-time fails (runs every 5 seconds)
-    let lastMessageCount = 0;
-    const pollInterval = setInterval(async () => {
-      if (!isActive) return;
-      try {
-        const raw = await getDisputeById(id);
-        const updated = mapDisputeDetail(raw);
-        if (updated && updated.messages?.length > lastMessageCount) {
-          console.log('[Fallback] New messages detected via polling');
-          lastMessageCount = updated.messages.length;
-          if (isActive) setDispute(updated);
-        } else if (updated) {
-          lastMessageCount = updated.messages?.length || 0;
+      // Fallback polling if real-time fails (runs every 5 seconds)
+      let lastMessageCount = 0;
+      const pollInterval = setInterval(async () => {
+        if (!isActive) return;
+        try {
+          const raw = await getDisputeById(id);
+          const updated = mapDisputeDetail(raw);
+          if (updated && updated.messages?.length > lastMessageCount) {
+            console.log('[Fallback] New messages detected via polling');
+            lastMessageCount = updated.messages.length;
+            if (isActive) setDispute(updated);
+          } else if (updated) {
+            lastMessageCount = updated.messages?.length || 0;
+          }
+        } catch (e) {
+          // Silent fail for polling
         }
-      } catch (e) {
-        // Silent fail for polling
-      }
-    }, 5000);
+      }, 5000);
 
+      return () => {
+        isActive = false;
+        console.log('[Real-time] Cleaning up subscriptions');
+        supabase.removeChannel(messagesChannel);
+        supabase.removeChannel(disputeChannel);
+        clearInterval(pollInterval);
+      };
+    };
+
+    // Start the subscription setup
+    const cleanup = setupSubscriptions();
+    
+    // Return cleanup function
     return () => {
       isActive = false;
-      console.log('[Real-time] Cleaning up subscriptions');
-      supabase.removeChannel(messagesChannel);
-      supabase.removeChannel(disputeChannel);
-      clearInterval(pollInterval);
+      cleanup.then(cleanupFn => cleanupFn && cleanupFn());
     };
   }, [id]);
 

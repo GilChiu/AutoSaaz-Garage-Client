@@ -18,19 +18,28 @@ export const SUPABASE_ANON_KEY =
 
 // Create a single shared Supabase client instance
 let supabaseClient = null;
+let authInitialized = false;
 
 const ensureAuth = async (client) => {
+  if (authInitialized) return; // Don't set multiple times
+  
   const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   if (token) {
     try {
       // Set the session for realtime subscriptions
-      await client.auth.setSession({
+      const { error } = await client.auth.setSession({
         access_token: token,
         refresh_token: token
       });
-      console.log('[Supabase] Auth session set for realtime');
+      
+      if (error) {
+        console.warn('[Supabase] Failed to set session:', error);
+      } else {
+        authInitialized = true;
+        console.log('[Supabase] Auth session set for realtime');
+      }
     } catch (err) {
-      console.warn('[Supabase] Failed to set session:', err);
+      console.warn('[Supabase] Exception setting session:', err);
     }
     
     // Also set auth headers for storage operations
@@ -38,6 +47,8 @@ const ensureAuth = async (client) => {
       ...client.storage.headers,
       'Authorization': `Bearer ${token}`
     };
+  } else {
+    console.warn('[Supabase] No auth token found in localStorage');
   }
 };
 
@@ -54,6 +65,7 @@ export const getSupabaseClient = () => {
         }
       }
     });
+    // Initialize auth asynchronously
     ensureAuth(supabaseClient);
   }
   return supabaseClient;
@@ -63,8 +75,9 @@ export const getSupabaseClient = () => {
 export const supabase = getSupabaseClient();
 
 // Helper to update auth token before storage operations
-export const updateSupabaseAuth = () => {
+export const updateSupabaseAuth = async () => {
   if (supabaseClient) {
-    ensureAuth(supabaseClient);
+    authInitialized = false; // Allow re-initialization
+    await ensureAuth(supabaseClient);
   }
 };
