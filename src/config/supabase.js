@@ -18,15 +18,23 @@ export const SUPABASE_ANON_KEY =
 
 // Create a single shared Supabase client instance
 let supabaseClient = null;
-let lastToken = null;
+
+const ensureAuth = (client) => {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  if (token) {
+    // Set auth headers for storage operations
+    client.storage.headers = {
+      ...client.storage.headers,
+      'Authorization': `Bearer ${token}`
+    };
+  }
+};
 
 export const getSupabaseClient = () => {
-  const currentToken = localStorage.getItem('accessToken') || localStorage.getItem('token');
-  
   if (!supabaseClient) {
     supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
-        persistSession: false, // We manage sessions manually
+        persistSession: false,
         autoRefreshToken: false,
       },
       realtime: {
@@ -35,32 +43,17 @@ export const getSupabaseClient = () => {
         }
       }
     });
+    ensureAuth(supabaseClient);
   }
-  
-  // Update auth token if it changed
-  if (currentToken && currentToken !== lastToken) {
-    lastToken = currentToken;
-    // Set auth header for API calls
-    supabaseClient.rest.headers = {
-      ...supabaseClient.rest.headers,
-      'Authorization': `Bearer ${currentToken}`
-    };
-    // Set auth header for storage calls
-    supabaseClient.storage.headers = {
-      ...supabaseClient.storage.headers,
-      'Authorization': `Bearer ${currentToken}`
-    };
-    console.log('[Supabase] Updated auth token');
-  }
-  
   return supabaseClient;
 };
 
-// Export a function that always gets fresh client with current auth
-export const supabase = new Proxy({}, {
-  get(target, prop) {
-    const client = getSupabaseClient();
-    const value = client[prop];
-    return typeof value === 'function' ? value.bind(client) : value;
+// Export the singleton instance directly
+export const supabase = getSupabaseClient();
+
+// Helper to update auth token before storage operations
+export const updateSupabaseAuth = () => {
+  if (supabaseClient) {
+    ensureAuth(supabaseClient);
   }
-});
+};

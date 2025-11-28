@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '../config/supabase';
+import { supabase, updateSupabaseAuth } from '../config/supabase';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getDisputeById, mapDisputeDetail, postDisputeMessage } from '../services/resolutionCenter.service';
 import '../components/Dashboard/Dashboard.css';
@@ -38,6 +38,7 @@ const DisputeChatPage = () => {
     if (!id) return;
 
     console.log('[Real-time] Setting up subscriptions for dispute:', id);
+    let isActive = true;
     
     // Subscribe to dispute_messages for new messages
     const messagesChannel = supabase
@@ -51,6 +52,7 @@ const DisputeChatPage = () => {
           filter: `ticket_id=eq.${id}`
         },
         async (payload) => {
+          if (!isActive) return;
           console.log('[Real-time] New message received:', payload.new);
           // Invalidate cache immediately
           import('../utils/cache').then(cacheModule => {
@@ -61,7 +63,7 @@ const DisputeChatPage = () => {
           try {
             const raw = await getDisputeById(id);
             const updated = mapDisputeDetail(raw);
-            if (updated) {
+            if (updated && isActive) {
               setDispute(updated);
               console.log('[Real-time] Dispute updated with new message');
               
@@ -92,11 +94,12 @@ const DisputeChatPage = () => {
           filter: `id=eq.${id}`
         },
         async (payload) => {
+          if (!isActive) return;
           // Refresh dispute data when status changes
           try {
             const raw = await getDisputeById(id);
             const updated = mapDisputeDetail(raw);
-            if (updated) {
+            if (updated && isActive) {
               setDispute(updated);
               
               // Invalidate cache when status changes
@@ -119,13 +122,18 @@ const DisputeChatPage = () => {
       });
 
     // Fallback polling if real-time fails (runs every 5 seconds)
+    let lastMessageCount = 0;
     const pollInterval = setInterval(async () => {
+      if (!isActive) return;
       try {
         const raw = await getDisputeById(id);
         const updated = mapDisputeDetail(raw);
-        if (updated && updated.messages?.length > dispute?.messages?.length) {
+        if (updated && updated.messages?.length > lastMessageCount) {
           console.log('[Fallback] New messages detected via polling');
-          setDispute(updated);
+          lastMessageCount = updated.messages.length;
+          if (isActive) setDispute(updated);
+        } else if (updated) {
+          lastMessageCount = updated.messages?.length || 0;
         }
       } catch (e) {
         // Silent fail for polling
@@ -133,11 +141,13 @@ const DisputeChatPage = () => {
     }, 5000);
 
     return () => {
+      isActive = false;
+      console.log('[Real-time] Cleaning up subscriptions');
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(disputeChannel);
       clearInterval(pollInterval);
     };
-  }, [id, dispute?.messages?.length]);
+  }, [id]);
 
   const sendMessage = async () => {
     if (!message.trim() && !selectedFile) return;
@@ -153,6 +163,8 @@ const DisputeChatPage = () => {
       if (selectedFile) {
         setUploadingFile(true);
         console.log('[Upload] Uploading file:', selectedFile.name);
+        // Ensure auth token is set before upload
+        updateSupabaseAuth();
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `${id}/${fileName}`;
