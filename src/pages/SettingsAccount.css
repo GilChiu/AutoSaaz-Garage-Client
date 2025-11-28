@@ -1,5 +1,79 @@
-.account-form { display:flex; flex-direction:column; gap:22px; max-width:720px; }
-.account-actions { justify-content:flex-start; }
+/* Settings Account Styles */
+.settings-account-wrapper {
+  padding: 32px 24px;
+  max-width: 900px;
+}
+
+.settings-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.settings-card-header {
+  padding: 24px 28px;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-card-header .bar {
+  width: 4px;
+  height: 24px;
+  background: #ff8a34;
+  border-radius: 2px;
+}
+
+.settings-card-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 720px;
+  padding: 28px;
+}
+
+/* Settings Field Styles */
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.settings-field input,
+.settings-field select {
+  border: 1px solid #d3d8dc;
+  padding: 11px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.settings-field input:focus,
+.settings-field select:focus {
+  outline: none;
+  border-color: #ff8a34;
+  box-shadow: 0 0 0 3px rgba(255, 138, 52, 0.1);
+}
 
 /* Password change button styling */
 .password-change-container {
@@ -42,6 +116,119 @@
 }
 
 .change-password-btn:focus {
-  outline: 2px solid rgba(255,138,52,.4);
+  outline: 2px solid rgba(255, 138, 52, 0.4);
   outline-offset: 2px;
 }
+
+/* Settings Actions / Save Button */
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.account-actions {
+  justify-content: flex-start;
+}
+
+.settings-primary-btn {
+  background: #ff8a34;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 138, 52, 0.2);
+  min-width: 140px;
+}
+
+.settings-primary-btn:hover:not(:disabled) {
+  background: #e67a29;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 138, 52, 0.25);
+}
+
+.settings-primary-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(255, 138, 52, 0.2);
+}
+
+.settings-primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.settings-primary-btn:focus {
+  outline: 2px solid rgba(255, 138, 52, 0.4);
+  outline-offset: 2px;
+}
+
+.settings-save-indicator {
+  color: #10b981;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: fadeIn 0.3s ease;
+}
+
+.settings-save-indicator::before {
+  content: "✓";
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 18px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .settings-account-wrapper {
+    padding: 20px 16px;
+  }
+
+  .settings-card-header {
+    padding: 20px;
+  }
+
+  .account-form {
+    padding: 20px;
+  }
+
+  .password-change-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .change-password-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .settings-primary-btn {
+    width: 100%;
+  }
+}
+
