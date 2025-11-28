@@ -9,13 +9,6 @@ const ResolvedDisputesPage = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const handleRefresh = () => {
-    // Invalidate resolution-center cache to force fresh data
-    cache.invalidatePattern('resolution-center');
-    setRefreshKey(prev => prev + 1);
-  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -32,7 +25,28 @@ const ResolvedDisputesPage = () => {
       }
     })();
     return () => controller.abort();
-  }, [refreshKey]);
+  }, []);
+
+  // Poll for updates every 10 seconds to detect newly resolved disputes
+  useEffect(() => {
+    const pollInterval = setInterval(async () => {
+      try {
+        // Invalidate cache before polling to get fresh data
+        cache.invalidate('/resolution-center?status=resolved');
+        const data = await getDisputes('resolved');
+        const mapped = data.map(mapDispute);
+        
+        // Only update if the list has changed (new dispute was resolved)
+        if (mapped.length !== items.length) {
+          setItems(mapped);
+        }
+      } catch (e) {
+        // Silent fail for polling
+      }
+    }, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [items.length]);
 
   return (
     <div className="dashboard-layout">
@@ -40,14 +54,7 @@ const ResolvedDisputesPage = () => {
       <div className="dashboard-layout-main">
         <div className="dashboard-layout-content rcfx-page">
           {/* Removed duplicate header (UpperNavbar provides title/subtitle) */}
-          <div className="rcfx-toolbar">
-            <div className="rcfx-toolbar-left">
-              <h2 className="rcfx-section-heading" style={{ margin: 0 }}>Resolved Cases</h2>
-            </div>
-            <button className="rcfx-btn" onClick={handleRefresh} disabled={loading} title="Refresh resolved cases">
-              🔄 Refresh
-            </button>
-          </div>
+          <h2 className="rcfx-section-heading">Resolved Cases</h2>
           {error && <div className="rcfx-error" role="alert">{error}</div>}
           {loading && <div className="rcfx-loading">Loading...</div>}
           {!loading && items.length === 0 && !error && <div className="rcfx-empty">No resolved cases.</div>}

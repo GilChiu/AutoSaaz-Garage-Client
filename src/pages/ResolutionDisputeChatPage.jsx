@@ -58,24 +58,33 @@ const DisputeChatPage = () => {
       try {
         const raw = await getDisputeById(id);
         const updated = mapDisputeDetail(raw);
-        // Only update messages if new messages are available
-        if (updated?.messages && dispute?.messages) {
-          if (updated.messages.length > dispute.messages.length) {
-            setDispute(prev => ({
-              ...prev,
-              messages: updated.messages
-            }));
+        
+        // Update the entire dispute if status changed or new messages arrived
+        if (updated) {
+          const statusChanged = updated.status !== dispute.status;
+          const newMessages = updated.messages?.length > dispute.messages?.length;
+          
+          if (statusChanged || newMessages) {
+            setDispute(updated);
+            
+            // If dispute was resolved, invalidate the cache so lists update
+            if (statusChanged && updated.status === 'resolved') {
+              // Import cache dynamically to invalidate
+              import('../utils/cache').then(cacheModule => {
+                cacheModule.default.invalidatePattern('resolution-center');
+              });
+            }
           }
         }
       } catch (e) {
         // Silent fail for polling - don't show errors
 
       }
-    }, 5000); // Poll every 5 seconds
+    }, 3000); // Poll every 3 seconds for more responsive updates
 
     return () => clearInterval(pollInterval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, dispute?.messages?.length]);
+  }, [id, dispute?.messages?.length, dispute?.status]);
 
   const sendMessage = async () => {
     if (!message.trim() && !selectedFile) return;

@@ -19,13 +19,6 @@ const NewDisputesPage = () => {
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const handleRefresh = () => {
-    // Invalidate resolution-center cache to force fresh data
-    cache.invalidatePattern('resolution-center');
-    setRefreshKey(prev => prev + 1);
-  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -51,7 +44,28 @@ const NewDisputesPage = () => {
       }
     })();
     return () => controller.abort();
-  }, [refreshKey]);
+  }, []);
+
+  // Poll for updates every 10 seconds to detect resolved disputes
+  useEffect(() => {
+    const pollInterval = setInterval(async () => {
+      try {
+        // Invalidate cache before polling to get fresh data
+        cache.invalidate('/resolution-center?status=new');
+        const data = await getDisputes('new');
+        const mapped = data.map(mapDispute);
+        
+        // Only update if the list has changed (dispute was resolved)
+        if (mapped.length !== items.length) {
+          setItems(mapped);
+        }
+      } catch (e) {
+        // Silent fail for polling
+      }
+    }, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [items.length]);
 
   // Fetch bookings when modal opens
   useEffect(() => {
@@ -83,12 +97,7 @@ const NewDisputesPage = () => {
             <div className="rcfx-toolbar-left">
               <h2 className="rcfx-section-heading" style={{ margin: 0 }}>New Disputes</h2>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="rcfx-btn" onClick={handleRefresh} disabled={loading} title="Refresh disputes list">
-                🔄 Refresh
-              </button>
-              <button className="rcfx-btn rcfx-btn-primary" onClick={() => setShowCreate(true)}>New Dispute</button>
-            </div>
+            <button className="rcfx-btn rcfx-btn-primary" onClick={() => setShowCreate(true)}>New Dispute</button>
           </div>
           {error && <div className="rcfx-error" role="alert">{error}</div>}
           {loading && <div className="rcfx-loading">Loading...</div>}
