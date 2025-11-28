@@ -22,8 +22,8 @@ const BookingSummary = () => {
                 return dateString; // Return original string if date is invalid
             }
             
-            // Return the date in YYYY-MM-DD format
-            return date.toISOString().split('T')[0];
+            // Return the date and time in locale format (e.g., 11/20/2025, 10:30:45 AM)
+            return date.toLocaleString();
         } catch (error) {
 
             return dateString; // Return original string if there's an error
