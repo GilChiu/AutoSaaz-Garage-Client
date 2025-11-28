@@ -19,7 +19,7 @@ export function mapApiBookingToBooking(apiBooking, index = 0) {
       : (apiBooking.id ? `#${apiBooking.id}` : `#${1001 + index}`),
     customer: apiBooking.customerName || apiBooking.customer_name,
     service: apiBooking.serviceType || apiBooking.service_type,
-    date: apiBooking.appointmentDate || apiBooking.appointment_date || apiBooking.booking_date,
+    date: apiBooking.created_at || apiBooking.appointmentDate || apiBooking.appointment_date || apiBooking.booking_date,
     status: mapApiStatusToUiStatus(apiBooking.status),
     
     // Extended fields (for detail view)
@@ -32,6 +32,7 @@ export function mapApiBookingToBooking(apiBooking, index = 0) {
     actualCost: apiBooking.actual_cost,
     paymentStatus: apiBooking.payment_status,
     scheduledTime: apiBooking.scheduled_time,
+    scheduledDate: apiBooking.booking_date, // Add the scheduled date separately
     completionDate: apiBooking.completion_date,
     assignedTechnician: apiBooking.assigned_technician,
     notes: apiBooking.notes,
