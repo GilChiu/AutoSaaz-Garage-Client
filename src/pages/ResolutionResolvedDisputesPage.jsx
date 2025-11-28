@@ -1,24 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import { supabase } from '../config/supabase';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getDisputes, mapDispute } from '../services/resolutionCenter.service';
 import cache from '../utils/cache';
 import '../components/Dashboard/Dashboard.css';
 import '../styles/resolution-center.css';
-
-// Create Supabase client
-const getSupabaseClient = () => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  if (token) {
-    client.auth.setSession({
-      access_token: token,
-      refresh_token: token
-    });
-  }
-  return client;
-};
 
 const ResolvedDisputesPage = () => {
   const [items, setItems] = useState([]);
@@ -44,8 +30,6 @@ const ResolvedDisputesPage = () => {
 
   // Real-time subscription for newly resolved disputes
   useEffect(() => {
-    const supabase = getSupabaseClient();
-
     // Subscribe to disputes table for any changes
     const channel = supabase
       .channel('resolved-disputes-realtime')
