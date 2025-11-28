@@ -38,7 +38,6 @@ const DisputeChatPage = () => {
   useEffect(() => {
     if (!id) return;
 
-    console.log('[Polling] Setting up message polling for dispute:', id);
     let isActive = true;
     let lastMessageCount = dispute?.messages?.length || 0;
     
@@ -49,7 +48,6 @@ const DisputeChatPage = () => {
         const raw = await getDisputeById(id, null, true); // skipCache=true for polling
         const updated = mapDisputeDetail(raw);
         if (updated && updated.messages?.length > lastMessageCount) {
-          console.log('[Polling] New messages detected');
           lastMessageCount = updated.messages.length;
           if (isActive) setDispute(updated);
           
@@ -76,7 +74,6 @@ const DisputeChatPage = () => {
 
     return () => {
       isActive = false;
-      console.log('[Polling] Cleaning up');
       clearInterval(pollInterval);
     };
   }, [id, dispute?.messages?.length, dispute?.status]);
@@ -85,7 +82,6 @@ const DisputeChatPage = () => {
     if (!message.trim() && !selectedFile) return;
     try {
       setSending(true);
-      console.log('[Upload] Starting message send:', { hasMessage: !!message.trim(), hasFile: !!selectedFile });
       
       let attachmentUrl = null;
       let attachmentType = null;
@@ -94,7 +90,6 @@ const DisputeChatPage = () => {
       // Upload file to Supabase Storage if selected
       if (selectedFile) {
         setUploadingFile(true);
-        console.log('[Upload] Uploading file:', selectedFile.name);
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `${id}/${fileName}`;
@@ -112,7 +107,6 @@ const DisputeChatPage = () => {
           .from('dispute-attachments')
           .getPublicUrl(filePath);
 
-        console.log('[Upload] File uploaded successfully:', publicUrl);
         attachmentUrl = publicUrl;
         attachmentType = selectedFile.type;
         attachmentName = selectedFile.name;
@@ -120,9 +114,7 @@ const DisputeChatPage = () => {
       }
       
       // Send message with optional attachment
-      console.log('[Upload] Posting message to API');
       const newMsg = await postDisputeMessage(id, message.trim() || 'Attachment', attachmentUrl, attachmentType, attachmentName);
-      console.log('[Upload] Message posted successfully:', newMsg);
       if (newMsg) setDispute(prev => ({ ...prev, messages: [...prev.messages, newMsg] }));
       setMessage('');
       setSelectedFile(null);

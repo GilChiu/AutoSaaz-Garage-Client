@@ -38,8 +38,6 @@ export const getSupabaseClient = () => {
         }
       }
     });
-    
-    console.log('[Supabase] Client initialized (using anon key for realtime)');
   }
   return supabaseClient;
 };

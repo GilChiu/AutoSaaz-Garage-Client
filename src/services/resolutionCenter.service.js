@@ -121,11 +121,8 @@ export async function getDisputeById(id, signal, skipCache = false) {
   if (!signal?.aborted && !skipCache) {
     const cached = cache.get(endpoint);
     if (cached) {
-      console.log('[Cache] localStorage hit for dispute:', id);
       return cached;
     }
-  } else if (skipCache) {
-    console.log('[Polling] Bypassing cache for fresh data');
   }
   
   // Use retry logic for resilience
