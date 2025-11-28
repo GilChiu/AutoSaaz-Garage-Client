@@ -200,7 +200,9 @@ const SettingsAccountPage = () => {
                     <option>Arabic</option>
                   </select>
                 </label>
-                <label className="settings-field">
+                {/* TIMEZONE HIDDEN - Hardcoded to GST +4 as per client requirement */}
+                {/* To re-enable: Remove style={{display: 'none'}} */}
+                <label className="settings-field" style={{display: 'none'}}>
                   <span className="settings-label">Time Zone</span>
                   <select name="timezone" value={form.timezone} onChange={change}>
                     <option>GMT+4 (Dubai)</option>
