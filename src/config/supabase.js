@@ -19,10 +19,21 @@ export const SUPABASE_ANON_KEY =
 // Create a single shared Supabase client instance
 let supabaseClient = null;
 
-const ensureAuth = (client) => {
+const ensureAuth = async (client) => {
   const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   if (token) {
-    // Set auth headers for storage operations
+    try {
+      // Set the session for realtime subscriptions
+      await client.auth.setSession({
+        access_token: token,
+        refresh_token: token
+      });
+      console.log('[Supabase] Auth session set for realtime');
+    } catch (err) {
+      console.warn('[Supabase] Failed to set session:', err);
+    }
+    
+    // Also set auth headers for storage operations
     client.storage.headers = {
       ...client.storage.headers,
       'Authorization': `Bearer ${token}`

@@ -80,7 +80,14 @@ const DisputeChatPage = () => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Real-time] Messages channel status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('[Real-time] Successfully subscribed to messages');
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[Real-time] Subscription failed:', status);
+        }
+      });
 
     // Subscribe to disputes table for status changes
     const disputeChannel = supabase
@@ -95,12 +102,14 @@ const DisputeChatPage = () => {
         },
         async (payload) => {
           if (!isActive) return;
+          console.log('[Real-time] Dispute status changed:', payload.new);
           // Refresh dispute data when status changes
           try {
             const raw = await getDisputeById(id);
             const updated = mapDisputeDetail(raw);
             if (updated && isActive) {
               setDispute(updated);
+              console.log('[Real-time] Dispute updated after status change');
               
               // Invalidate cache when status changes
               import('../utils/cache').then(cacheModule => {
@@ -113,11 +122,11 @@ const DisputeChatPage = () => {
         }
       )
       .subscribe((status) => {
-        console.log('[Real-time] Messages channel status:', status);
+        console.log('[Real-time] Dispute channel status:', status);
         if (status === 'SUBSCRIBED') {
-          console.log('[Real-time] Successfully subscribed to messages');
+          console.log('[Real-time] Successfully subscribed to dispute updates');
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error('[Real-time] Subscription failed:', status);
+          console.error('[Real-time] Dispute subscription failed:', status);
         }
       });
 
