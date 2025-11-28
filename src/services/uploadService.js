@@ -4,15 +4,15 @@
  * Used during registration for Emirates ID documents
  */
 
-import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import { supabase as supabaseClient, updateSupabaseAuth } from '../config/supabase';
 
 /**
  * Get Supabase client for storage operations
  * @returns {Object} Supabase client instance
  */
 const getSupabaseClient = () => {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  updateSupabaseAuth(); // Ensure storage auth is current
+  return supabaseClient;
 };
 
 /**

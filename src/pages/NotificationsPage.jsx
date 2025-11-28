@@ -1,14 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabase';
+import { supabase } from '../config/supabase';
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../services/notifications.service';
 import Sidebar from '../components/Dashboard/Sidebar';
 import './NotificationsPage.css';
 import '../components/Dashboard/Dashboard.css';
-
-// Initialize Supabase client for real-time subscriptions
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
