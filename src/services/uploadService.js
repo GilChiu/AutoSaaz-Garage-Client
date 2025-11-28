@@ -4,14 +4,14 @@
  * Used during registration for Emirates ID documents
  */
 
-import { supabase as supabaseClient, updateSupabaseAuth } from '../config/supabase';
+import { supabase as supabaseClient } from '../config/supabase';
 
 /**
  * Get Supabase client for storage operations
+ * Supabase client already has correct anon key authentication for storage
  * @returns {Object} Supabase client instance
  */
 const getSupabaseClient = () => {
-  updateSupabaseAuth(); // Ensure storage auth is current
   return supabaseClient;
 };
 

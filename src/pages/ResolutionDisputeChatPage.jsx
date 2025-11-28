@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase, updateSupabaseAuth } from '../config/supabase';
+import { supabase } from '../config/supabase';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { getDisputeById, mapDisputeDetail, postDisputeMessage } from '../services/resolutionCenter.service';
 import '../components/Dashboard/Dashboard.css';
@@ -94,8 +94,6 @@ const DisputeChatPage = () => {
       if (selectedFile) {
         setUploadingFile(true);
         console.log('[Upload] Uploading file:', selectedFile.name);
-        // Ensure auth token is set before upload
-        updateSupabaseAuth();
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `${id}/${fileName}`;

@@ -19,19 +19,6 @@ export const SUPABASE_ANON_KEY =
 // Create a single shared Supabase client instance
 let supabaseClient = null;
 
-// Custom fetch wrapper that adds our backend JWT to requests
-const customFetch = (url, options = {}) => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-  if (token) {
-    options.headers = {
-      ...options.headers,
-      'Authorization': `Bearer ${token}`,
-      'apikey': SUPABASE_ANON_KEY, // Still need anon key for Supabase
-    };
-  }
-  return fetch(url, options);
-};
-
 export const getSupabaseClient = () => {
   if (!supabaseClient) {
     supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -59,16 +46,3 @@ export const getSupabaseClient = () => {
 
 // Export the singleton instance directly
 export const supabase = getSupabaseClient();
-
-// Helper to update auth token before storage operations
-export const updateSupabaseAuth = async () => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-  if (supabaseClient && token) {
-    // Update storage headers with backend JWT
-    supabaseClient.storage.headers = {
-      ...supabaseClient.storage.headers,
-      'Authorization': `Bearer ${token}`
-    };
-    console.log('[Supabase] Storage auth updated');
-  }
-};
