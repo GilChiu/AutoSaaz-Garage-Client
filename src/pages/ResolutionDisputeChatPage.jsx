@@ -37,6 +37,8 @@ const DisputeChatPage = () => {
   useEffect(() => {
     if (!id) return;
 
+    console.log('[Real-time] Setting up subscriptions for dispute:', id);
+    
     // Subscribe to dispute_messages for new messages
     const messagesChannel = supabase
       .channel(`dispute-messages-${id}`)
@@ -107,18 +109,41 @@ const DisputeChatPage = () => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Real-time] Messages channel status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('[Real-time] Successfully subscribed to messages');
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[Real-time] Subscription failed:', status);
+        }
+      });
+
+    // Fallback polling if real-time fails (runs every 5 seconds)
+    const pollInterval = setInterval(async () => {
+      try {
+        const raw = await getDisputeById(id);
+        const updated = mapDisputeDetail(raw);
+        if (updated && updated.messages?.length > dispute?.messages?.length) {
+          console.log('[Fallback] New messages detected via polling');
+          setDispute(updated);
+        }
+      } catch (e) {
+        // Silent fail for polling
+      }
+    }, 5000);
 
     return () => {
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(disputeChannel);
+      clearInterval(pollInterval);
     };
-  }, [id]);
+  }, [id, dispute?.messages?.length]);
 
   const sendMessage = async () => {
     if (!message.trim() && !selectedFile) return;
     try {
       setSending(true);
+      console.log('[Upload] Starting message send:', { hasMessage: !!message.trim(), hasFile: !!selectedFile });
       
       let attachmentUrl = null;
       let attachmentType = null;
@@ -127,6 +152,7 @@ const DisputeChatPage = () => {
       // Upload file to Supabase Storage if selected
       if (selectedFile) {
         setUploadingFile(true);
+        console.log('[Upload] Uploading file:', selectedFile.name);
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `${id}/${fileName}`;
@@ -136,14 +162,15 @@ const DisputeChatPage = () => {
           .upload(filePath, selectedFile);
 
         if (uploadError) {
-
-          throw new Error('Failed to upload file');
+          console.error('[Upload] File upload failed:', uploadError);
+          throw new Error('Failed to upload file: ' + uploadError.message);
         }
 
         const { data: { publicUrl } } = supabase.storage
           .from('dispute-attachments')
           .getPublicUrl(filePath);
 
+        console.log('[Upload] File uploaded successfully:', publicUrl);
         attachmentUrl = publicUrl;
         attachmentType = selectedFile.type;
         attachmentName = selectedFile.name;
@@ -151,12 +178,15 @@ const DisputeChatPage = () => {
       }
       
       // Send message with optional attachment
+      console.log('[Upload] Posting message to API');
       const newMsg = await postDisputeMessage(id, message.trim() || 'Attachment', attachmentUrl, attachmentType, attachmentName);
+      console.log('[Upload] Message posted successfully:', newMsg);
       if (newMsg) setDispute(prev => ({ ...prev, messages: [...prev.messages, newMsg] }));
       setMessage('');
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (e) {
+      console.error('[Upload] Failed to send message:', e);
       setError('Failed to send message: ' + (e.message || 'Unknown error'));
     } finally {
       setSending(false);

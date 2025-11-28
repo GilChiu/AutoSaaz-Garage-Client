@@ -25,6 +25,8 @@ export const getSupabaseClient = () => {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
+        storage: window.localStorage,
+        storageKey: 'supabase.auth.token',
       },
       realtime: {
         params: {
@@ -36,11 +38,12 @@ export const getSupabaseClient = () => {
     // Set auth token if available
     const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
     if (token) {
+      // Set the session asynchronously
       supabaseClient.auth.setSession({
         access_token: token,
         refresh_token: token
-      }).catch(() => {
-        // Silent fail - session setting is best effort
+      }).catch(err => {
+        console.warn('[Supabase] Failed to set session:', err);
       });
     }
   }
