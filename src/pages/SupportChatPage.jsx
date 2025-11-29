@@ -14,58 +14,48 @@ const SupportChatPage = () => {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
-  const lastMessageCountRef = useRef(0);
-  const lastStatusRef = useRef(null);
 
   useEffect(() => {
     fetchTicketDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Polling for new messages every 3 seconds for instant updates
+  // Polling for new messages (realtime doesn't work with custom JWT auth)
   useEffect(() => {
     if (!id) return;
 
     let isActive = true;
+    let lastMessageCount = ticket?.conversation?.length || 0;
     
-    // Poll every 3 seconds for responsive updates (same as disputes)
+    // Poll every 3 seconds for responsive updates
     const pollInterval = setInterval(async () => {
       if (!isActive) return;
       try {
         const updated = await getTicketDetail(id);
-        if (updated && updated.conversation) {
-          const newMessageCount = updated.conversation.length;
-          const newStatus = updated.ticket?.status;
+        if (updated && updated.conversation?.length > lastMessageCount) {
+          lastMessageCount = updated.conversation.length;
+          if (isActive) setTicket(updated);
           
-          // Check if there are updates
-          const hasNewMessages = newMessageCount > lastMessageCountRef.current;
-          const statusChanged = newStatus !== lastStatusRef.current;
-          
-          // Update if we have new messages OR status changed
-          if (hasNewMessages || statusChanged) {
-            lastMessageCountRef.current = newMessageCount;
-            lastStatusRef.current = newStatus;
-            if (isActive) {
-              setTicket(updated);
-              // Auto-scroll only if new messages arrived
-              if (hasNewMessages) {
-                setTimeout(() => scrollToBottom(), 100);
-              }
-            }
+          // Auto-scroll to new message
+          setTimeout(() => scrollToBottom(), 100);
+        } else if (updated) {
+          lastMessageCount = updated.conversation?.length || 0;
+          // Update if status changed even without new messages
+          if (updated.ticket?.status !== ticket?.ticket?.status && isActive) {
+            setTicket(updated);
           }
         }
       } catch (e) {
         // Silent fail for polling
-        console.error('Polling error:', e);
       }
-    }, 3000); // 3 seconds for instant updates
+    }, 3000);
 
     return () => {
       isActive = false;
       clearInterval(pollInterval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]); // Only depend on id, not on ticket state
+  }, [id, ticket?.conversation?.length, ticket?.ticket?.status]);
 
   useEffect(() => {
     scrollToBottom();
@@ -80,13 +70,6 @@ const SupportChatPage = () => {
       if (!silent) setLoading(true);
       const data = await getTicketDetail(id);
       setTicket(data);
-      // Update the refs with current message count and status
-      if (data?.conversation) {
-        lastMessageCountRef.current = data.conversation.length;
-      }
-      if (data?.ticket?.status) {
-        lastStatusRef.current = data.ticket.status;
-      }
       setError(null);
     } catch (e) {
       if (!silent) {
