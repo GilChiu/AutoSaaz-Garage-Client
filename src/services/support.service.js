@@ -116,11 +116,7 @@ export async function getTicketDetail(ticketId) {
   try {
     const endpoint = `/support-tickets/${ticketId}`;
     
-    // Check cache first
-    const cached = cache.get(endpoint);
-    if (cached) {
-      return cached;
-    }
+    // NO CACHE - Always fetch fresh data for real-time messages
     
     // Use retry logic for resilience
     const result = await retryApiCall(async () => {
@@ -135,9 +131,6 @@ export async function getTicketDetail(ticketId) {
 
       return await res.json();
     }, `GET ${endpoint}`);
-    
-    // Cache the result
-    cache.set(endpoint, {}, result);
     
     return result;
   } catch (e) {
@@ -178,8 +171,7 @@ export async function addTicketMessage(ticketId, message) {
 
     const json = await res.json();
     
-    // Invalidate ticket detail cache after adding message
-    cache.invalidate(`/support-tickets/${ticketId}`);
+    // No cache invalidation needed - we don't cache ticket details anymore
     
     return json.message || json;
   } catch (e) {
