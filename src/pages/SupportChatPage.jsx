@@ -20,17 +20,42 @@ const SupportChatPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // Polling for new messages every 3 seconds for instant updates
   useEffect(() => {
-    // Poll for new messages every 5 seconds
-    const pollInterval = setInterval(() => {
-      if (!loading) {
-        fetchTicketDetail(true); // Silent fetch
-      }
-    }, 5000);
+    if (!id) return;
 
-    return () => clearInterval(pollInterval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, loading]);
+    let isActive = true;
+    let lastMessageCount = ticket?.conversation?.length || 0;
+    
+    // Poll every 3 seconds for responsive updates (same as disputes)
+    const pollInterval = setInterval(async () => {
+      if (!isActive) return;
+      try {
+        const updated = await getTicketDetail(id);
+        if (updated && updated.conversation?.length > lastMessageCount) {
+          lastMessageCount = updated.conversation.length;
+          if (isActive) setTicket(updated);
+          
+          // Auto-scroll to new message
+          setTimeout(() => scrollToBottom(), 100);
+        } else if (updated) {
+          lastMessageCount = updated.conversation?.length || 0;
+          // Update if status changed even without new messages
+          if (updated.ticket?.status !== ticket?.ticket?.status && isActive) {
+            setTicket(updated);
+          }
+        }
+      } catch (e) {
+        // Silent fail for polling
+        console.error('Polling error:', e);
+      }
+    }, 3000); // 3 seconds for instant updates
+
+    return () => {
+      isActive = false;
+      clearInterval(pollInterval);
+    };
+  }, [id, ticket?.conversation?.length, ticket?.ticket?.status]);
 
   useEffect(() => {
     scrollToBottom();
