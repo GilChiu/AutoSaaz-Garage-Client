@@ -37,10 +37,20 @@ const AppointmentDetailPage = () => {
   const mutateStatus = async (actionFn, nextStatus) => {
     try {
       setActionLoading(true);
+      console.log('🔄 [mutateStatus] Starting action for status:', nextStatus);
       const updated = await actionFn(id);
-      if (updated) setItem(prev => ({ ...prev, status: nextStatus }));
+      console.log('✅ [mutateStatus] Action completed:', updated);
+      
+      // Refetch the appointment to get fresh data from server
+      if (updated) {
+        console.log('🔄 [mutateStatus] Refetching appointment data...');
+        const freshData = await getAppointmentById(id);
+        setItem(mapDetailedAppointment(freshData));
+        console.log('✅ [mutateStatus] UI updated with fresh data');
+      }
     } catch (e) {
-      setError('Action failed');
+      console.error('❌ [mutateStatus] Error:', e);
+      setError('Action failed: ' + (e.message || 'Unknown error'));
     } finally {
       setActionLoading(false);
     }

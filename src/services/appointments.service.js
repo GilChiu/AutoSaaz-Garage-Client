@@ -304,22 +304,35 @@ export function mapDetailedAppointment(raw) {
  */
 export async function acceptAppointment(id) {
   try {
+    console.log('🔄 [acceptAppointment] Accepting appointment:', id);
+    
     const response = await fetch(`${API_BASE_URL}/appointments/${id}/accept`, {
       method: 'POST',
       headers: getHeaders(),
     });
 
+    console.log('📥 [acceptAppointment] Response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
+      console.error('❌ [acceptAppointment] Error:', error);
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
 
     const result = await response.json();
+    console.log('✅ [acceptAppointment] Success:', result);
     const appointment = result.data || result;
+    
+    // Invalidate appointments cache after accepting
+    console.log('🗑️ [acceptAppointment] Invalidating cache...');
+    cache.invalidatePattern('appointments');
+    cache.invalidate(`/appointments/${id}`);
+    cache.invalidatePattern('dashboard');
     
     return appointment;
 
   } catch (error) {
+    console.error('❌ [acceptAppointment] Exception:', error);
     throw error;
   }
 }
@@ -331,22 +344,35 @@ export async function acceptAppointment(id) {
  */
 export async function cancelAppointment(id) {
   try {
+    console.log('🔄 [cancelAppointment] Cancelling appointment:', id);
+    
     const response = await fetch(`${API_BASE_URL}/appointments/${id}/cancel`, {
       method: 'POST',
       headers: getHeaders(),
     });
 
+    console.log('📥 [cancelAppointment] Response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
+      console.error('❌ [cancelAppointment] Error:', error);
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
 
     const result = await response.json();
+    console.log('✅ [cancelAppointment] Success:', result);
     const appointment = result.data || result;
+    
+    // Invalidate appointments cache after cancelling
+    console.log('🗑️ [cancelAppointment] Invalidating cache...');
+    cache.invalidatePattern('appointments');
+    cache.invalidate(`/appointments/${id}`);
+    cache.invalidatePattern('dashboard');
     
     return appointment;
 
   } catch (error) {
+    console.error('❌ [cancelAppointment] Exception:', error);
     throw error;
   }
 }
