@@ -117,13 +117,7 @@ export async function getDisputes(status, signal) {
 export async function getDisputeById(id, signal, skipCache = false) {
   const endpoint = `/resolution-center/${id}`;
   
-  // Check cache first (skip if aborted or skipCache flag set)
-  if (!signal?.aborted && !skipCache) {
-    const cached = cache.get(endpoint);
-    if (cached) {
-      return cached;
-    }
-  }
+  // NO CACHE - Always fetch fresh data for real-time messages
   
   // Use retry logic for resilience
   const res = await retryApiCall(async () => {
@@ -131,9 +125,6 @@ export async function getDisputeById(id, signal, skipCache = false) {
   }, `GET ${endpoint}`);
   
   const result = res?.data?.data ?? res?.data;
-  
-  // Cache the result
-  cache.set(endpoint, {}, result);
   
   return result;
 }
@@ -147,8 +138,7 @@ export async function postDisputeMessage(id, text, attachmentUrl = null, attachm
   }
   const res = await axios.post(url(`/resolution-center/${id}/messages`), payload, { headers: headers() });
   
-  // Invalidate dispute detail cache after adding message
-  cache.invalidate(`/resolution-center/${id}`);
+  // No cache invalidation needed - we don't cache dispute details anymore
   
   return res?.data?.data ?? res?.data;
 }
@@ -156,9 +146,8 @@ export async function postDisputeMessage(id, text, attachmentUrl = null, attachm
 export async function resolveDispute(id, resolutionText) {
   const res = await axios.put(url(`/resolution-center/${id}/resolve`), { resolution: resolutionText }, { headers: headers() });
   
-  // Invalidate disputes cache after resolution
+  // Invalidate disputes list cache after resolution (keep this for list view)
   cache.invalidatePattern('resolution-center');
-  cache.invalidate(`/resolution-center/${id}`);
   
   return res?.data?.data ?? res?.data;
 }
