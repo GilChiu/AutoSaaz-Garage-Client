@@ -14,6 +14,7 @@ const SupportChatPage = () => {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
+  const lastMessageCountRef = useRef(0);
 
   useEffect(() => {
     fetchTicketDetail();
@@ -25,24 +26,26 @@ const SupportChatPage = () => {
     if (!id) return;
 
     let isActive = true;
-    let lastMessageCount = ticket?.conversation?.length || 0;
     
     // Poll every 3 seconds for responsive updates (same as disputes)
     const pollInterval = setInterval(async () => {
       if (!isActive) return;
       try {
         const updated = await getTicketDetail(id);
-        if (updated && updated.conversation?.length > lastMessageCount) {
-          lastMessageCount = updated.conversation.length;
-          if (isActive) setTicket(updated);
+        if (updated && updated.conversation) {
+          const newMessageCount = updated.conversation.length;
           
-          // Auto-scroll to new message
-          setTimeout(() => scrollToBottom(), 100);
-        } else if (updated) {
-          lastMessageCount = updated.conversation?.length || 0;
-          // Update if status changed even without new messages
-          if (updated.ticket?.status !== ticket?.ticket?.status && isActive) {
-            setTicket(updated);
+          // Update if we have new messages
+          if (newMessageCount > lastMessageCountRef.current) {
+            lastMessageCountRef.current = newMessageCount;
+            if (isActive) {
+              setTicket(updated);
+              // Auto-scroll to new message
+              setTimeout(() => scrollToBottom(), 100);
+            }
+          } else if (updated.ticket?.status !== ticket?.ticket?.status) {
+            // Update if status changed even without new messages
+            if (isActive) setTicket(updated);
           }
         }
       } catch (e) {
@@ -55,7 +58,7 @@ const SupportChatPage = () => {
       isActive = false;
       clearInterval(pollInterval);
     };
-  }, [id, ticket?.conversation?.length, ticket?.ticket?.status]);
+  }, [id]); // Only depend on id, not on ticket state
 
   useEffect(() => {
     scrollToBottom();
@@ -70,6 +73,10 @@ const SupportChatPage = () => {
       if (!silent) setLoading(true);
       const data = await getTicketDetail(id);
       setTicket(data);
+      // Update the ref with current message count
+      if (data?.conversation) {
+        lastMessageCountRef.current = data.conversation.length;
+      }
       setError(null);
     } catch (e) {
       if (!silent) {
