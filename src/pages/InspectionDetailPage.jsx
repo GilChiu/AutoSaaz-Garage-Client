@@ -42,17 +42,29 @@ const InspectionDetailPage = () => {
 
         try {
             setUpdating(true);
+            console.log('🔄 [handleMarkAsCompleted] Starting completion for:', inspection.id);
+            
             // Call the dedicated complete endpoint so completed_at and other fields are set server-side
             const updated = await completeInspection(inspection.id, {
                 // You can pass findings/recommendations/actual_cost here if a form is added later
             });
-            setInspection(updated);
+            
+            console.log('✅ [handleMarkAsCompleted] Completion successful:', updated);
+            
+            // Refetch the inspection to get fresh data from server
+            console.log('🔄 [handleMarkAsCompleted] Refetching inspection data...');
+            const freshData = await getInspectionById(inspection.id);
+            setInspection(freshData);
+            
+            console.log('✅ [handleMarkAsCompleted] UI updated with fresh data');
+            
             // Navigate to Completed tab to reflect the change in list view
             setTimeout(() => {
                 navigate('/inspections/completed');
             }, 300);
         } catch (err) {
-
+            console.error('❌ [handleMarkAsCompleted] Error:', err);
+            setError('Failed to complete inspection: ' + (err.message || 'Unknown error'));
             // Optionally surface a toast/message here
         } finally {
             setUpdating(false);

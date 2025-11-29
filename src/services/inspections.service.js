@@ -272,23 +272,37 @@ export async function deleteInspection(id) {
 export async function completeInspection(id, completionData) {
   try {
     const cleanId = id.toString().replace('#', '');
+    console.log('🔄 [completeInspection] Completing inspection:', cleanId);
+    console.log('📝 [completeInspection] Completion data:', completionData);
+    
     const response = await fetch(`${API_BASE_URL}/inspections/${cleanId}/complete`, {
       method: 'PATCH',
       headers: getHeaders(),
       body: JSON.stringify(completionData),
     });
 
+    console.log('📥 [completeInspection] Response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
+      console.error('❌ [completeInspection] Error:', error);
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
 
     const result = await response.json();
+    console.log('✅ [completeInspection] Success:', result);
     const apiInspection = result.data || result.inspection || result;
+    
+    // Invalidate inspections cache after completing
+    console.log('🗑️ [completeInspection] Invalidating cache...');
+    cache.invalidatePattern('inspections');
+    cache.invalidate(`/inspections/${cleanId}`);
+    cache.invalidatePattern('dashboard');
     
     return mapApiInspectionToInspection(apiInspection);
 
   } catch (error) {
+    console.error('❌ [completeInspection] Exception:', error);
     throw error;
   }
 }
