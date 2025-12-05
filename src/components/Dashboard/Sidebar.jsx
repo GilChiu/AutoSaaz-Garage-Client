@@ -86,11 +86,19 @@ const Sidebar = () => {
         navigate('/settings/profile');
         setSettingsExpanded(true);
     };
+    const handleLogoClick = () => {
+        navigate('/dashboard');
+    };
 
     return (
         <aside className="dashboard-sidebar" role="navigation" aria-label="Main navigation">
             <div className="dashboard-sidebar-header">
-                <div className="dashboard-logo">
+                <button
+                    type="button"
+                    className="dashboard-logo"
+                    onClick={handleLogoClick}
+                    aria-label="Go to dashboard home"
+                >
                     <img 
                         src={`${process.env.PUBLIC_URL}/autoSaaz-logo.png`}
                         alt="AutoSaaz - One Stop Auto Shop" 
@@ -110,7 +118,7 @@ const Sidebar = () => {
                         <span className="dashboard-logo-name">AutoSaaz</span>
                         <span className="dashboard-logo-subtitle">One Stop Auto Shop</span>
                     </div>
-                </div>
+                </button>
             </div>
             
             <nav className="dashboard-sidebar-nav">

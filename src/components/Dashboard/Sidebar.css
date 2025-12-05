@@ -1,7 +1,8 @@
 /* Dashboard Sidebar Styles - Compact Desktop Layout */
 .dashboard-sidebar { width: var(--sidebar-width); background-color: var(--color-bg-sidebar); color: var(--color-text-primary); height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: var(--z-sidebar); border-right: 1px solid var(--color-border-light); box-shadow: var(--shadow-sidebar); }
 .dashboard-sidebar-header { padding: var(--space-lg); border-bottom: 1px solid var(--color-border-lighter); }
-.dashboard-logo { display: flex; align-items: center; gap: var(--space-md); }
+.dashboard-logo { display: flex; align-items: center; gap: var(--space-md); border: none; background: none; padding: 0; width: 100%; text-align: left; cursor: pointer; font: inherit; }
+.dashboard-logo:focus-visible { outline: 2px solid var(--color-primary-orange); outline-offset: 4px; }
 .dashboard-logo-image { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
 .dashboard-logo-icon { width: 28px; height: 28px; background-color: var(--color-primary-orange); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; color: var(--color-white); font-weight: var(--font-weight-bold); font-size: var(--font-size-xs); }
 .dashboard-logo-text { display: flex; flex-direction: column; }
