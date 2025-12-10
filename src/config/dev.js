@@ -4,7 +4,7 @@ const DEV_CONFIG = {
   ENABLE_AUTH: true,
   
   // Supabase Functions base URL for API calls
-  API_BASE_URL: process.env.REACT_APP_FUNCTIONS_URL || 'https://lblcjyeiwgyanadssqac.functions.supabase.co',
+  API_BASE_URL: process.env.REACT_APP_FUNCTIONS_URL || 'https://woerqhgdmwhggmwhyieh.functions.supabase.co',
   
   // Mock user for development when auth is disabled
   MOCK_USER: {
