@@ -31,6 +31,49 @@
 
 .profile-actions { justify-content:flex-start; }
 
+/* Primary action button styling (mirrors account settings) */
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.settings-primary-btn {
+  background: #ff8a34;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 138, 52, 0.2);
+  min-width: 140px;
+}
+
+.settings-primary-btn:hover:not(:disabled) {
+  background: #e67a29;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 138, 52, 0.25);
+}
+
+.settings-primary-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(255, 138, 52, 0.2);
+}
+
+.settings-primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.settings-primary-btn:focus {
+  outline: 2px solid rgba(255, 138, 52, 0.4);
+  outline-offset: 2px;
+}
+
 /* Skeleton Loader Styles */
 .skeleton-loader { opacity: 0.6; pointer-events: none; }
 
