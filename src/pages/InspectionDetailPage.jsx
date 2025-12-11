@@ -80,36 +80,9 @@ const InspectionDetailPage = () => {
             <div className="dashboard-layout">
                 <Sidebar />
                 <div className="dashboard-layout-main">
-                    <div className="dashboard-layout-header">
-                        <div className="dashboard-header-left">
-                            <h1 className="dashboard-layout-title">Inspection</h1>
-                            <p className="dashboard-layout-subtitle">Garage Overview and Activities</p>
-                        </div>
-                        <div className="dashboard-header-right">
-                            <button className="dashboard-notification-btn" aria-label="Notifications">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                                </svg>
-                            </button>
-                            <button className="dashboard-settings-btn" aria-label="Settings">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="3"/>
-                                    <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
-                                </svg>
-                            </button>
-                            <div className="dashboard-user-profile">
-                                <div className="dashboard-user-info">
-                                    <span className="dashboard-garage-name">AAA Auto Garage</span>
-                                    <span className="dashboard-user-role">Mechanics</span>
-                                </div>
-                                <div className="dashboard-user-avatar">
-                                    <span>A</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div className="dashboard-layout-content">
+                        <h1 className="dashboard-layout-title">Inspection</h1>
+                        <p className="dashboard-layout-subtitle">Garage Overview and Activities</p>
                         <div className="inspection-detail-loading">Loading inspection details...</div>
                     </div>
                 </div>
@@ -122,36 +95,9 @@ const InspectionDetailPage = () => {
             <div className="dashboard-layout">
                 <Sidebar />
                 <div className="dashboard-layout-main">
-                    <div className="dashboard-layout-header">
-                        <div className="dashboard-header-left">
-                            <h1 className="dashboard-layout-title">Inspection</h1>
-                            <p className="dashboard-layout-subtitle">Garage Overview and Activities</p>
-                        </div>
-                        <div className="dashboard-header-right">
-                            <button className="dashboard-notification-btn" aria-label="Notifications">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                                </svg>
-                            </button>
-                            <button className="dashboard-settings-btn" aria-label="Settings">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="3"/>
-                                    <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
-                                </svg>
-                            </button>
-                            <div className="dashboard-user-profile">
-                                <div className="dashboard-user-info">
-                                    <span className="dashboard-garage-name">AAA Auto Garage</span>
-                                    <span className="dashboard-user-role">Mechanics</span>
-                                </div>
-                                <div className="dashboard-user-avatar">
-                                    <span>A</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div className="dashboard-layout-content">
+                        <h1 className="dashboard-layout-title">Inspection</h1>
+                        <p className="dashboard-layout-subtitle">Garage Overview and Activities</p>
                         <div className="inspection-detail-error">{error || 'Inspection not found'}</div>
                         <button 
                             className="inspection-detail-back-btn"
@@ -171,36 +117,9 @@ const InspectionDetailPage = () => {
         <div className="dashboard-layout">
             <Sidebar />
             <div className="dashboard-layout-main">
-                <div className="dashboard-layout-header">
-                    <div className="dashboard-header-left">
-                        <h1 className="dashboard-layout-title">Inspection</h1>
-                        <p className="dashboard-layout-subtitle">Garage Overview and Activities</p>
-                    </div>
-                    <div className="dashboard-header-right">
-                        <button className="dashboard-notification-btn" aria-label="Notifications">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                            </svg>
-                        </button>
-                        <button className="dashboard-settings-btn" aria-label="Settings">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="3"/>
-                                <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
-                            </svg>
-                        </button>
-                        <div className="dashboard-user-profile">
-                            <div className="dashboard-user-info">
-                                <span className="dashboard-garage-name">AAA Auto Garage</span>
-                                <span className="dashboard-user-role">Mechanics</span>
-                            </div>
-                            <div className="dashboard-user-avatar">
-                                <span>A</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div className="dashboard-layout-content">
+                    <h1 className="dashboard-layout-title">Inspection</h1>
+                    <p className="dashboard-layout-subtitle">Garage Overview and Activities</p>
                     <div className="inspection-detail-section">
                         <h2 className="inspection-detail-section-title">Details</h2>
                         
