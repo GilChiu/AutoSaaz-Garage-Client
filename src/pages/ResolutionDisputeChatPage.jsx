@@ -223,13 +223,17 @@ const DisputeChatPage = () => {
                               background: '#3b82f6', 
                               color: 'white', 
                               border: 'none', 
-                              borderRadius: '4px', 
+                              borderRadius: '6px', 
                               cursor: 'pointer',
                               fontSize: '14px',
-                              fontWeight: '500'
+                              fontWeight: '500',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '8px'
                             }}
                           >
-                            📎 Upload Document
+                            <PaperclipIcon size={16} color="#ffffff" />
+                            <span>Upload Document</span>
                           </button>
                         )}
                         <div className="rcfx-msg-time">{formatMessageTimeGST(m.ts)}</div>
