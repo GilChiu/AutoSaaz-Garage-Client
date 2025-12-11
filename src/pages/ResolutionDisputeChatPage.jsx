@@ -7,6 +7,24 @@ import { formatMessageTimeGST } from '../utils/gstDateTime';
 import '../components/Dashboard/Dashboard.css';
 import '../styles/resolution-center.css';
 
+// Simple paperclip icon for attachments
+const PaperclipIcon = ({ size = 16, color = '#4b5563', style = {} }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ display: 'inline-block', verticalAlign: 'middle', ...style }}
+    aria-hidden="true"
+  >
+    <path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.2-9.2a3 3 0 014.24 4.24l-9.2 9.2a1 1 0 01-1.41-1.41l8.49-8.49" />
+  </svg>
+);
+
 const DisputeChatPage = () => {
   const { id } = useParams();
   const [dispute, setDispute] = useState(null);
@@ -188,8 +206,9 @@ const DisputeChatPage = () => {
                                 />
                               </a>
                             ) : (
-                              <a href={m.attachmentUrl} target="_blank" rel="noopener noreferrer" className="rcfx-file-link">
-                                📎 {m.attachmentName || 'Download Attachment'}
+                              <a href={m.attachmentUrl} target="_blank" rel="noopener noreferrer" className="rcfx-file-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                <PaperclipIcon size={16} color="#2563eb" />
+                                <span>{m.attachmentName || 'Download Attachment'}</span>
                               </a>
                             )}
                           </div>
@@ -236,11 +255,16 @@ const DisputeChatPage = () => {
                       marginRight: '8px',
                       background: '#f3f4f6',
                       border: '1px solid #d1d5db',
-                      borderRadius: '4px',
-                      fontSize: '14px'
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      color: '#111827'
                     }}
                   >
-                    📎 Attach
+                    <PaperclipIcon size={16} />
+                    <span>Attach file</span>
                   </label>
                   {selectedFile && (
                     <span style={{fontSize: '12px', color: '#666', marginRight: '8px'}}>
