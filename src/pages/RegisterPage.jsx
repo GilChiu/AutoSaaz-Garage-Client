@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
 import { registerStep1 } from '../services/registrationApi';
-import { validateFullName, validateEmail, validatePhoneNumber, formatPhoneNumber } from '../utils/registrationValidation';
+import { validateFullName, validateEmail, validatePhoneNumber, formatPhoneNumber, validatePassword, validatePasswordConfirmation, getPasswordStrength } from '../utils/registrationValidation';
 import './RegisterPage.css';
 import { autoSaazLogo, heroRegister } from '../assets/images';
 
@@ -10,6 +10,9 @@ const RegisterPage = () => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordStrength, setPasswordStrength] = useState('weak');
     const [error, setError] = useState('');
     const { updateRegistrationData, goToNextStep } = useRegistration();
     const navigate = useNavigate();
@@ -19,7 +22,7 @@ const RegisterPage = () => {
         setError('');
 
         // Validate required fields
-        if (!fullName || !email || !phoneNumber) {
+        if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
             setError('All fields are required');
             return;
         }
@@ -40,6 +43,18 @@ const RegisterPage = () => {
         const phoneError = validatePhoneNumber(phoneNumber);
         if (phoneError) {
             setError(phoneError);
+            return;
+        }
+
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+            setError(passwordError);
+            return;
+        }
+
+        const confirmError = validatePasswordConfirmation(password, confirmPassword);
+        if (confirmError) {
+            setError(confirmError);
             return;
         }
 
@@ -68,6 +83,7 @@ const RegisterPage = () => {
                     lastName,
                     email,
                     phone: formattedPhone,
+                    password,
                     sessionId: response.data.sessionId
                 });
 
@@ -158,6 +174,40 @@ const RegisterPage = () => {
                                     placeholder="Enter Phone Number"
                                     required
                                 />
+                            </div>
+
+                            <div className="form-group-register-page">
+                                <label>Password <span className="required-asterisk-register-page">*</span></label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        setPasswordStrength(getPasswordStrength(e.target.value));
+                                    }}
+                                    placeholder="Create a strong password"
+                                    required
+                                    autoComplete="new-password"
+                                />
+                                <div className={`password-strength-register-page ${passwordStrength}`}>
+                                    Strength: {passwordStrength}
+                                </div>
+                            </div>
+
+                            <div className="form-group-register-page">
+                                <label>Confirm Password <span className="required-asterisk-register-page">*</span></label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Re-enter password"
+                                    required
+                                    autoComplete="new-password"
+                                />
+                            </div>
+
+                            <div className="password-requirements-register-page">
+                                Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
                             </div>
 
                             <button type="submit" className="next-btn-register-page">

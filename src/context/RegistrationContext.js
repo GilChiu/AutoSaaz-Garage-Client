@@ -10,6 +10,7 @@ export const RegistrationProvider = ({ children }) => {
         lastName: '',
         email: '',
         phone: '',
+        password: '',
         
         // Step 2: Business Location
         address: '',
