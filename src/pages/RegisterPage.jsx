@@ -191,14 +191,18 @@ const RegisterPage = () => {
                                         {showPassword ? 'Hide password' : 'Show password'}
                                     </button>
                                 </div>
-                                <div className={`password-strength-register-page ${passwordStrength}`}>
-                                    Strength: {passwordStrength}
-                                </div>
+                                {password && (
+                                    <div className={`password-strength-register-page ${passwordStrength}`}>
+                                        Strength: {passwordStrength}
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="password-requirements-register-page">
-                                Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
-                            </div>
+                            {password && (
+                                <div className="password-requirements-register-page">
+                                    Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+                                </div>
+                            )}
 
                             <button type="submit" className="next-btn-register-page">
                                 Next
