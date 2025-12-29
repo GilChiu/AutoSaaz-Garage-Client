@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
 import { registerStep1 } from '../services/registrationApi';
-import { validateFullName, validateEmail, validatePhoneNumber, formatPhoneNumber, validatePassword, validatePasswordConfirmation, getPasswordStrength } from '../utils/registrationValidation';
+import { validateFullName, validateEmail, validatePhoneNumber, formatPhoneNumber, validatePassword, getPasswordStrength } from '../utils/registrationValidation';
 import './RegisterPage.css';
 import { autoSaazLogo, heroRegister } from '../assets/images';
 
@@ -11,7 +11,7 @@ const RegisterPage = () => {
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState('weak');
     const [error, setError] = useState('');
     const { updateRegistrationData, goToNextStep } = useRegistration();
@@ -22,7 +22,7 @@ const RegisterPage = () => {
         setError('');
 
         // Validate required fields
-        if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
+        if (!fullName || !email || !phoneNumber || !password) {
             setError('All fields are required');
             return;
         }
@@ -49,12 +49,6 @@ const RegisterPage = () => {
         const passwordError = validatePassword(password);
         if (passwordError) {
             setError(passwordError);
-            return;
-        }
-
-        const confirmError = validatePasswordConfirmation(password, confirmPassword);
-        if (confirmError) {
-            setError(confirmError);
             return;
         }
 
@@ -179,7 +173,7 @@ const RegisterPage = () => {
                             <div className="form-group-register-page">
                                 <label>Password <span className="required-asterisk-register-page">*</span></label>
                                 <input
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={(e) => {
                                         setPassword(e.target.value);
@@ -189,21 +183,17 @@ const RegisterPage = () => {
                                     required
                                     autoComplete="new-password"
                                 />
+                                <div className="password-toggle-register-page">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword((prev) => !prev)}
+                                    >
+                                        {showPassword ? 'Hide password' : 'Show password'}
+                                    </button>
+                                </div>
                                 <div className={`password-strength-register-page ${passwordStrength}`}>
                                     Strength: {passwordStrength}
                                 </div>
-                            </div>
-
-                            <div className="form-group-register-page">
-                                <label>Confirm Password <span className="required-asterisk-register-page">*</span></label>
-                                <input
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="Re-enter password"
-                                    required
-                                    autoComplete="new-password"
-                                />
                             </div>
 
                             <div className="password-requirements-register-page">
