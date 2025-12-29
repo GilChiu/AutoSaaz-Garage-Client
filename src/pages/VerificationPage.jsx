@@ -3,15 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
 import { useAuth } from '../context/AuthContext';
 import { verifyRegistration, resendOTP } from '../services/registrationApi';
-import { validateOTP } from '../utils/registrationValidation';
+import { validateOTP, validatePassword, validatePasswordConfirmation, getPasswordStrength } from '../utils/registrationValidation';
 import './VerificationPage.css';
 
 const VerificationPage = () => {
     const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
     const [resendSuccess, setResendSuccess] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState('weak');
     const { resetRegistration } = useRegistration();
     const { loginWithToken } = useAuth();
     const navigate = useNavigate();
@@ -81,12 +84,27 @@ const VerificationPage = () => {
             return;
         }
 
+        // Validate password strength and confirmation
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+            setError(passwordError);
+            setLoading(false);
+            return;
+        }
+
+        const confirmError = validatePasswordConfirmation(password, confirmPassword);
+        if (confirmError) {
+            setError(confirmError);
+            setLoading(false);
+            return;
+        }
+
         try {
 
 
 
             // Call the real backend verification API
-            const response = await verifyRegistration(codeString);
+            const response = await verifyRegistration(codeString, password);
 
             if (response && response.success) {
 
@@ -228,6 +246,40 @@ const VerificationPage = () => {
                                         autoComplete="off"
                                     />
                                 ))}
+                            </div>
+
+                            <div className="password-section-verification-page">
+                                <label>Create Password <span className="required-asterisk-verification-page">*</span></label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        setPasswordStrength(getPasswordStrength(e.target.value));
+                                    }}
+                                    placeholder="Enter a strong password"
+                                    className="password-input-verification-page"
+                                    autoComplete="new-password"
+                                />
+                                <div className={`password-strength-indicator ${passwordStrength}`}>
+                                    Strength: {passwordStrength}
+                                </div>
+                            </div>
+
+                            <div className="password-section-verification-page">
+                                <label>Confirm Password <span className="required-asterisk-verification-page">*</span></label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Re-enter your password"
+                                    className="password-input-verification-page"
+                                    autoComplete="new-password"
+                                />
+                            </div>
+
+                            <div className="password-requirements-verification-page">
+                                <p>Password must be at least 8 characters and include uppercase, lowercase, number, and special character.</p>
                             </div>
 
                             <div className="resend-section-verification-page">

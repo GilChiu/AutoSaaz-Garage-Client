@@ -138,10 +138,10 @@ export const registerStep3 = async (companyLegalName, emiratesIdUrl, tradeLicens
 };
 
 /**
- * Step 4: Verification with OTP (NO PASSWORD)
- * Verifies OTP and returns auth tokens
+ * Step 4: Verification with OTP and password
+ * Verifies OTP, sets user password, and returns auth tokens
  */
-export const verifyRegistration = async (code) => {
+export const verifyRegistration = async (code, password) => {
   try {
     const sessionId = localStorage.getItem('registrationSessionId');
     
@@ -155,6 +155,7 @@ export const verifyRegistration = async (code) => {
       body: JSON.stringify({
         sessionId,
         code,
+        password,
       }),
     });
 
@@ -178,10 +179,6 @@ export const verifyRegistration = async (code) => {
       }
       if (data.data.user) {
         localStorage.setItem('user', JSON.stringify(data.data.user));
-      }
-      // Save generated password if available (development mode)
-      if (data.data.generatedPassword) {
-        localStorage.setItem('userGeneratedPassword', data.data.generatedPassword);
       }
     }
 

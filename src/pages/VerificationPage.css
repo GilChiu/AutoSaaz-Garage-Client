@@ -219,3 +219,40 @@
 .resend-btn-verification-page:hover {
   color: #e55a2b;
 }
+
+.password-section-verification-page {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.password-input-verification-page {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.password-input-verification-page:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.1);
+}
+
+.password-strength-indicator {
+  font-size: 14px;
+  color: #555;
+}
+
+.password-strength-indicator.weak { color: #e53e3e; }
+.password-strength-indicator.medium { color: #d97706; }
+.password-strength-indicator.strong { color: #15803d; }
+
+.password-requirements-verification-page {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
