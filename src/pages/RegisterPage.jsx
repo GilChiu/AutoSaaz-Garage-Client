@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistration } from '../context/RegistrationContext';
 import { registerStep1 } from '../services/registrationApi';
-import { validateFullName, validateEmail, validatePhoneNumber, formatPhoneNumber, validatePassword, getPasswordStrength } from '../utils/registrationValidation';
+import { validateFullName, validateEmail, validatePhoneNumber, formatPhoneNumber, validatePassword, validatePasswordConfirmation, getPasswordStrength } from '../utils/registrationValidation';
 import './RegisterPage.css';
 import { autoSaazLogo, heroRegister } from '../assets/images';
 
@@ -11,6 +11,7 @@ const RegisterPage = () => {
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState('weak');
     const [error, setError] = useState('');
@@ -22,7 +23,7 @@ const RegisterPage = () => {
         setError('');
 
         // Validate required fields
-        if (!fullName || !email || !phoneNumber || !password) {
+        if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
             setError('All fields are required');
             return;
         }
@@ -49,6 +50,12 @@ const RegisterPage = () => {
         const passwordError = validatePassword(password);
         if (passwordError) {
             setError(passwordError);
+            return;
+        }
+
+        const confirmError = validatePasswordConfirmation(password, confirmPassword);
+        if (confirmError) {
+            setError(confirmError);
             return;
         }
 
@@ -196,6 +203,18 @@ const RegisterPage = () => {
                                         Strength: {passwordStrength}
                                     </div>
                                 )}
+                            </div>
+
+                            <div className="form-group-register-page">
+                                <label>Confirm Password <span className="required-asterisk-register-page">*</span></label>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Re-enter your password"
+                                    required
+                                    autoComplete="new-password"
+                                />
                             </div>
 
                             {password && (

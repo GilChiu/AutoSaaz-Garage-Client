@@ -51,27 +51,33 @@
 
 /* Main Container */
 .main-container-register-page {
-  position: relative; /* to position children absolutely */
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
   min-height: calc(100vh - 88px); /* viewport minus header */
-  padding: 0;
+  padding: 32px 24px 40px;
   box-sizing: border-box;
 }
 
 /* Left Side - Image Section */
 .image-section-register-page {
-  display: contents; /* let child be absolutely positioned */
+  display: flex;
+  justify-content: center;
+  flex: 1 1 360px;
 }
 
 .garage-image-register-page {
-  width: 625px;
-  height: 750px;
+  width: min(44vw, 560px);
+  max-width: 600px;
+  aspect-ratio: 5 / 6;
+  height: auto;
   border-radius: 10px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-  margin-top: 20px;
-  margin-left: 150px;
+  margin: 0;
 }
 
 .hero-image-register-page {
@@ -84,16 +90,16 @@
 
 /* Right Side - Form Section */
 .form-section-register-page {
-  display: contents; /* allow absolute positioned child */
+  display: flex;
+  justify-content: center;
+  flex: 1 1 380px;
 }
 
 .form-content-register-page {
-  position: absolute;
-  width: 694px;
-  height: 581.17px;
-  left: calc(50% - 694px/2 + 335px);
-  top: 50%;
-  transform: translateY(-50%); /* center vertically to remove big top gap */
+  position: relative;
+  width: min(46vw, 680px);
+  max-width: 720px;
+  min-width: 340px;
   text-align: center;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
@@ -101,6 +107,8 @@
   background: #fff;
   box-shadow: 0 2px 0 rgba(0,0,0,0.02), 0 4px 14px rgba(0,0,0,0.06);
   box-sizing: border-box;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
 }
 
 .fullname-label-register-page{
@@ -277,37 +285,39 @@
 
 /* Responsive Layouts */
 @media (max-width: 1200px) {
+  .main-container-register-page {
+    gap: 24px;
+    padding: 24px 20px 32px;
+  }
   .garage-image-register-page {
-    margin-left: 60px;
-    width: 520px;
-    height: 640px;
+    width: min(48vw, 520px);
   }
   .form-content-register-page {
-    left: calc(50% - 650px/2 + 250px);
-    width: 650px;
+    width: min(90vw, 700px);
+    max-height: calc(100vh - 140px);
   }
 }
 
 @media (max-width: 992px) {
   .main-container-register-page {
-    display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 16px;
+    padding: 24px 16px 32px;
+  }
+  .image-section-register-page,
+  .form-section-register-page {
+    flex: 1 1 100%;
   }
   .garage-image-register-page {
-    margin: 0 0 20px 0;
-    width: 90%;
+    width: 100%;
     max-width: 640px;
-    height: auto;
     aspect-ratio: 5 / 6;
   }
   .form-content-register-page {
-    position: static;
-    transform: none;
     width: 100%;
     max-width: 720px;
-    height: auto;
+    min-width: 0;
+    max-height: calc(100vh - 140px);
   }
 }
 
@@ -318,9 +328,13 @@
   .company-name-register-page { font-size: 20px; }
   .tagline-register-page { font-size: 12px; }
 
+  .main-container-register-page {
+    padding: 20px 14px 28px;
+  }
   .form-content-register-page {
     padding: 16px;
     border-radius: 10px;
+    max-height: calc(100vh - 120px);
   }
   .form-header-register-page h1 {
     font-size: 22px;
